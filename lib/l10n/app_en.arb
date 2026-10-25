@@ -1483,5 +1483,7 @@
   "onboardingReopen": "You can open this guide again from Settings → General.",
   "onboardingSettingsTitle": "Getting started",
   "onboardingSettingsBody": "Permissions, the speech model and the basics, step by step.",
-  "onboardingSettingsOpen": "Show again"
+  "onboardingSettingsOpen": "Show again",
+  "panelMicrophoneDenied": "macOS doesn't let TingLang use the microphone. Turn TingLang on in System Settings → Privacy & Security → Microphone; if it is on already, turn it off and on again.",
+  "panelSystemAudioDenied": "macOS doesn't let TingLang record system audio. Allow TingLang in System Settings → Privacy & Security, under screen and system audio recording."
 }

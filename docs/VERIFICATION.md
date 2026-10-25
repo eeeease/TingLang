@@ -4,6 +4,17 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.1 · captions from downloaded and cloud models start again
+
+A user on macOS 15.6 got `Bad state: No usable microphone backend` with the microphone allowed. The portable pipeline (every downloaded or cloud model, so all of macOS 14.2–15) refused capture unless the probe said the permission was granted: the probe never reports system audio recording (macOS cannot be asked), and an ad-hoc build that macOS has not asked yet reads "not determined". Nothing asked macOS, so captions from that pipeline could not start.
+
+| Command | Outcome |
+| --- | --- |
+| A temporary integration test (not kept) on this Mac with the real probe | Before: `systemAudio → none; coreaudio_tap: NeedsPermission(systemAudio)`. With `pickCapture`: the Core Audio tap and the microphone (probe "not determined") both opened and ran for 2 s |
+| `bash scripts/check.sh` | Python checks 33 OK (release rules: every version is released); analyze no issues; app tests 278; `tinglang_platform_interface` 53; `tinglang_api` 68; `tinglang_cloud_asr` 118; `tinglang_ui` 4; `tinglang_native` 74; `tinglang_native_macos` 27 |
+
+Not run: a macOS 14.2–15 Mac; captions from a downloaded model with real system audio end to end; the microphone question and the System Settings button in the running app.
+
 ## 0.7.0 · first-start guide and update arrow
 
 | Command | Outcome |

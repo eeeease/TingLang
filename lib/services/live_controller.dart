@@ -173,11 +173,22 @@ abstract interface class LiveModelText {
 
   /// "Cloud · [service]", shown while a cloud service recognises.
   String cloudLabel(String backendId);
+
+  /// macOS refused [permission]; says where to allow it.
+  String permissionDenied(PermissionKind permission);
+  String get openSystemSettings;
 }
 
 final class TranslationPackNeeded extends LiveSetupNeed {
   const TranslationPackNeeded(this.pair);
   final LanguagePair pair;
+}
+
+/// macOS refused [permission] (the microphone, or system audio recording):
+/// only System Settings can allow it now.
+final class CapturePermissionNeeded extends LiveSetupNeed {
+  const CapturePermissionNeeded(this.permission);
+  final PermissionKind permission;
 }
 
 /// Sentences the floating panel shows, localised by the app.
@@ -234,6 +245,11 @@ class LiveController extends ChangeNotifier {
   String? error;
   String? unavailableReason;
   LiveSetupNeed? setupNeed;
+
+  /// Asks macOS for the microphone before captions from it start (macOS
+  /// asks only once; afterwards this just reports the answer). Without it
+  /// capture opens and macOS asks by itself, where it can.
+  Future<bool> Function()? requestMicrophone;
   final issues = <AudioCaptureIssue>[];
   final lines = <LiveLine>[];
   final level = ValueNotifier<double>(0);
@@ -452,6 +468,12 @@ class LiveController extends ChangeNotifier {
         ),
         action: OverlayAction.openSettings,
         actionLabel: modelText?.openSettings,
+      ),
+      LiveStatus.idle when need is CapturePermissionNeeded => state(
+        OverlayPhase.needsSetup,
+        message: modelText?.permissionDenied(need.permission),
+        action: OverlayAction.openSettings,
+        actionLabel: modelText?.openSystemSettings,
       ),
       LiveStatus.idle when error != null => state(
         OverlayPhase.error,
@@ -719,7 +741,9 @@ class LiveController extends ChangeNotifier {
       return;
     }
     await start(request);
-    if (need != null) {
+    // A refused permission found while starting says more than a missing
+    // translation pack.
+    if (need != null && setupNeed == null) {
       setupNeed = need;
       notifyListeners();
     }
@@ -762,7 +786,8 @@ class LiveController extends ChangeNotifier {
       case ModelLanguageUnsupported() ||
           RecognizerChoiceNeeded() ||
           CloudSetupNeeded() ||
-          CloudLanguageUnsupported():
+          CloudLanguageUnsupported() ||
+          CapturePermissionNeeded():
         return;
     }
     if (setupNeed == need) setupNeed = null;
@@ -787,6 +812,13 @@ class LiveController extends ChangeNotifier {
         setupNeed = plan.need;
         notifyListeners();
       }
+      return;
+    }
+    final ask = requestMicrophone;
+    if (request.source == AudioSourceKind.microphone && ask != null && !await ask()) {
+      error = null;
+      setupNeed = const CapturePermissionNeeded(PermissionKind.microphone);
+      notifyListeners();
       return;
     }
     status = LiveStatus.starting;
@@ -845,6 +877,9 @@ class LiveController extends ChangeNotifier {
       _flushTimer = Timer.periodic(flushInterval, (_) => _flush());
       _startedAt = DateTime.now();
       status = LiveStatus.running;
+    } on CapturePermissionDenied catch (e) {
+      setupNeed = CapturePermissionNeeded(e.permission);
+      status = LiveStatus.idle;
     } catch (e) {
       error = e is AsrFailure ? modelText?.recognizerFailed(e) ?? e.message : '$e';
       status = LiveStatus.idle;

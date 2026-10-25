@@ -65,6 +65,8 @@ Future<void> main() async {
     final repository = LiveRepository(store.db);
     final live = LiveController(repository: repository, libraryRoot: store.root);
     final recorder = RecordingService(store);
+    // Captions from the microphone ask macOS first (it asks only once).
+    live.requestMicrophone = recorder.requestPermission;
     final transcription = TranscriptionController(repository: repository, store: store);
     // Downloaded speech models live in <data>/models. Nothing is fetched
     // until the user presses a download button that names the size.

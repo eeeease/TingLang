@@ -4040,6 +4040,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show again'**
   String get onboardingSettingsOpen;
+
+  /// No description provided for @panelMicrophoneDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'macOS doesn\'t let TingLang use the microphone. Turn TingLang on in System Settings → Privacy & Security → Microphone; if it is on already, turn it off and on again.'**
+  String get panelMicrophoneDenied;
+
+  /// No description provided for @panelSystemAudioDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'macOS doesn\'t let TingLang record system audio. Allow TingLang in System Settings → Privacy & Security, under screen and system audio recording.'**
+  String get panelSystemAudioDenied;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

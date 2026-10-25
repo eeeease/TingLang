@@ -28,6 +28,16 @@ final class NeedsPermission extends Availability {
   String toString() => 'NeedsPermission(${permission.name}${denied ? ', denied' : ''})';
 }
 
+/// Capture cannot open because the user refused [permission]: only System
+/// Settings can change that now (macOS does not ask twice).
+final class CapturePermissionDenied implements Exception {
+  const CapturePermissionDenied(this.permission);
+  final PermissionKind permission;
+
+  @override
+  String toString() => 'CapturePermissionDenied(${permission.name})';
+}
+
 /// Usable after downloading [assetId] (a model pack). Downloads always ask
 /// for consent first.
 final class NeedsDownload extends Availability {

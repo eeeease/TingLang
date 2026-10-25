@@ -131,6 +131,12 @@ final class L10nModelText implements LiveModelText {
   String cloudServiceName(String backendId) => _serviceName(_l(), backendId);
   @override
   String cloudLabel(String backendId) => _l().panelCloudLabel(_serviceName(_l(), backendId));
+  @override
+  String permissionDenied(PermissionKind permission) => permission == PermissionKind.microphone
+      ? _l().panelMicrophoneDenied
+      : _l().panelSystemAudioDenied;
+  @override
+  String get openSystemSettings => _l().permissionOpenSettings;
 }
 
 /// [cloudServiceName], for [L10nModelText], whose method has the same name.

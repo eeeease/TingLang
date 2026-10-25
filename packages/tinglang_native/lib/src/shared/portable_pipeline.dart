@@ -35,7 +35,7 @@ final class PortablePipelineHost implements LivePipelineHost {
     final captures = config.source == AudioSourceKind.systemAudio
         ? platform.systemAudio
         : platform.microphone;
-    final capture = captures.pick(probe).create();
+    final capture = pickCapture(captures, probe).create();
 
     TranslatorBackend? translator;
     LanguagePair? pair;

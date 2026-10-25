@@ -657,5 +657,7 @@
   "onboardingReopen": "以后可以在 设置 → 通用 里重新打开这个引导。",
   "onboardingSettingsTitle": "新手引导",
   "onboardingSettingsBody": "一步步完成授权、选择识别模型，了解基本用法。",
-  "onboardingSettingsOpen": "重新查看"
+  "onboardingSettingsOpen": "重新查看",
+  "panelMicrophoneDenied": "macOS 不允许听浪使用麦克风。请在 系统设置 → 隐私与安全性 → 麦克风 里打开听浪；如果已经打开，先关掉再打开一次。",
+  "panelSystemAudioDenied": "macOS 不允许听浪录制系统音频。请在 系统设置 → 隐私与安全性 的屏幕与系统录音里允许听浪。"
 }

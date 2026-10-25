@@ -247,3 +247,21 @@ final class BackendRegistry<T extends Object> {
     );
   }
 }
+
+/// The capture backend [registry] would use with [probe]. A permission that
+/// was never asked for does not stop a backend: macOS asks when capture
+/// opens, and for system audio it cannot be asked about beforehand at all.
+/// Only a refusal does ([CapturePermissionDenied]).
+BackendFactory<T> pickCapture<T extends Object>(BackendRegistry<T> registry, PlatformProbe probe) {
+  final choice = registry.pick(probe);
+  if (choice.selected case final selected?) return selected;
+  NeedsPermission? refused;
+  for (final candidate in choice.candidates) {
+    final availability = candidate.availability;
+    if (availability is! NeedsPermission) continue;
+    if (!availability.denied) return candidate.factory;
+    refused ??= availability;
+  }
+  if (refused != null) throw CapturePermissionDenied(refused.permission);
+  throw StateError('No usable ${registry.capability} backend: ${choice.blocker}');
+}

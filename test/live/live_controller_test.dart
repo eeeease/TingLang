@@ -96,6 +96,80 @@ void main() {
     await live.stop();
   });
 
+  test('captions from the microphone ask macOS first; a refusal says where to allow it', () async {
+    var allowed = false, asked = 0;
+    live
+      ..requestMicrophone = () async {
+        asked++;
+        return allowed;
+      }
+      ..requestBuilder = () =>
+          const LiveRequest(source: AudioSourceKind.microphone, language: 'en');
+    await live.toggle();
+    expect(asked, 1);
+    expect(live.status, LiveStatus.idle);
+    expect(live.error, isNull);
+    expect(
+      live.setupNeed,
+      isA<CapturePermissionNeeded>().having(
+        (n) => n.permission,
+        'permission',
+        PermissionKind.microphone,
+      ),
+    );
+    expect(host.sessions, isEmpty, reason: 'nothing is captured without the microphone');
+
+    allowed = true;
+    await live.toggle();
+    expect(asked, 2);
+    expect(live.setupNeed, isNull);
+    expect(live.status, LiveStatus.running);
+    expect(host.sessions.single.config.source, AudioSourceKind.microphone);
+    await live.stop();
+  });
+
+  test('system audio never asks the microphone; a capture refusal becomes a setup need', () async {
+    var asked = 0;
+    live.requestMicrophone = () async {
+      asked++;
+      return false;
+    };
+    final refusing =
+        LiveController(
+            repository: LiveRepository(db),
+            platform:
+                TinglangPlatform(
+                    probeSource: FakeProbeSource(FakeProbes.macos(const OsVersion(26))),
+                  )
+                  ..pipelines.register(
+                    BackendFactory(BackendCatalog.nativeMacosPipeline, () => _RefusingHost()),
+                  )
+                  ..overlays.register(
+                    BackendFactory(BackendCatalog.nsPanel, FakeCaptionOverlay.new),
+                  ),
+          )
+          ..requestBuilder = () =>
+              const LiveRequest(source: AudioSourceKind.systemAudio, language: 'en');
+    addTearDown(refusing.dispose);
+    await refusing.init();
+    await refusing.toggle();
+    expect(refusing.status, LiveStatus.idle);
+    expect(refusing.error, isNull, reason: 'not a "Bad state" error');
+    expect(
+      refusing.setupNeed,
+      isA<CapturePermissionNeeded>().having(
+        (n) => n.permission,
+        'permission',
+        PermissionKind.systemAudio,
+      ),
+    );
+
+    await live.toggle();
+    expect(asked, 0);
+    expect(live.status, LiveStatus.running);
+    await live.stop();
+  });
+
   test('the global shortcut toggles capture', () async {
     hotkeys.press(LiveController.toggleHotkeyId);
     await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -170,4 +244,14 @@ void main() {
     expect(old.status, LiveStatus.idle);
     old.dispose();
   });
+}
+
+/// A pipeline whose capture macOS refused.
+final class _RefusingHost implements LivePipelineHost {
+  @override
+  PipelineTopology get topology => PipelineTopology.nativeMacos;
+
+  @override
+  Future<LiveSession> start(LivePipelineConfig config) async =>
+      throw const CapturePermissionDenied(PermissionKind.systemAudio);
 }

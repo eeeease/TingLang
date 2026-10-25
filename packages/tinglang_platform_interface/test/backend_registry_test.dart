@@ -405,4 +405,35 @@ void main() {
       expect(overlay.pushes.single, hasLength(30));
     });
   });
+
+  group('pickCapture', () {
+    BackendRegistry<Object> registry() =>
+        BackendRegistry<Object>('microphone')
+          ..register(BackendFactory<Object>(BackendCatalog.avAudioEngineMic, Object.new));
+    PlatformProbe probe(PermissionState? microphone) => FakeProbes.macos(
+      const OsVersion(15),
+      permissions: {PermissionKind.microphone: ?microphone},
+    );
+
+    test('allowed, or never asked (macOS asks when capture opens)', () {
+      expect(pickCapture(registry(), probe(PermissionState.granted)).id, 'avaudioengine_mic');
+      expect(pickCapture(registry(), probe(PermissionState.notDetermined)).id, 'avaudioengine_mic');
+      expect(pickCapture(registry(), probe(null)).id, 'avaudioengine_mic');
+    });
+
+    test('a refusal is its own error; nothing that can run is a state error', () {
+      expect(
+        () => pickCapture(registry(), probe(PermissionState.denied)),
+        throwsA(isA<CapturePermissionDenied>()),
+      );
+      expect(
+        () => pickCapture(registry(), probe(PermissionState.restricted)),
+        throwsA(isA<CapturePermissionDenied>()),
+      );
+      expect(
+        () => pickCapture(BackendRegistry<Object>('microphone'), probe(PermissionState.granted)),
+        throwsStateError,
+      );
+    });
+  });
 }

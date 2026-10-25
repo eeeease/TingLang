@@ -54,6 +54,11 @@ See VERIFICATION.md for what actually ran. Not executed yet: live captions from 
 - macOS offers no way to ask whether system audio recording is allowed before the first capture, and none for Full Disk Access, so the guide shows those two without a state; screen recording shows only "allowed" (macOS does not report a refusal).
 - The guide cannot help with the very first launch of a download: the unsigned app is stopped by macOS before it runs. The README, the release notes and the website explain Open Anyway.
 
+## Permissions
+
+- Builds are ad-hoc signed, so macOS ties a permission to one build: after an update or a fresh copy the switch in System Settings can stay on while macOS treats the new build as never asked. Captions then ask again. If the microphone is still refused, `tccutil reset Microphone dev.eeeease.tinglang` clears the old answer.
+- Live captions from a downloaded or cloud model with real system audio on macOS 14.2–15 have not been run on such a Mac (0.7.1 fixed the capture choice that stopped them; see VERIFICATION.md).
+
 ## Floating panel
 
 - The look (mode, colours, size, lines, lock) is one set per Mac, not per display. The panel stays where it was dragged; Settings → Live captions → Reset position brings it back.
@@ -85,7 +90,7 @@ Only one app instance should write a library. The data folder is `~/Library/Appl
 
 ## Updates
 
-The update check reads the GitHub Releases of `eeeease/TingLang`. While the repository is private, GitHub cannot be reached or the unauthenticated rate limit (60 requests an hour per address) is used up, the app quietly finds no update. Only X.Y.0 versions are published as releases, so patch versions are never offered. The download is checked against the `.sha256` file of the same release and the bundle's identifier and version, not against a signature: builds are ad-hoc signed, so there is no Developer ID to compare. The app replaces itself only where the user may change the folder that holds it (usually `/Applications` for an administrator); a standard account, a disk image and App Translocation get the release page instead. If the app stops between moving the new copy next to itself and starting the script, a hidden `.tinglang-update-*` folder stays next to the app and can be deleted.
+The update check reads the GitHub Releases of `eeeease/TingLang`. While the repository is private, GitHub cannot be reached or the unauthenticated rate limit (60 requests an hour per address) is used up, the app quietly finds no update. The download is checked against the `.sha256` file of the same release and the bundle's identifier and version, not against a signature: builds are ad-hoc signed, so there is no Developer ID to compare. The app replaces itself only where the user may change the folder that holds it (usually `/Applications` for an administrator); a standard account, a disk image and App Translocation get the release page instead. If the app stops between moving the new copy next to itself and starting the script, a hidden `.tinglang-update-*` folder stays next to the app and can be deleted.
 
 ## Build and distribution cautions
 

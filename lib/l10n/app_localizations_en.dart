@@ -2272,4 +2272,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSettingsOpen => 'Show again';
+
+  @override
+  String get panelMicrophoneDenied =>
+      'macOS doesn\'t let TingLang use the microphone. Turn TingLang on in System Settings → Privacy & Security → Microphone; if it is on already, turn it off and on again.';
+
+  @override
+  String get panelSystemAudioDenied =>
+      'macOS doesn\'t let TingLang record system audio. Allow TingLang in System Settings → Privacy & Security, under screen and system audio recording.';
 }

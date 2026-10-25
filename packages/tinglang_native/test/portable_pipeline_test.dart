@@ -279,6 +279,58 @@ void main() {
     await session.stop();
   });
 
+  test('captions start although macOS has not been asked yet; only a refusal stops them', () async {
+    // As the real macOS probe: it reports the microphone and screen
+    // recording, never system audio recording (macOS has no way to ask).
+    PlatformProbe probe(PermissionState microphone) => FakeProbes.macos(
+      const OsVersion(15, 6),
+      permissions: {
+        PermissionKind.microphone: microphone,
+        PermissionKind.screenCapture: PermissionState.notDetermined,
+      },
+      installedAssets: {'xasr-zh-en-480ms-int8', 'silero-vad'},
+    );
+    TinglangPlatform macos(PermissionState microphone, FakeAudioCaptureBackend mic) =>
+        fakeTinglangPlatform(probe(microphone))
+          ..liveAsr.register(BackendFactory(BackendCatalog.sherpaXasrZhEn, () => asr))
+          ..systemAudio.register(BackendFactory(BackendCatalog.coreAudioTap, () => capture))
+          ..microphone.register(BackendFactory(BackendCatalog.avAudioEngineMic, () => mic));
+
+    final mic = FakeAudioCaptureBackend(AudioSourceKind.microphone);
+    final system = await PortablePipelineHost(macos(PermissionState.notDetermined, mic))
+        .start(config(translateTo: null, overlay: false));
+    expect(capture.opened, hasLength(1), reason: 'macOS asks for system audio when the tap opens');
+    await system.stop();
+
+    final asked = await PortablePipelineHost(macos(PermissionState.notDetermined, mic)).start(
+      const LivePipelineConfig(
+        source: AudioSourceKind.microphone,
+        asrBackendId: asrId,
+        language: 'en',
+      ),
+    );
+    expect(mic.opened, hasLength(1), reason: 'macOS asks for the microphone when capture opens');
+    await asked.stop();
+
+    await expectLater(
+      PortablePipelineHost(macos(PermissionState.denied, mic)).start(
+        const LivePipelineConfig(
+          source: AudioSourceKind.microphone,
+          asrBackendId: asrId,
+          language: 'en',
+        ),
+      ),
+      throwsA(
+        isA<CapturePermissionDenied>().having(
+          (e) => e.permission,
+          'permission',
+          PermissionKind.microphone,
+        ),
+      ),
+    );
+    expect(mic.opened, hasLength(1));
+  });
+
   test('refuses unknown or not yet installed recognisers', () async {
     final host = PortablePipelineHost(platform);
     await expectLater(

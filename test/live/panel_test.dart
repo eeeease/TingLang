@@ -310,6 +310,19 @@ void main() {
       expect(shell.mainWindowShown, 2);
     });
 
+    test('a refused capture permission opens its System Settings pane, not the app', () async {
+      live.setupNeed = const CapturePermissionNeeded(PermissionKind.microphone);
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.openSettings));
+      live.setupNeed = const CapturePermissionNeeded(PermissionKind.systemAudio);
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.openSettings));
+      expect(shell.openedSettings, [
+        SystemSettingsPane.microphone,
+        SystemSettingsPane.screenRecording,
+      ]);
+      expect(navigation.value, isNull);
+      expect(shell.mainWindowShown, 0);
+    });
+
     test('a look chosen on the panel is saved and applied', () async {
       final style = const CaptionStyle().copyWith(
         mode: CaptionMode.text,

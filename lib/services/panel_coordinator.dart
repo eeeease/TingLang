@@ -143,6 +143,15 @@ class PanelCoordinator {
       case OverlayActionRequested(action: OverlayAction.showRecordings):
         await _open(voiceMemos == null ? const OpenHistory() : const OpenVoiceMemos());
       case OverlayActionRequested(action: OverlayAction.openSettings):
+        // A refused capture permission is allowed in System Settings.
+        if (live.setupNeed case CapturePermissionNeeded(:final permission)) {
+          await shell?.openSystemSettings(
+            permission == PermissionKind.microphone
+                ? SystemSettingsPane.microphone
+                : SystemSettingsPane.screenRecording,
+          );
+          return;
+        }
         await _open(OpenSettings(speech: isSpeechSettingsNeed(live.setupNeed)));
       case OverlayActionRequested(action: OverlayAction.openSession, value: final id?):
         await _open(OpenSession(id));

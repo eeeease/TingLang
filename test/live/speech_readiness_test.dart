@@ -119,6 +119,10 @@ final class _ModelText implements LiveModelText {
   String cloudServiceName(String backendId) => backendId;
   @override
   String cloudLabel(String backendId) => 'Cloud · $backendId';
+  @override
+  String permissionDenied(PermissionKind permission) => 'Allow ${permission.name}';
+  @override
+  String get openSystemSettings => 'Open System Settings';
 }
 
 void main() {

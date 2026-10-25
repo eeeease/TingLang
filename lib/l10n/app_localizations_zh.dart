@@ -2201,4 +2201,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingSettingsOpen => '重新查看';
+
+  @override
+  String get panelMicrophoneDenied =>
+      'macOS 不允许听浪使用麦克风。请在 系统设置 → 隐私与安全性 → 麦克风 里打开听浪；如果已经打开，先关掉再打开一次。';
+
+  @override
+  String get panelSystemAudioDenied => 'macOS 不允许听浪录制系统音频。请在 系统设置 → 隐私与安全性 的屏幕与系统录音里允许听浪。';
 }
