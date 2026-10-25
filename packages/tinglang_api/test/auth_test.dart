@@ -167,6 +167,41 @@ void main() {
       expect(store.writes, ['r1', 'r2']);
     });
 
+    test("Supabase's own refusal of a refresh token is a dead grant too", () async {
+      // What the live server answers for a revoked or unknown refresh token.
+      server.handler = (_) => Reply.json({
+        'code': 400,
+        'error_code': 'refresh_token_not_found',
+        'msg': 'Invalid Refresh Token: Refresh Token Not Found',
+      }, status: 400);
+      await expectLater(
+        client().refresh('r0'),
+        throwsA(
+          isA<AuthFailure>()
+              .having((e) => e.reason, 'reason', AuthFailureReason.invalidGrant)
+              .having((e) => e.message, 'message', contains('refresh_token_not_found')),
+        ),
+      );
+      final store = _MemoryStore('r0');
+      await expectLater(AuthSession(client(), store).accessToken(), throwsA(isA<AuthFailure>()));
+      expect(store.value, isNull, reason: 'the dead token is forgotten');
+    });
+
+    test(
+      'a refused code exchange is not mistaken for a dead grant; a server error keeps it',
+      () async {
+        server.handler = (_) => Reply.json({'error_code': 'bad_code_verifier'}, status: 400);
+        await expectLater(
+          client().exchangeCode('c1', Pkce('v' * 43)),
+          throwsA(isA<AuthFailure>().having((e) => e.reason, 'reason', AuthFailureReason.other)),
+        );
+        server.handler = (_) => Reply.json({'error_code': 'unexpected_failure'}, status: 500);
+        final store = _MemoryStore('r0');
+        await expectLater(AuthSession(client(), store).accessToken(), throwsA(isA<AuthFailure>()));
+        expect(store.value, 'r0', reason: 'a server failure may pass; keep the token');
+      },
+    );
+
     test('a dead grant is forgotten', () async {
       server.handler = (_) => Reply.json({'error': 'invalid_grant'}, status: 400);
       final store = _MemoryStore('r0');

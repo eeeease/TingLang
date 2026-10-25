@@ -129,6 +129,15 @@ class OAuthClient {
     'client_id': auth.clientId,
   });
 
+  /// Whether a refused token request means the grant itself is unusable.
+  /// RFC 6749 servers say `invalid_grant`; some (Supabase's OAuth server)
+  /// answer a revoked, expired or reused refresh token with their own code
+  /// (`refresh_token_not_found`, …) and HTTP 400. A refresh refused with 400
+  /// or 401 can never succeed later, so it counts as a dead grant too.
+  static bool _grantGone(Map<String, String> form, int status, Object? error) =>
+      error == 'invalid_grant' ||
+      (form['grant_type'] == 'refresh_token' && (status == 400 || status == 401));
+
   /// RFC 7009. Does nothing when the server has no revocation endpoint.
   Future<void> revoke(String token, {String hint = 'refresh_token'}) async {
     final endpoint = auth.revocationEndpoint;
@@ -154,11 +163,15 @@ class OAuthClient {
     );
     final body = reply.json();
     if (!reply.ok) {
-      // RFC 6749 §5.2: {"error": "invalid_grant", ...}
-      final error = body is Map<String, Object?> ? body['error'] : null;
+      // RFC 6749 §5.2: {"error": "invalid_grant", ...}; Supabase also sends
+      // {"error_code": "...", "msg": "..."}.
+      final fields = body is Map<String, Object?> ? body : const <String, Object?>{};
+      final error = fields['error'] ?? fields['error_code'];
       throw AuthFailure(
         'The sign-in server refused the request (${error ?? reply.status})',
-        reason: error == 'invalid_grant' ? AuthFailureReason.invalidGrant : AuthFailureReason.other,
+        reason: _grantGone(form, reply.status, error)
+            ? AuthFailureReason.invalidGrant
+            : AuthFailureReason.other,
       );
     }
     if (body is! Map<String, Object?>) throw const ApiBadResponse('token: expected an object');
