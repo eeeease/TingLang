@@ -52,11 +52,12 @@ class BumpVersion(unittest.TestCase):
         self.assertIn('publishes a GitHub Release', result.stdout)
         self.assertIn('git push --atomic origin main v0.5.0', result.stdout)
 
-    def test_patch_is_tag_only(self):
+    def test_patch_is_released_too(self):
         result = self.bump('patch')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.versions(), ('0.4.1+5', '0.4.1'))
-        self.assertIn('tag only', result.stdout)
+        self.assertIn('publishes a GitHub Release', result.stdout)
+        self.assertNotIn('tag only', result.stdout)
 
     def test_major_and_explicit(self):
         self.assertEqual(self.bump('major').returncode, 0)
@@ -96,9 +97,10 @@ class ReleaseWorkflow(unittest.TestCase):
         self.assertIn('branches: [main]', text)
         self.assertIn('paths: [pubspec.yaml]', text)
         self.assertNotIn('tags:', text)
-        # Patch versions are tagged but not released.
-        self.assertIn('"$version" != *.0', text)
+        # Every version is tagged and released, patch versions included.
+        self.assertNotIn('"$version" != *.0', text)
         self.assertIn('git/refs', text)
+        self.assertIn('publish=true', text)
 
 
 if __name__ == '__main__':

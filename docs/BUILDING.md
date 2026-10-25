@@ -86,10 +86,9 @@ git push --atomic origin main vX.Y.Z
 
 | Version | What happens |
 |---|---|
-| `X.Y.0` (minor or major) | Creates the tag on the pushed commit if it is missing, runs `scripts/check.sh --build` on the `xcode-27` image, packs the app with `ditto` into `Tinglang-X.Y.Z-macOS.zip`, writes its SHA-256 and publishes a GitHub Release with the notes from `.github/release-notes.md` and the commit subjects since the previous `X.Y.0` release. |
-| `X.Y.Z`, Z > 0 (patch) | Creates the tag if it is missing; no build, no Release. |
+| any new `X.Y.Z` (patch, minor or major) | Creates the tag on the pushed commit if it is missing, runs `scripts/check.sh --build` on the `xcode-27` image, packs the app with `ditto` into `Tinglang-X.Y.Z-macOS.zip`, writes its SHA-256 and publishes a GitHub Release with the notes from `.github/release-notes.md` and the commit subjects since the previous version's tag. The in-app updater offers it from then on. |
 | unchanged | Nothing (the tag and the release already exist). |
 
-Pushing a tag on its own does not start a release. To publish a patch version anyway, or to rebuild an existing release, run the workflow by hand (Actions → Release → Run workflow) with the tag.
+Pushing a tag on its own does not start a release. To publish an older tag (such as `v0.6.1`, from before every version was released) or to rebuild an existing release, run the workflow by hand (Actions → Release → Run workflow) with the tag.
 
 Builds are signed ad-hoc, not with a Developer ID, and are not notarised, so macOS asks users to allow the app once; the release notes explain how. Signing and notarisation need an Apple Developer account and secrets in the repository; see KNOWN_LIMITATIONS.

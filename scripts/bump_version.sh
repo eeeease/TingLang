@@ -9,8 +9,8 @@
 #   bash scripts/bump_version.sh major|X.Y.Z
 #
 # Then push the commit and the tag together (printed at the end). On GitHub,
-# .github/workflows/release.yml publishes a Release for X.Y.0 versions;
-# patch versions (X.Y.Z, Z > 0) get the tag only.
+# .github/workflows/release.yml publishes a GitHub Release for every version,
+# patch versions included.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -67,9 +67,5 @@ git commit -q -m "release: $new"
 git tag -a "$tag" -m "Tinglang $new"
 branch="$(git branch --show-current)"
 echo "Version $old → $new (build $build), committed and tagged $tag on ${branch:-a detached HEAD}."
-if [[ "$new" == *.0 ]]; then
-  echo 'Pushing it publishes a GitHub Release (release.yml).'
-else
-  echo 'Patch version: pushing it adds the tag only, no GitHub Release.'
-fi
+echo 'Pushing it publishes a GitHub Release (release.yml).'
 echo "Push with:  git push --atomic origin ${branch:-main} $tag"

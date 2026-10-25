@@ -3,10 +3,10 @@ name: Release
 # also sets lib/app.dart and makes the commit and tag). When a push to main
 # changes it:
 #   - the tag v<version> is created on that commit if it is not there yet;
-#   - X.Y.0 versions are checked, built and published as a GitHub Release;
-#   - patch versions (X.Y.Z, Z > 0) get the tag only.
-# Run it by hand (Actions → Release → Run workflow) to publish any existing
-# tag, a patch version included, or to rebuild a release.
+#   - every version, patch versions included, is checked, built and
+#     published as a GitHub Release (the in-app updater only sees releases).
+# Run it by hand (Actions → Release → Run workflow) to publish an older tag
+# or to rebuild a release.
 # The app is not signed or notarised yet; the release notes say how to open it.
 on:
   push:
@@ -55,10 +55,7 @@ jobs:
               gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" >/dev/null
               echo "Created tag $tag on $GITHUB_SHA."
             fi
-            if [[ "$version" != *.0 ]]; then
-              publish=false
-              echo "Patch version $version: tag only, no release." >> "$GITHUB_STEP_SUMMARY"
-            elif gh release view "$tag" >/dev/null 2>&1; then
+            if gh release view "$tag" >/dev/null 2>&1; then
               publish=false
               echo "Release $tag already exists." >> "$GITHUB_STEP_SUMMARY"
             else
@@ -98,8 +95,8 @@ jobs:
           echo "SHA256=$(cut -d' ' -f1 "$zip.sha256")" >> "$GITHUB_ENV"
       - name: Release notes
         run: |
-          # Changes since the previous release (X.Y.0), patch versions included.
-          previous="$(git describe --tags --abbrev=0 --match 'v*.*.0' "$TAG^" 2>/dev/null || true)"
+          # Changes since the previous version's tag.
+          previous="$(git describe --tags --abbrev=0 --match 'v*.*.*' "$TAG^" 2>/dev/null || true)"
           if [ -n "$previous" ]; then
             changes="$(git log --no-merges --format='- %s' "$previous..$TAG")"
           else
