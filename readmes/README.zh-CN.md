@@ -79,7 +79,7 @@ flowchart LR
 
 在[最新版本](https://github.com/eeeease/TingLang/releases/latest)下载 `Tinglang-<版本>-macOS.zip`，解压后把 **Tinglang** 拖进「应用程序」。支持 macOS 14.2 或更高版本，Apple 芯片和 Intel 芯片都可以。
 
-App 目前还没有签名和公证，第一次打开会被 macOS 拦下。先尝试打开一次，再到 **系统设置 → 隐私与安全性 → 仍要打开**（或在终端运行 `xattr -dr com.apple.quarantine /Applications/Tinglang.app`）。每个版本都列出了 zip 的 SHA-256，可以用 `shasum -a 256` 核对。之后有新版本时，听浪会提醒你，并可以替你安装（安装前先核对 zip 的 SHA-256）。
+App 目前还没有签名和公证，第一次打开会被 macOS 拦下（弹窗只有「完成」和「移到废纸篓」，请点「完成」）。先尝试打开一次，再到 **系统设置 → 隐私与安全性 → 仍要打开**（或在终端运行 `xattr -dr com.apple.quarantine /Applications/Tinglang.app`）。每个版本都列出了 zip 的 SHA-256，可以用 `shasum -a 256` 核对。之后有新版本时，听浪会提醒你，并可以替你安装（安装前先核对 zip 的 SHA-256）。
 
 ### 第一次打开
 

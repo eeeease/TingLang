@@ -79,7 +79,7 @@ flowchart LR
 
 Download `Tinglang-<version>-macOS.zip` from the [latest release](https://github.com/eeeease/TingLang/releases/latest), unzip it and move **Tinglang** to Applications. It runs on macOS 14.2 or later, on Apple silicon and Intel.
 
-The app is not signed or notarised yet, so macOS refuses to open it the first time. Open it once, then choose **System Settings → Privacy & Security → Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/Tinglang.app` in Terminal). Each release lists the zip's SHA-256 so you can check it with `shasum -a 256`. After that, TingLang tells you when a new version is out and can install it for you (it checks the zip's SHA-256 first).
+The app is not signed or notarised yet, so macOS refuses to open it the first time (the message offers only Done and Move to Trash: choose Done). Open it once, then choose **System Settings → Privacy & Security → Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/Tinglang.app` in Terminal). Each release lists the zip's SHA-256 so you can check it with `shasum -a 256`. After that, TingLang tells you when a new version is out and can install it for you (it checks the zip's SHA-256 first).
 
 ### First run
 
