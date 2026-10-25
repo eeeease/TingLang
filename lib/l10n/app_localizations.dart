@@ -3734,6 +3734,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TingLang menu: open the app, appearance, settings'**
   String get panelHintMenu;
+
+  /// No description provided for @updateBadgeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'TingLang {version} is available — click to update'**
+  String updateBadgeHint(String version);
+
+  /// No description provided for @updateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'TingLang {version} is available'**
+  String updateDialogTitle(String version);
+
+  /// No description provided for @updateDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {current}. Updating downloads the new version, checks it, puts it in place and reopens TingLang. Your library and settings stay as they are.'**
+  String updateDialogBody(String current);
+
+  /// No description provided for @onboardingWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to TingLang'**
+  String get onboardingWelcome;
+
+  /// No description provided for @onboardingStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String onboardingStepOf(String current, String total);
+
+  /// No description provided for @onboardingStepPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get onboardingStepPermissions;
+
+  /// No description provided for @onboardingStepModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech model'**
+  String get onboardingStepModel;
+
+  /// No description provided for @onboardingStepUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use'**
+  String get onboardingStepUsage;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingDone;
+
+  /// No description provided for @onboardingPermissionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let TingLang hear the sound'**
+  String get onboardingPermissionsTitle;
+
+  /// No description provided for @onboardingPermissionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'macOS asks you to approve these yourself. TingLang uses them only while captions or a recording run; unless you turn on a cloud service, the sound stays on this Mac.'**
+  String get onboardingPermissionsBody;
+
+  /// No description provided for @onboardingPermissionsReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back after changing System Settings: this list updates by itself.'**
+  String get onboardingPermissionsReturn;
+
+  /// No description provided for @permissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get permissionRequired;
+
+  /// No description provided for @permissionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get permissionOptional;
+
+  /// No description provided for @permissionGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get permissionGranted;
+
+  /// No description provided for @permissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Not allowed'**
+  String get permissionDenied;
+
+  /// No description provided for @permissionAskedLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked on first use'**
+  String get permissionAskedLater;
+
+  /// No description provided for @permissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get permissionAllow;
+
+  /// No description provided for @permissionOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open System Settings'**
+  String get permissionOpenSettings;
+
+  /// No description provided for @permissionSystemAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'System audio recording'**
+  String get permissionSystemAudio;
+
+  /// No description provided for @permissionSystemAudioBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Live captions hear what your Mac plays (videos, meetings, podcasts) through it. macOS asks the first time captions start: choose Allow. If you said no before, open System Settings and turn TingLang on under system audio recording.'**
+  String get permissionSystemAudioBody;
+
+  /// No description provided for @permissionMicrophone.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get permissionMicrophone;
+
+  /// No description provided for @permissionMicrophoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For speaking practice, and for captions when their source is the microphone.'**
+  String get permissionMicrophoneBody;
+
+  /// No description provided for @permissionScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen recording'**
+  String get permissionScreen;
+
+  /// No description provided for @permissionScreenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A fallback: when system audio arrives silent, TingLang takes the sound through screen recording instead. It keeps no picture.'**
+  String get permissionScreenBody;
+
+  /// No description provided for @permissionFullDisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Disk Access'**
+  String get permissionFullDisk;
+
+  /// No description provided for @permissionFullDiskBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only for importing Voice Memos; macOS may ask you to quit and reopen TingLang.'**
+  String get permissionFullDiskBody;
+
+  /// No description provided for @onboardingModelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how speech is recognised'**
+  String get onboardingModelTitle;
+
+  /// No description provided for @onboardingModelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Captions and transcripts come from a speech recognition model. A model on this Mac suits most people: free, offline, and the audio never leaves it.'**
+  String get onboardingModelBody;
+
+  /// No description provided for @onboardingRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get onboardingRecommended;
+
+  /// No description provided for @onboardingModelForMac.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for this Mac'**
+  String get onboardingModelForMac;
+
+  /// No description provided for @onboardingModelReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get onboardingModelReady;
+
+  /// No description provided for @onboardingModelNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No model on this Mac can run yet; a cloud API still works.'**
+  String get onboardingModelNone;
+
+  /// No description provided for @onboardingModelMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Other models, latency and accents are in Settings → Speech recognition.'**
+  String get onboardingModelMore;
+
+  /// No description provided for @onboardingCloudNext.
+  ///
+  /// In en, this message translates to:
+  /// **'When you finish this guide, Settings → Speech recognition opens: pick a service and enter your own key.'**
+  String get onboardingCloudNext;
+
+  /// No description provided for @onboardingUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using TingLang'**
+  String get onboardingUsageTitle;
+
+  /// No description provided for @onboardingUseStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start live captions'**
+  String get onboardingUseStartTitle;
+
+  /// No description provided for @onboardingUseStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the orange button at the left end of the floating panel, or ⌘⇧T in any app. What your Mac plays turns into captions as you listen.'**
+  String get onboardingUseStartBody;
+
+  /// No description provided for @onboardingUsePanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Place the panel'**
+  String get onboardingUsePanelTitle;
+
+  /// No description provided for @onboardingUsePanelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the panel anywhere over a video or a meeting. Point at it for its toolbar: change the look, or lock it so clicks pass through.'**
+  String get onboardingUsePanelBody;
+
+  /// No description provided for @onboardingUseHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay and learn'**
+  String get onboardingUseHistoryTitle;
+
+  /// No description provided for @onboardingUseHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you stop, the session is saved in History: replay it line by line, or make a course for close listening, speaking and review.'**
+  String get onboardingUseHistoryBody;
+
+  /// No description provided for @onboardingUseFilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcribe files'**
+  String get onboardingUseFilesTitle;
+
+  /// No description provided for @onboardingUseFilesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop an audio or video file on the panel or the main window to get a transcript you can replay line by line.'**
+  String get onboardingUseFilesBody;
+
+  /// No description provided for @onboardingReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'You can open this guide again from Settings → General.'**
+  String get onboardingReopen;
+
+  /// No description provided for @onboardingSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started'**
+  String get onboardingSettingsTitle;
+
+  /// No description provided for @onboardingSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions, the speech model and the basics, step by step.'**
+  String get onboardingSettingsBody;
+
+  /// No description provided for @onboardingSettingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show again'**
+  String get onboardingSettingsOpen;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

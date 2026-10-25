@@ -2038,4 +2038,167 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get panelHintMenu => '听浪菜单：打开主窗口、外观、设置';
+
+  @override
+  String updateBadgeHint(String version) {
+    return '听浪 $version 已发布，点这里更新';
+  }
+
+  @override
+  String updateDialogTitle(String version) {
+    return '听浪 $version 可以更新了';
+  }
+
+  @override
+  String updateDialogBody(String current) {
+    return '你现在用的是 $current。更新会下载新版本、校验后替换，再自动重新打开听浪。你的资料和设置都会保留。';
+  }
+
+  @override
+  String get onboardingWelcome => '欢迎使用听浪';
+
+  @override
+  String onboardingStepOf(String current, String total) {
+    return '第 $current 步，共 $total 步';
+  }
+
+  @override
+  String get onboardingStepPermissions => '授权';
+
+  @override
+  String get onboardingStepModel => '识别模型';
+
+  @override
+  String get onboardingStepUsage => '怎么用';
+
+  @override
+  String get onboardingSkip => '跳过';
+
+  @override
+  String get onboardingBack => '上一步';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingDone => '开始使用';
+
+  @override
+  String get onboardingPermissionsTitle => '允许听浪听到声音';
+
+  @override
+  String get onboardingPermissionsBody =>
+      '这些权限要你在 macOS 里亲自批准。听浪只在字幕或录音进行时使用它们；除非你自己开启云端服务，声音不会离开这台 Mac。';
+
+  @override
+  String get onboardingPermissionsReturn => '在系统设置里改完后回到听浪，这里的状态会自动刷新。';
+
+  @override
+  String get permissionRequired => '必需';
+
+  @override
+  String get permissionOptional => '可选';
+
+  @override
+  String get permissionGranted => '已允许';
+
+  @override
+  String get permissionDenied => '未允许';
+
+  @override
+  String get permissionAskedLater => '首次使用时询问';
+
+  @override
+  String get permissionAllow => '允许';
+
+  @override
+  String get permissionOpenSettings => '打开系统设置';
+
+  @override
+  String get permissionSystemAudio => '录制系统音频';
+
+  @override
+  String get permissionSystemAudioBody =>
+      '实时字幕靠它听到 Mac 正在播放的声音（视频、会议、播客）。第一次开始字幕时 macOS 会询问，请点「允许」。如果之前点了不允许，打开系统设置，在系统录音那一栏里打开听浪。';
+
+  @override
+  String get permissionMicrophone => '麦克风';
+
+  @override
+  String get permissionMicrophoneBody => '跟读练习录音，以及把字幕来源切到麦克风时需要。';
+
+  @override
+  String get permissionScreen => '屏幕录制';
+
+  @override
+  String get permissionScreenBody => '备用方式：系统音频收不到声音时，听浪改用屏幕录制来取声音，不保留画面。';
+
+  @override
+  String get permissionFullDisk => '完全磁盘访问权限';
+
+  @override
+  String get permissionFullDiskBody => '只在导入「语音备忘录」时需要；macOS 可能会要求退出并重新打开听浪。';
+
+  @override
+  String get onboardingModelTitle => '选择语音识别方式';
+
+  @override
+  String get onboardingModelBody => '字幕和转写都靠语音识别模型。大多数情况下用本地模型就好：免费、离线，音频不上传。';
+
+  @override
+  String get onboardingRecommended => '推荐';
+
+  @override
+  String get onboardingModelForMac => '推荐这台 Mac 使用';
+
+  @override
+  String get onboardingModelReady => '已就绪';
+
+  @override
+  String get onboardingModelNone => '这台 Mac 暂时没有能用的本地模型，可以改用云端 API。';
+
+  @override
+  String get onboardingModelMore => '其他模型、延迟和口音可以稍后在 设置 → 语音识别 里调整。';
+
+  @override
+  String get onboardingCloudNext => '完成引导后会打开 设置 → 语音识别：选一家服务，填入你自己的密钥。';
+
+  @override
+  String get onboardingUsageTitle => '这样用听浪';
+
+  @override
+  String get onboardingUseStartTitle => '开始实时字幕';
+
+  @override
+  String get onboardingUseStartBody => '点浮窗左端的橙色按钮，或在任何 App 里按 ⌘⇧T。Mac 正在播放的声音会实时变成字幕。';
+
+  @override
+  String get onboardingUsePanelTitle => '摆好浮窗';
+
+  @override
+  String get onboardingUsePanelBody => '浮窗可以拖到任何位置，盖在视频或会议上。鼠标移上去会出现工具栏，可以换外观，或锁定让点击穿透。';
+
+  @override
+  String get onboardingUseHistoryTitle => '回看和学习';
+
+  @override
+  String get onboardingUseHistoryBody => '停止后自动保存到「记录」，可以逐句回放，也可以生成课程，做精听、跟读和复习。';
+
+  @override
+  String get onboardingUseFilesTitle => '转写音频和视频';
+
+  @override
+  String get onboardingUseFilesBody => '把音频或视频文件拖到浮窗或主窗口，就会转写成可以逐句回放的文本。';
+
+  @override
+  String get onboardingReopen => '以后可以在 设置 → 通用 里重新打开这个引导。';
+
+  @override
+  String get onboardingSettingsTitle => '新手引导';
+
+  @override
+  String get onboardingSettingsBody => '一步步完成授权、选择识别模型，了解基本用法。';
+
+  @override
+  String get onboardingSettingsOpen => '重新查看';
 }

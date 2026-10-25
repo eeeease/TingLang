@@ -221,6 +221,91 @@ void main() {
     expect(find.text('当前版本：听浪 0.4.0。'), findsOneWidget);
     expect(find.text('立即检查'), findsOneWidget);
   });
+
+  Future<void> showBadge(WidgetTester tester, UpdateService updates, {String locale = 'en'}) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TinglangTheme.light(),
+        locale: Locale(locale),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Column(
+            children: [
+              UpdateBanner(updates: updates, openUrl: (url) async => opened.add(url)),
+              UpdateBadge(updates: updates, openUrl: (url) async => opened.add(url)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  testWidgets('no arrow on the mark without a newer version', (tester) async {
+    final app = memoryApp();
+    final updates = service(app);
+    addTearDown(updates.dispose);
+    await showBadge(tester, updates);
+    expect(find.byKey(const ValueKey('update-badge')), findsNothing);
+  });
+
+  testWidgets('the arrow stays after the banner is put off and opens the update', (tester) async {
+    final app = memoryApp({UpdateService.releaseKey: _cached()});
+    final updates = service(app);
+    addTearDown(updates.dispose);
+    await showBadge(tester, updates);
+    expect(find.byKey(const ValueKey('update-badge')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('update-later')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('update-banner')), findsNothing);
+    expect(find.byKey(const ValueKey('update-badge')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('update-badge')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('update-dialog')), findsOneWidget);
+    expect(find.text('TingLang 0.5.0 is available'), findsOneWidget);
+    expect(find.textContaining('You have 0.4.0.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('update-dialog-install')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('update-dialog-whats-new')));
+    await tester.pump();
+    expect(opened, [Uri.parse('https://github.com/eeeease/TingLang/releases/tag/v0.5.0')]);
+
+    await tester.tap(find.byKey(const ValueKey('update-dialog-later')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('update-dialog')), findsNothing);
+    expect(network.created, isEmpty, reason: 'opening the dialog downloads nothing');
+  });
+
+  testWidgets('the dialog follows the download and can cancel it', (tester) async {
+    final app = memoryApp({UpdateService.releaseKey: _cached()});
+    final updates = _Downloading(app);
+    addTearDown(updates.dispose);
+    await showBadge(tester, updates, locale: 'zh');
+    await tester.tap(find.byKey(const ValueKey('update-badge')));
+    await tester.pumpAndSettle();
+    expect(find.text('听浪 0.5.0 可以更新了'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('update-dialog')),
+        matching: find.byKey(const ValueKey('update-progress')),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('update-dialog-install')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('update-dialog-cancel')));
+    expect(updates.cancelled, isTrue);
+  });
 }
 
 /// A download in progress, for the banner's looks.

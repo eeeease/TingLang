@@ -1401,5 +1401,87 @@
   },
   "panelHintRecord": "Start live captions (⌘⇧T)",
   "panelHintStop": "Stop live captions (⌘⇧T)",
-  "panelHintMenu": "TingLang menu: open the app, appearance, settings"
+  "panelHintMenu": "TingLang menu: open the app, appearance, settings",
+  "updateBadgeHint": "TingLang {version} is available — click to update",
+  "@updateBadgeHint": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateDialogTitle": "TingLang {version} is available",
+  "@updateDialogTitle": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateDialogBody": "You have {current}. Updating downloads the new version, checks it, puts it in place and reopens TingLang. Your library and settings stay as they are.",
+  "@updateDialogBody": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingWelcome": "Welcome to TingLang",
+  "onboardingStepOf": "Step {current} of {total}",
+  "@onboardingStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingStepPermissions": "Permissions",
+  "onboardingStepModel": "Speech model",
+  "onboardingStepUsage": "How to use",
+  "onboardingSkip": "Skip",
+  "onboardingBack": "Back",
+  "onboardingNext": "Next",
+  "onboardingDone": "Get started",
+  "onboardingPermissionsTitle": "Let TingLang hear the sound",
+  "onboardingPermissionsBody": "macOS asks you to approve these yourself. TingLang uses them only while captions or a recording run; unless you turn on a cloud service, the sound stays on this Mac.",
+  "onboardingPermissionsReturn": "Come back after changing System Settings: this list updates by itself.",
+  "permissionRequired": "Required",
+  "permissionOptional": "Optional",
+  "permissionGranted": "Allowed",
+  "permissionDenied": "Not allowed",
+  "permissionAskedLater": "Asked on first use",
+  "permissionAllow": "Allow",
+  "permissionOpenSettings": "Open System Settings",
+  "permissionSystemAudio": "System audio recording",
+  "permissionSystemAudioBody": "Live captions hear what your Mac plays (videos, meetings, podcasts) through it. macOS asks the first time captions start: choose Allow. If you said no before, open System Settings and turn TingLang on under system audio recording.",
+  "permissionMicrophone": "Microphone",
+  "permissionMicrophoneBody": "For speaking practice, and for captions when their source is the microphone.",
+  "permissionScreen": "Screen recording",
+  "permissionScreenBody": "A fallback: when system audio arrives silent, TingLang takes the sound through screen recording instead. It keeps no picture.",
+  "permissionFullDisk": "Full Disk Access",
+  "permissionFullDiskBody": "Only for importing Voice Memos; macOS may ask you to quit and reopen TingLang.",
+  "onboardingModelTitle": "Choose how speech is recognised",
+  "onboardingModelBody": "Captions and transcripts come from a speech recognition model. A model on this Mac suits most people: free, offline, and the audio never leaves it.",
+  "onboardingRecommended": "Recommended",
+  "onboardingModelForMac": "Recommended for this Mac",
+  "onboardingModelReady": "Ready",
+  "onboardingModelNone": "No model on this Mac can run yet; a cloud API still works.",
+  "onboardingModelMore": "Other models, latency and accents are in Settings → Speech recognition.",
+  "onboardingCloudNext": "When you finish this guide, Settings → Speech recognition opens: pick a service and enter your own key.",
+  "onboardingUsageTitle": "Using TingLang",
+  "onboardingUseStartTitle": "Start live captions",
+  "onboardingUseStartBody": "Press the orange button at the left end of the floating panel, or ⌘⇧T in any app. What your Mac plays turns into captions as you listen.",
+  "onboardingUsePanelTitle": "Place the panel",
+  "onboardingUsePanelBody": "Drag the panel anywhere over a video or a meeting. Point at it for its toolbar: change the look, or lock it so clicks pass through.",
+  "onboardingUseHistoryTitle": "Replay and learn",
+  "onboardingUseHistoryBody": "When you stop, the session is saved in History: replay it line by line, or make a course for close listening, speaking and review.",
+  "onboardingUseFilesTitle": "Transcribe files",
+  "onboardingUseFilesBody": "Drop an audio or video file on the panel or the main window to get a transcript you can replay line by line.",
+  "onboardingReopen": "You can open this guide again from Settings → General.",
+  "onboardingSettingsTitle": "Getting started",
+  "onboardingSettingsBody": "Permissions, the speech model and the basics, step by step.",
+  "onboardingSettingsOpen": "Show again"
 }

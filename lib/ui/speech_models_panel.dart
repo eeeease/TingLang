@@ -9,6 +9,50 @@ import 'brand.dart';
 import 'cloud_speech_panel.dart';
 import 'speech_model_names.dart';
 
+/// Asks before downloading [model] (size, host, licence) and then downloads
+/// it; Settings and the first-start guide use the same question.
+Future<void> confirmSpeechDownload(
+  BuildContext context,
+  SpeechModelService models,
+  SpeechModel model,
+) async {
+  final l = context.l10n;
+  final name = speechModelName(l, model) ?? model.id;
+  final pack = model.pack!;
+  final host = Uri.parse(pack.archive?.url ?? pack.files.first.url).host;
+  final agreed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l.speechDownloadTitle(name)),
+      content: Text(
+        l.speechDownloadBody(
+          formatBytes(l, models.missingBytes(model)),
+          host,
+          [model.license?.name, model.license?.attribution].whereType<String>().join(' — '),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.speechCancel)),
+        FilledButton(
+          key: const ValueKey('speech-download-confirm'),
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l.speechDownload(formatBytes(l, models.missingBytes(model)))),
+        ),
+      ],
+    ),
+  );
+  if (agreed != true || !context.mounted) return;
+  await reportAction(context, () async {
+    try {
+      await models.download(model);
+    } on DownloadCancelled {
+      return;
+    } on ChecksumMismatch {
+      throw StateError(l.speechChecksumFailed);
+    }
+  });
+}
+
 /// Settings → Speech recognition: models on this Mac or a cloud API. Local:
 /// the latency tier, the recommended models for live captions and for files
 /// (accuracy, speed, CPU, size), downloads with consent and progress,
@@ -166,7 +210,7 @@ class _SpeechModelsPanelState extends State<SpeechModelsPanel> {
     final appleChosen = SpeechUse.values.any((use) {
       final id = _models.localModelFor(use);
       return id == null
-          ? _autoModel(use)?.isApple ?? false
+          ? _models.automaticModel(use)?.isApple ?? false
           : SpeechModels.byId(id)?.isApple ?? false;
     });
     final dictationChosen = SpeechUse.values.any(
@@ -210,21 +254,11 @@ class _SpeechModelsPanelState extends State<SpeechModelsPanel> {
     ];
   }
 
-  /// What "automatic" resolves to right now.
-  SpeechModel? _autoModel(SpeechUse use) {
-    final probe = _models.probe;
-    if (probe == null || !TinglangPlatform.isInstalled) return null;
-    final platform = TinglangPlatform.instance;
-    final choice = (use == SpeechUse.live ? platform.liveAsr : platform.fileAsr).pick(probe);
-    final id = choice.id;
-    return id == null ? null : SpeechModels.all.where((m) => m.backendId(use) == id).firstOrNull;
-  }
-
   Widget _useSection(BuildContext context, SpeechUse use, String title) {
     final l = context.l10n;
     final c = context.sl;
     final chosen = _models.localModelFor(use);
-    final auto = _autoModel(use);
+    final auto = _models.automaticModel(use);
     final models = [
       for (final model in SpeechModels.forUse(use))
         // Hide what can never run on this OS family (e.g. Apple on Windows).
@@ -313,15 +347,6 @@ class _SpeechModelsPanelState extends State<SpeechModelsPanel> {
     final installed = model.isApple || _models.isInstalled(model);
     final download = _models.downloads[model.id];
     final name = speechModelName(l, model) ?? model.id;
-    String dots(int n) => '●' * n + '○' * (3 - n);
-    // Three ratings and the size, nothing else (the download dialog names
-    // the source and licence).
-    final facts = [
-      '${l.speechAccuracy} ${dots(model.ratings.accuracy)}',
-      '${l.speechSpeed} ${dots(model.ratings.speed)}',
-      l.speechCpuLevel(cpuLevel(l, model.ratings.cpuPercent)),
-      model.isApple ? l.speechSystemAsset : formatBytes(l, model.diskBytes),
-    ].join('  ·  ');
     final Widget? trailing;
     if (unsupported) {
       trailing = SlBadge(l.speechNeedsMacos('${model.minMacos?.major ?? ''}'));
@@ -344,7 +369,7 @@ class _SpeechModelsPanelState extends State<SpeechModelsPanel> {
     } else if (model.isSherpa && !installed) {
       trailing = FilledButton.tonal(
         key: ValueKey('speech-download-${model.id}'),
-        onPressed: () => _confirmDownload(context, model),
+        onPressed: () => confirmSpeechDownload(context, _models, model),
         child: Text(l.speechDownload(formatBytes(l, _models.missingBytes(model)))),
       );
     } else if (model.isSherpa && _models.hasOwnPack(model)) {
@@ -363,46 +388,8 @@ class _SpeechModelsPanelState extends State<SpeechModelsPanel> {
       enabled: !unsupported,
       title: name,
       trailing: trailing,
-      subtitle: Text(facts, style: SlType.caption.copyWith(color: c.muted)),
+      subtitle: Text(speechModelFacts(l, model), style: SlType.caption.copyWith(color: c.muted)),
     );
-  }
-
-  Future<void> _confirmDownload(BuildContext context, SpeechModel model) async {
-    final l = context.l10n;
-    final name = speechModelName(l, model) ?? model.id;
-    final pack = model.pack!;
-    final host = Uri.parse(pack.archive?.url ?? pack.files.first.url).host;
-    final agreed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l.speechDownloadTitle(name)),
-        content: Text(
-          l.speechDownloadBody(
-            formatBytes(l, _models.missingBytes(model)),
-            host,
-            [model.license?.name, model.license?.attribution].whereType<String>().join(' — '),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.speechCancel)),
-          FilledButton(
-            key: const ValueKey('speech-download-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l.speechDownload(formatBytes(l, _models.missingBytes(model)))),
-          ),
-        ],
-      ),
-    );
-    if (agreed != true || !context.mounted) return;
-    await reportAction(context, () async {
-      try {
-        await _models.download(model);
-      } on DownloadCancelled {
-        return;
-      } on ChecksumMismatch {
-        throw StateError(l.speechChecksumFailed);
-      }
-    });
   }
 
   Future<void> _confirmDelete(BuildContext context, SpeechModel model) async {

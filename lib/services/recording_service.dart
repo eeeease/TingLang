@@ -24,6 +24,9 @@ class RecordingService extends ChangeNotifier {
   int get elapsedMs => _clock.elapsedMilliseconds;
   bool get navigationLocked => recording || busy;
 
+  /// Asks macOS for the microphone (it asks only once); true when allowed.
+  Future<bool> requestPermission() => _recorder.hasPermission();
+
   Future<void> start(String key, {Future<void> Function()? beforeStart}) async {
     if (navigationLocked) throw StateError('A recording is already active.');
     busy = true;

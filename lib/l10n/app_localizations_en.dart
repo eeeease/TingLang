@@ -2097,4 +2097,179 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get panelHintMenu => 'TingLang menu: open the app, appearance, settings';
+
+  @override
+  String updateBadgeHint(String version) {
+    return 'TingLang $version is available — click to update';
+  }
+
+  @override
+  String updateDialogTitle(String version) {
+    return 'TingLang $version is available';
+  }
+
+  @override
+  String updateDialogBody(String current) {
+    return 'You have $current. Updating downloads the new version, checks it, puts it in place and reopens TingLang. Your library and settings stay as they are.';
+  }
+
+  @override
+  String get onboardingWelcome => 'Welcome to TingLang';
+
+  @override
+  String onboardingStepOf(String current, String total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get onboardingStepPermissions => 'Permissions';
+
+  @override
+  String get onboardingStepModel => 'Speech model';
+
+  @override
+  String get onboardingStepUsage => 'How to use';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingDone => 'Get started';
+
+  @override
+  String get onboardingPermissionsTitle => 'Let TingLang hear the sound';
+
+  @override
+  String get onboardingPermissionsBody =>
+      'macOS asks you to approve these yourself. TingLang uses them only while captions or a recording run; unless you turn on a cloud service, the sound stays on this Mac.';
+
+  @override
+  String get onboardingPermissionsReturn =>
+      'Come back after changing System Settings: this list updates by itself.';
+
+  @override
+  String get permissionRequired => 'Required';
+
+  @override
+  String get permissionOptional => 'Optional';
+
+  @override
+  String get permissionGranted => 'Allowed';
+
+  @override
+  String get permissionDenied => 'Not allowed';
+
+  @override
+  String get permissionAskedLater => 'Asked on first use';
+
+  @override
+  String get permissionAllow => 'Allow';
+
+  @override
+  String get permissionOpenSettings => 'Open System Settings';
+
+  @override
+  String get permissionSystemAudio => 'System audio recording';
+
+  @override
+  String get permissionSystemAudioBody =>
+      'Live captions hear what your Mac plays (videos, meetings, podcasts) through it. macOS asks the first time captions start: choose Allow. If you said no before, open System Settings and turn TingLang on under system audio recording.';
+
+  @override
+  String get permissionMicrophone => 'Microphone';
+
+  @override
+  String get permissionMicrophoneBody =>
+      'For speaking practice, and for captions when their source is the microphone.';
+
+  @override
+  String get permissionScreen => 'Screen recording';
+
+  @override
+  String get permissionScreenBody =>
+      'A fallback: when system audio arrives silent, TingLang takes the sound through screen recording instead. It keeps no picture.';
+
+  @override
+  String get permissionFullDisk => 'Full Disk Access';
+
+  @override
+  String get permissionFullDiskBody =>
+      'Only for importing Voice Memos; macOS may ask you to quit and reopen TingLang.';
+
+  @override
+  String get onboardingModelTitle => 'Choose how speech is recognised';
+
+  @override
+  String get onboardingModelBody =>
+      'Captions and transcripts come from a speech recognition model. A model on this Mac suits most people: free, offline, and the audio never leaves it.';
+
+  @override
+  String get onboardingRecommended => 'Recommended';
+
+  @override
+  String get onboardingModelForMac => 'Recommended for this Mac';
+
+  @override
+  String get onboardingModelReady => 'Ready';
+
+  @override
+  String get onboardingModelNone => 'No model on this Mac can run yet; a cloud API still works.';
+
+  @override
+  String get onboardingModelMore =>
+      'Other models, latency and accents are in Settings → Speech recognition.';
+
+  @override
+  String get onboardingCloudNext =>
+      'When you finish this guide, Settings → Speech recognition opens: pick a service and enter your own key.';
+
+  @override
+  String get onboardingUsageTitle => 'Using TingLang';
+
+  @override
+  String get onboardingUseStartTitle => 'Start live captions';
+
+  @override
+  String get onboardingUseStartBody =>
+      'Press the orange button at the left end of the floating panel, or ⌘⇧T in any app. What your Mac plays turns into captions as you listen.';
+
+  @override
+  String get onboardingUsePanelTitle => 'Place the panel';
+
+  @override
+  String get onboardingUsePanelBody =>
+      'Drag the panel anywhere over a video or a meeting. Point at it for its toolbar: change the look, or lock it so clicks pass through.';
+
+  @override
+  String get onboardingUseHistoryTitle => 'Replay and learn';
+
+  @override
+  String get onboardingUseHistoryBody =>
+      'When you stop, the session is saved in History: replay it line by line, or make a course for close listening, speaking and review.';
+
+  @override
+  String get onboardingUseFilesTitle => 'Transcribe files';
+
+  @override
+  String get onboardingUseFilesBody =>
+      'Drop an audio or video file on the panel or the main window to get a transcript you can replay line by line.';
+
+  @override
+  String get onboardingReopen => 'You can open this guide again from Settings → General.';
+
+  @override
+  String get onboardingSettingsTitle => 'Getting started';
+
+  @override
+  String get onboardingSettingsBody =>
+      'Permissions, the speech model and the basics, step by step.';
+
+  @override
+  String get onboardingSettingsOpen => 'Show again';
 }

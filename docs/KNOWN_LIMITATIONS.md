@@ -1,4 +1,4 @@
-# Known limitations · TingLang 0.6
+# Known limitations · TingLang 0.7
 
 ## Not yet verified
 
@@ -47,6 +47,12 @@ See VERIFICATION.md for what actually ran. Not executed yet: live captions from 
 - Live captions in the cloud depend on the network. While reconnecting, up to 30 s of audio waits and is sent afterwards; longer outages leave a gap in the transcript. Audio already sent on a connection that then fails may not be recognised.
 - Cloud mode is one choice for live captions and files; a service without one of them leaves that one to the local model. Translation of cloud captions still uses Apple Translation (macOS 15+).
 - Long files are cut into pieces at quiet moments; a sentence that spans a cut may be split in two.
+
+## First-start guide
+
+- It opens by itself only for a library created by 0.7 or later (no data folder at launch). People who used an earlier version can open it from Settings → General.
+- macOS offers no way to ask whether system audio recording is allowed before the first capture, and none for Full Disk Access, so the guide shows those two without a state; screen recording shows only "allowed" (macOS does not report a refusal).
+- The guide cannot help with the very first launch of a download: the unsigned app is stopped by macOS before it runs. The README, the release notes and the website explain Open Anyway.
 
 ## Floating panel
 

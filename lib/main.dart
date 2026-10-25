@@ -52,10 +52,16 @@ Future<void> main() async {
     await shell?.ready();
     final support = await getApplicationSupportDirectory();
     final dataFolder = Directory(p.join(support.path, 'Tinglang'));
+    // No data folder yet: TingLang was never opened on this Mac (for this
+    // user), so the first-start guide opens once.
+    final firstStart = !dataFolder.existsSync();
     final store = SqliteLibraryStore.open(dataFolder);
     final state = await store.load();
     MediaKit.ensureInitialized();
     final controller = AppController(store, state);
+    if (firstStart) {
+      await controller.setSetting(AppController.onboardingKey, AppController.onboardingPending);
+    }
     final repository = LiveRepository(store.db);
     final live = LiveController(repository: repository, libraryRoot: store.root);
     final recorder = RecordingService(store);
@@ -177,11 +183,14 @@ Future<void> main() async {
         speechModels: speechModels,
         sync: sync,
         updates: updates,
+        openSystemSettings: shell?.openSystemSettings,
       ),
     );
     // Without the panel (hidden by the user, or no panel on this system) the
-    // main window is the only way in.
-    if (!live.panelVisible) await shell?.showMainWindow();
+    // main window is the only way in; the first-start guide opens in it.
+    final onboarding =
+        controller.setting(AppController.onboardingKey, '') == AppController.onboardingPending;
+    if (!live.panelVisible || onboarding) await shell?.showMainWindow();
   } catch (error, stack) {
     runApp(StartupFailure(error: error, stack: stack));
     try {

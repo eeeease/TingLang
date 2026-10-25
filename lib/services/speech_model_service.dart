@@ -283,6 +283,24 @@ class SpeechModelService extends ChangeNotifier implements SpeechModelSource {
   @override
   SpeechOptions optionsFor(String language) => speechOptionsFrom(app, language: language);
 
+  /// What "automatic" resolves to for [use] on this Mac right now: the
+  /// model that runs, or else the first local one that only needs a
+  /// download (what starting captions would offer to download). Null before
+  /// [refresh] or when nothing can run here.
+  SpeechModel? automaticModel(SpeechUse use) {
+    final probe = this.probe, platform = _platform;
+    if (probe == null || platform == null) return null;
+    final choice = (use == SpeechUse.live ? platform.liveAsr : platform.fileAsr).pick(probe);
+    final id =
+        choice.id ??
+        choice.candidates
+            .where((c) => !c.factory.spec.cloud && c.availability is NeedsDownload)
+            .firstOrNull
+            ?.factory
+            .id;
+    return id == null ? null : SpeechModels.all.where((m) => m.backendId(use) == id).firstOrNull;
+  }
+
   /// Whether [model] can run here at all (OS version, platform).
   Availability availability(SpeechModel model, SpeechUse use) {
     final probe = this.probe, platform = _platform;

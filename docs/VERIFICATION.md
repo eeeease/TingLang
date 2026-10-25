@@ -4,6 +4,13 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.0 · first-start guide and update arrow
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh --build` (before the version commit, so the build says 0.6.1) | Python delivery checks 33 OK; `flutter analyze --no-fatal-infos` no issues; app tests 275 passed (new: `test/onboarding_test.dart`, the arrow in `test/shell_test.dart` and `test/update/update_widgets_test.dart`); `tinglang_platform_interface` 51; `tinglang_api` 68 plus the contract check; `tinglang_cloud_asr` 118; `tinglang_ui` 4; `tinglang_native` 73 (9 skipped); `tinglang_native_macos` 27; release build `Tinglang.app` 172.4 MB, literal usage strings, `codesign --verify` (ad-hoc); `integration_test/app_test.dart` 1 passed, 2 skipped |
+| A temporary integration test (not kept) driving `TinglangApp` on this Mac with the real platform, a temporary library, `onboarding = pending` and a cached release 0.7.0 | 1 passed; screenshots checked by eye: the guide's three steps, the cloud choice, Skip, Show again, the arrow on the mark and the update dialog, light and dark, Chinese and English. Its first run found the arrow taking no clicks (below) |
+
 ## 0.6.0 · full check
 
 | Command | Outcome |
@@ -27,9 +34,10 @@ Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 thr
 | Voice Memos | Reader tested against generated `CloudRecordings.db` files; without Full Disk Access the app explains how to grant it and reads nothing | Listing and importing real recordings |
 | TingLang packages (`.tinglang`) | Round trips and refusals in tests; the built app declares the type and the document type; opened files are queued and imported in tests | Opening a package from Finder, Open With or the Dock; the generated document icon; export through the system dialog |
 | iCloud Drive sync (opt-in) | Tests only: two simulated Macs sharing one folder (add, update, conflict, tombstone, placeholder and not-downloaded files, corrupt and newer packages, no network), the service's triggers and states, the Settings panel | Real iCloud Drive between two Macs; the iCloud Drive access prompt; folder watching on iCloud |
-| In-app updates | Tests only: release parsing, versions, host checks; a loopback fake GitHub (404/403/429/5xx, no connection, bad JSON, prereleases: silently nothing); download → size and SHA-256 → `ditto -x -k` → Info.plist check; the install script against fake folders (swap, roll-back, give-up); nothing requested at startup. The real endpoint answers 404 while the repository is private, and the app shows nothing | A real update: downloading from GitHub, replacing the running app and reopening it |
+| In-app updates | The green arrow on the mark and the update dialog opening from it, rendered by the app on this Mac with a cached newer release (no download). Tests only: release parsing, versions, host checks; a loopback fake GitHub (404/403/429/5xx, no connection, bad JSON, prereleases: silently nothing); download → size and SHA-256 → `ditto -x -k` → Info.plist check; the install script against fake folders (swap, roll-back, give-up); nothing requested at startup. The real endpoint answers 404 while the repository is private, and the app shows nothing | A real update: downloading from GitHub, replacing the running app and reopening it |
 | TingLang account | Tests only: the contract and client, sign-in against a local server with a fake browser, the sidebar entry and dialog, and the whole app proving it opens no connection before sign-in | Signing in to `api.tinglang.app` through the system sign-in window; plans and usage from the real server |
 | Main window and Settings | Sections, grouped history, the seven Settings tabs, light/dark switching, closing keeps the app and panel running | — |
+| First-start guide (0.7) | Rendered by the app on this Mac from a temporary library (light Chinese, dark English): the three steps, the real probe's permission states, Apple Speech recommended and ready on macOS 27, the cloud choice, Skip, Settings → General → Show again; widget tests for the microphone question, the System Settings links (faked), the download question with no request, the outcome and the `onboarding` value | Pressing Allow for the microphone and the System Settings links in the running app; a real first start of the release build without a data folder; a model download started from the guide; macOS 14.2–15 |
 | Windows | — | The C++ plugin has never been compiled |
 | CI | GitHub Actions: the Linux job (pure Dart packages, generated code up to date) and the macOS job (`check.sh --build`) on the `xcode-27` image. Its runners are virtual machines without the system speech recogniser, so the integration test checks Apple Speech strictly only on a real Mac | — |
 
@@ -49,6 +57,8 @@ The panel's Swift files are compiled into a small harness that runs in its own p
 - macOS cannot launch the app twice in one integration run, so each integration test file runs on its own.
 - SwiftUI's `.help` tooltips do not appear while the app is in the background, which is how the panel is used; the panel draws its own hints.
 - The English accent picker overflowed with system fonts; long dropdown labels now shrink.
+- 0.7: the update arrow was first drawn partly outside the box of the sidebar's mark, and Flutter takes no clicks outside a widget's parent: clicking it in the real app did nothing. The arrow now sits inside the mark's box (`test/shell_test.dart` clicks it where it is drawn).
+- 0.7: on a Mac where every local model still needs a download (macOS 14.2–15), "automatic" resolved to nothing, so the guide would have recommended no model; `SpeechModelService.automaticModel` now names the model starting captions would offer to download, as `LiveController` does.
 
 ## Not verified yet
 

@@ -62,6 +62,18 @@ String asrFailureMessage(AppLocalizations l, AsrFailure failure) {
   };
 }
 
+/// Three ratings and the size on one line ("Accuracy ●●○ · Speed ●●● ·
+/// CPU low · 169 MB"); the download dialog names the source and licence.
+String speechModelFacts(AppLocalizations l, SpeechModel model) {
+  String dots(int n) => '●' * n + '○' * (3 - n);
+  return [
+    '${l.speechAccuracy} ${dots(model.ratings.accuracy)}',
+    '${l.speechSpeed} ${dots(model.ratings.speed)}',
+    l.speechCpuLevel(cpuLevel(l, model.ratings.cpuPercent)),
+    model.isApple ? l.speechSystemAsset : formatBytes(l, model.diskBytes),
+  ].join('  ·  ');
+}
+
 /// "Low", "medium" or "high" CPU from the measured percentage.
 String cpuLevel(AppLocalizations l, double percent) => percent <= 5
     ? l.speechCpuLow

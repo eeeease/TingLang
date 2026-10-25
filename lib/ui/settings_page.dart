@@ -58,6 +58,7 @@ class SettingsPage extends StatelessWidget {
     this.speechModels,
     this.sync,
     this.updates,
+    this.onShowOnboarding,
   });
   final AppController app;
   final SettingsTab tab;
@@ -78,6 +79,9 @@ class SettingsPage extends StatelessWidget {
 
   /// Updates (automatic check, check now), shown under General.
   final Widget? updates;
+
+  /// Opens the first-start guide again (Settings → General).
+  final VoidCallback? onShowOnboarding;
 
   List<SettingsTab> get _tabs => [
     for (final t in SettingsTab.values)
@@ -218,6 +222,7 @@ class SettingsPage extends StatelessWidget {
             children: switch (current) {
               SettingsTab.general => [
                 ..._general(context),
+                if (onShowOnboarding != null) _onboarding(context),
                 if (updates != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: SlSpace.lg),
@@ -279,6 +284,32 @@ class SettingsPage extends StatelessWidget {
         ),
       ]),
     ];
+  }
+
+  Widget _onboarding(BuildContext context) {
+    final l = context.l10n;
+    final c = context.sl;
+    return _section(context, [
+      Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.onboardingSettingsTitle, style: SlType.body.copyWith(color: c.text)),
+                Text(l.onboardingSettingsBody, style: SlType.caption.copyWith(color: c.muted)),
+              ],
+            ),
+          ),
+          const SizedBox(width: SlSpace.md),
+          OutlinedButton(
+            key: const ValueKey('onboarding-open'),
+            onPressed: onShowOnboarding,
+            child: Text(l.onboardingSettingsOpen),
+          ),
+        ],
+      ),
+    ]);
   }
 
   List<Widget> _captions(BuildContext context) {

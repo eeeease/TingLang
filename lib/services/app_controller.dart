@@ -46,6 +46,13 @@ class AppController extends ChangeNotifier {
   static const themeKey = 'theme';
   static const learningLanguageKey = 'learning_language';
   static const nativeLanguageKey = 'native_language';
+
+  /// The first-start guide: `pending` in a library made by a version that
+  /// has the guide, until the guide closes (`done`). Libraries from before it
+  /// have no value and never open it by themselves (Settings → General can).
+  static const onboardingKey = 'onboarding';
+  static const onboardingPending = 'pending';
+  static const onboardingDone = 'done';
   String setting(String key, String fallback) => state.settings[key] ?? fallback;
   Future<void> setSetting(String key, String value) => change((next) {
     next.settings[key] = value;

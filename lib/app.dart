@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tinglang_native/tinglang_native.dart' show SystemSettingsPane, TinglangPlatform;
 import 'package:tinglang_ui/tinglang_ui.dart';
 
 import 'core/models.dart';
@@ -28,6 +29,7 @@ import 'ui/file_picking.dart';
 import 'ui/import_dialog.dart';
 import 'ui/learn_page.dart';
 import 'ui/library_page.dart';
+import 'ui/onboarding_dialog.dart';
 import 'ui/records_page.dart';
 import 'ui/session_page.dart';
 import 'ui/settings_page.dart';
@@ -68,6 +70,7 @@ class TinglangApp extends StatelessWidget {
     this.speechModels,
     this.sync,
     this.updates,
+    this.openSystemSettings,
   });
   final AppController controller;
   final PlaybackHub playback;
@@ -88,6 +91,9 @@ class TinglangApp extends StatelessWidget {
 
   /// Updates from GitHub Releases (banner and Settings → General).
   final UpdateService? updates;
+
+  /// Opens a Privacy & Security pane (the first-start guide).
+  final Future<void> Function(SystemSettingsPane pane)? openSystemSettings;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -121,6 +127,7 @@ class TinglangApp extends StatelessWidget {
         speechModels: speechModels,
         sync: sync,
         updates: updates,
+        openSystemSettings: openSystemSettings,
       ),
     ),
   );
@@ -148,6 +155,7 @@ class TinglangShell extends StatefulWidget {
     this.speechModels,
     this.sync,
     this.updates,
+    this.openSystemSettings,
   });
   final AppController app;
   final PlaybackHub playback;
@@ -176,6 +184,9 @@ class TinglangShell extends StatefulWidget {
 
   /// Updates from GitHub Releases.
   final UpdateService? updates;
+
+  /// Opens a Privacy & Security pane (the first-start guide).
+  final Future<void> Function(SystemSettingsPane pane)? openSystemSettings;
   @override
   State<TinglangShell> createState() => _TinglangShellState();
 }
@@ -315,7 +326,37 @@ class _TinglangShellState extends State<TinglangShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _onNavigation();
       _onExitNotice();
+      // A new library: the guide opens once (main.dart shows the window).
+      if (widget.app.setting(AppController.onboardingKey, '') == AppController.onboardingPending) {
+        unawaited(_showOnboarding());
+      }
     });
+  }
+
+  bool _onboarding = false;
+
+  /// The first-start guide; finished with the cloud chosen, it leads on to
+  /// Settings → Speech recognition for the key.
+  Future<void> _showOnboarding() async {
+    if (_onboarding || !mounted) return;
+    _onboarding = true;
+    try {
+      final outcome = await showOnboarding(
+        context,
+        app: widget.app,
+        models: widget.speechModels,
+        access: PermissionAccess(
+          probe: TinglangPlatform.isInstalled ? TinglangPlatform.instance.probe : null,
+          requestMicrophone: widget.recorder.requestPermission,
+          openSettings: widget.openSystemSettings,
+        ),
+      );
+      if (outcome == OnboardingOutcome.setUpCloud) {
+        _navigate(Section.settings, settings: SettingsTab.speech);
+      }
+    } finally {
+      _onboarding = false;
+    }
   }
 
   void _navigate(
@@ -452,6 +493,7 @@ class _TinglangShellState extends State<TinglangShell> {
         updates: widget.updates == null
             ? null
             : UpdateSettingsTile(updates: widget.updates!, openUrl: widget.openUrl),
+        onShowOnboarding: () => unawaited(_showOnboarding()),
       ),
     };
   }
@@ -474,6 +516,7 @@ class _TinglangShellState extends State<TinglangShell> {
               onSpeechSetup: () => _navigate(Section.settings, settings: SettingsTab.speech),
               cloud: widget.cloud,
               openUrl: widget.openUrl,
+              updates: widget.updates,
             ),
             Expanded(
               child: Column(
@@ -538,6 +581,7 @@ class _Sidebar extends StatelessWidget {
     required this.onSpeechSetup,
     this.cloud,
     this.openUrl,
+    this.updates,
   });
   final Section section;
   final bool locked;
@@ -551,6 +595,9 @@ class _Sidebar extends StatelessWidget {
   /// The TingLang account (null in tests without one).
   final CloudController? cloud;
   final Future<void> Function(Uri url)? openUrl;
+
+  /// A newer version puts a green arrow on the mark's corner.
+  final UpdateService? updates;
 
   @override
   Widget build(BuildContext context) {
@@ -573,8 +620,24 @@ class _Sidebar extends StatelessWidget {
             child: Row(
               key: const ValueKey('sidebar-brand'),
               children: [
-                const BrandMark(size: 36),
-                const SizedBox(width: SlSpace.sm + 2),
+                // The mark and the gap after it. A newer version puts a green
+                // arrow on the mark's corner, inside this box: a widget that
+                // sticks out of its parent takes no clicks there.
+                SizedBox(
+                  width: 36 + SlSpace.sm + 2,
+                  height: 36,
+                  child: Stack(
+                    children: [
+                      const Align(alignment: Alignment.centerLeft, child: BrandMark(size: 36)),
+                      if (updates != null)
+                        Positioned(
+                          top: 0,
+                          left: 27,
+                          child: UpdateBadge(updates: updates!, openUrl: openUrl),
+                        ),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
