@@ -1,0 +1,18 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        generate_for:
+          - lib/core/db/**
+        options:
+          store_date_time_values_as_text: true
+          databases:
+            tinglang: lib/core/db/database.dart
+          schema_dir: drift_schemas/
+          test_dir: test/drift/
+          sql:
+            dialect: sqlite
+            options:
+              version: "3.45"
+              modules:
+                - fts5

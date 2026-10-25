@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobResult",
+  "description": "Exactly one of transcript, course or download.",
+  "type": "object",
+  "required": [
+    "kind"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "transcribe, translate or course; clients ignore jobs of unknown kinds."
+    },
+    "transcript": {
+      "$ref": "transcript.json"
+    },
+    "course": {
+      "$ref": "course.json"
+    },
+    "download": {
+      "type": "object",
+      "required": [
+        "url",
+        "expires_at"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "content_type": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "transcript"
+      ]
+    },
+    {
+      "required": [
+        "course"
+      ]
+    },
+    {
+      "required": [
+        "download"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobEstimate",
+  "type": "object",
+  "required": [
+    "kind",
+    "allowed",
+    "cost"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "transcribe, translate or course; clients ignore jobs of unknown kinds."
+    },
+    "allowed": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string",
+      "description": "A problem code when not allowed, e.g. quota_exceeded."
+    },
+    "cost": {
+      "type": "object",
+      "required": [
+        "unit",
+        "amount"
+      ],
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "quota": {
+      "$ref": "quota.json"
+    },
+    "eta_seconds": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

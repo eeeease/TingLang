@@ -1,0 +1,14 @@
+{
+  "kind": "transcribe",
+  "allowed": false,
+  "reason": "quota_exceeded",
+  "cost": {
+    "unit": "minute",
+    "amount": 22
+  },
+  "quota": {
+    "unit": "minute",
+    "limit": 60,
+    "used": 55
+  }
+}

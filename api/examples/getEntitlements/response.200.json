@@ -1,0 +1,30 @@
+{
+  "plan": "pro",
+  "status": "active",
+  "features": {
+    "jobs.transcribe": {
+      "enabled": true,
+      "quota": {
+        "unit": "minute",
+        "limit": 600,
+        "used": 42,
+        "resets_at": "2026-11-01T00:00:00Z"
+      }
+    },
+    "jobs.translate": {
+      "enabled": true
+    },
+    "llm_gateway": {
+      "enabled": true,
+      "quota": {
+        "unit": "credit",
+        "limit": 1000,
+        "used": 10,
+        "resets_at": "2026-11-01T00:00:00Z"
+      }
+    }
+  },
+  "valid_until": "2026-11-23T00:00:00Z",
+  "checked_at": "2026-10-23T08:00:00Z",
+  "grace_until": "2026-10-30T08:00:00Z"
+}

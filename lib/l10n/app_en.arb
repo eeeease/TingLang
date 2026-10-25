@@ -1,0 +1,1405 @@
+{
+  "@@locale": "en",
+  "appTitle": "TingLang",
+  "navLibrary": "Library",
+  "navSettings": "Settings",
+  "exitBlockedRecording": "Stop and save the recording before quitting TingLang.",
+  "exitBlockedSaveError": "Something still failed to save. Fix the local storage problem first.",
+  "lockPendingAttempt": "The recording stopped but its record is not saved yet. Use Retry save below.",
+  "lockRecording": "Recording in progress. Stop and save before switching pages.",
+  "persistenceFailed": "Could not save locally: {error}",
+  "@persistenceFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "retrySave": "Retry save",
+  "showDataLocation": "Show data location",
+  "cancel": "Cancel",
+  "startupFailedTitle": "TingLang could not start",
+  "startupFailedNotice": "Your library was not reset. Leave the data folder as it is, and copy the error details if you ask for help.",
+  "copyErrorDetails": "Copy error details",
+  "areaNba": "NBA",
+  "areaGaming": "Gaming",
+  "areaCinema": "Cinema",
+  "areaLife": "Life & Vlogs",
+  "areaPodcasts": "Podcasts",
+  "areaPersonal": "My voice",
+  "discoverEmptyTitle": "Curated podcasts and channels are on the way",
+  "discoverEmptyBody": "Themed shelves of hand-picked podcasts and channels to listen to closely.",
+  "discoverImportInstead": "Import your own material",
+  "importMaterial": "Import",
+  "searchHint": "Search courses or sources…",
+  "allScenes": "All scenes",
+  "libraryEmptyTitle": "Start with something you genuinely care about.",
+  "libraryEmptyBody": "Import a video or audio you care about, or try the sample first.",
+  "loadDemo": "Load the sample course",
+  "demoLoaded": "The sample was added to NBA.",
+  "courseScenes": "{count, plural, =1{1 scene} other{{count} scenes}}",
+  "@courseScenes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaPending": "Media not attached",
+  "mediaLocal": "Local media",
+  "percentDone": "{percent}% done",
+  "@percentDone": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "importTitle": "Bring your own scene",
+  "importSubtitle": "Local video or audio, with subtitles if you have them.",
+  "importAreaLabel": "Area",
+  "pickMedia": "Choose local video / audio",
+  "pickSubtitles": "Choose SRT / VTT subtitles (optional)",
+  "courseNameLabel": "Course name",
+  "untitledScene": "Untitled scene",
+  "importNeedMedia": "Choose a media file.",
+  "updateCourseTitle": "Update existing course?",
+  "updateCourseBody": "A course with this ID already exists. Its content will be updated; your practice records, recordings, saved expressions and completion marks are kept.",
+  "updateContent": "Update content",
+  "importing": "Copying and checking…",
+  "importToLibrary": "Add to library",
+  "attachMediaPrompt": "The course is ready. Attach the original media to play it.",
+  "attachMedia": "Attach full video / audio",
+  "pause": "Pause",
+  "playClip": "Play clip",
+  "backToClipStart": "Back to clip start",
+  "abLoop": "A–B loop",
+  "clipRange": "CLIP {start} — {end}",
+  "@clipRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "clipEnd": "end",
+  "mediaBoundsMismatch": "Course times go beyond the media length. Attach the complete original media from the same source, not an already-cut clip.",
+  "transcript": "Transcript",
+  "hideTranscript": "Hide transcript",
+  "showTranscript": "Show transcript",
+  "noSubtitles": "No subtitles yet. Pair this media with an SRT/VTT file when importing it.",
+  "listenFirst": "Listen once first; let the words appear a little later.",
+  "wordsTitle": "Words worth keeping",
+  "phrasesTitle": "Expressions you can reuse",
+  "sentencesTitle": "A frame for your own words",
+  "noItems": "No prepared words or patterns for this clip. You can still listen, shadow and record.",
+  "saveToReview": "Save to review",
+  "savedToReview": "Added to review.",
+  "inThisScene": "IN THIS SCENE\n{text}",
+  "@inThisScene": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "makeItYours": "MAKE IT YOURS\n{text}",
+  "@makeItYours": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "frameLabel": "Frame: {frame}",
+  "@frameLabel": {
+    "placeholders": {
+      "frame": {
+        "type": "String"
+      }
+    }
+  },
+  "blindTitle": "Listen before you look",
+  "noBlanks": "No prepared blanks. Hide the transcript, listen to the whole clip, then say what you heard.",
+  "checkAnswers": "Check my answers",
+  "hideAnswers": "Hide answers",
+  "showAnswers": "Show answers",
+  "shadowTitle": "Borrow the rhythm",
+  "retellTitle": "Now, make it yours",
+  "shadowFallback": "Play the original, pause, then record your shadowing.",
+  "focusOn": "Focus on",
+  "needHint": "Need a hint?",
+  "stepWords": "Words",
+  "stepPhrases": "Phrases",
+  "stepSentences": "Sentences",
+  "stepBlind": "Blind",
+  "stepShadow": "Shadow",
+  "stepRetell": "Retell",
+  "stepDone": "I've finished this step",
+  "backToLibrary": "Back to library",
+  "changeMedia": "Change media",
+  "practiceHint": "Jot down a few cue words, or what you just wanted to say…\nYour words are kept exactly as written.",
+  "draftSaved": "Draft saved on this computer",
+  "draftSaving": "Saving draft…",
+  "stopAndSave": "Stop and save · {time}",
+  "@stopAndSave": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "recordYourself": "Record yourself",
+  "saveTextOnly": "Save text only",
+  "recordingBadge": "● Recording",
+  "practiceNotice": "Use headphones to compare with the original.",
+  "practiceSaved": "Practice saved on this computer.",
+  "practiceEmpty": "Write your expression first, or record your own voice.",
+  "recentPractice": "Recently saved practice",
+  "clipPractice": "Practice for this clip",
+  "playRecording": "Play your recording",
+  "showAllSaved": "Show all saved",
+  "reviewEmptyNone": "Nothing to review yet",
+  "reviewEmptyDone": "All caught up",
+  "recallPrompt": "Recall the expression you saved from this clip.",
+  "nextReview": "Next review: {date}",
+  "@nextReview": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reveal": "Reveal",
+  "recallAgain": "Forgot",
+  "recallHard": "Hard",
+  "recallGood": "Good",
+  "recallEasy": "Easy",
+  "backToScene": "Back to the scene",
+  "clipMissing": "The original clip is not in the current course version. Your saved expression and practice are kept.",
+  "speakQuestion": "What is one thing you are working on right now?",
+  "speakHelp": "Talk about training, games, study or something small from today — or switch topics entirely.",
+  "appVersionLine": "Version {version}",
+  "@appVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "uiLanguage": "Interface language",
+  "followSystem": "Follow system",
+  "learningLanguage": "Language you are learning",
+  "nativeLanguage": "Your language (for translations)",
+  "appearance": "Appearance",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "exportMarkdown": "Export practice as Markdown",
+  "exportDialogTitle": "Export practice text",
+  "exported": "Text exported. Recordings stay in the local data folder.",
+  "copyDataFolder": "Copy data folder path",
+  "dataFolderCopied": "Data folder path copied.",
+  "openInFinder": "Open in Finder",
+  "finderFailed": "Cannot open Finder: {error}",
+  "@finderFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "openSourceBody": "Open source under AGPL-3.0. Commercial licences are available from the author.",
+  "viewLicenses": "View full open-source licences",
+  "legalese": "Copyright 2026 eeeease and Tinglang contributors.",
+  "exportHeading": "# TingLang — My English practice",
+  "exportedAt": "Exported: {date}",
+  "@exportedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exportTextOnly": "This export contains text only. Original recordings and media stay in the app data folder.",
+  "exportAudioOnly": "_Audio-only practice._",
+  "exportRecordingSaved": "Recording: saved locally",
+  "exportRecordingNone": "Recording: none",
+  "exportExpressions": "## Expressions",
+  "liveSourceSystem": "System audio",
+  "liveSourceMic": "Microphone",
+  "liveStop": "Stop",
+  "liveStopping": "Saving…",
+  "liveLanguagePair": "{source} → {target}",
+  "@liveLanguagePair": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "liveUnavailable": "Live captions are not available on this Mac yet: {reason}",
+  "@liveUnavailable": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "liveNeedSpeechModel": "Recognising {language} needs a speech model download first.",
+  "@liveNeedSpeechModel": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "liveNeedTranslationPack": "Translating {pair} needs a language pack download first.",
+  "@liveNeedTranslationPack": {
+    "placeholders": {
+      "pair": {
+        "type": "String"
+      }
+    }
+  },
+  "liveDownload": "Download",
+  "liveIssueSilentTap": "System audio arrived silent, so TingLang switched to Screen Recording capture. If macOS asks, allow TingLang in System Settings → Privacy & Security.",
+  "liveIssueFallback": "Capturing through Screen Recording.",
+  "liveTranslating": "Translating…",
+  "liveSessionTitle": "Captions · {date}",
+  "@liveSessionTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "liveSessionInterrupted": "interrupted",
+  "liveSearchHint": "Search all captions",
+  "liveNoMatches": "No captions match.",
+  "liveExport": "Export…",
+  "liveDelete": "Delete",
+  "liveDeleteConfirm": "Delete this session and its captions?",
+  "liveExportBilingual": "Bilingual",
+  "liveExportSource": "Original only",
+  "liveExportTranslation": "Translation only",
+  "liveTimesNote": "Times count from the start of the captions.",
+  "liveSaveFailed": "Could not save captions: {error}",
+  "@liveSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTranscript": "Transcript",
+  "sessionDictation": "Dictation",
+  "sessionNoMedia": "No audio was saved with this session, so it can't be played. To keep audio next time, turn on “Save system audio with captions” in Settings.",
+  "playerBack5": "Back 5 seconds",
+  "playerForward5": "Forward 5 seconds",
+  "playerSpeed": "Speed",
+  "playerVolume": "Volume",
+  "playerMute": "Mute",
+  "playerUnmute": "Unmute",
+  "playerSetA": "Set A",
+  "playerSetB": "Set B",
+  "playerClearLoop": "Clear loop",
+  "playerLoopSentence": "Loop this sentence",
+  "dictationPrompt": "Listen and type what you hear.",
+  "dictationPlay": "Play sentence",
+  "dictationHint": "Type the sentence… (⌘↩ checks, ⌘R replays)",
+  "dictationCheck": "Check",
+  "dictationPrevious": "Previous",
+  "dictationNext": "Next",
+  "dictationReveal": "Show answer",
+  "dictationCorrect": "Correct",
+  "dictationClose": "Almost",
+  "dictationIncorrect": "Not yet",
+  "dictationProgress": "{done} of {total} sentences correct",
+  "@dictationProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dictationEmpty": "No sentences to practise in this session yet.",
+  "importMedia": "Import audio or video…",
+  "importTranscribing": "Transcribing · {percent}%",
+  "@importTranscribing": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "importCopying": "Copying…",
+  "importCancel": "Cancel",
+  "recallInterval": "{label} · {days} d",
+  "@recallInterval": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "stepQuiz": "Quiz",
+  "youtubeBlocked": "This video can't be played inside TingLang (YouTube error {code}).",
+  "@youtubeBlocked": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "openOnYouTube": "Open on YouTube",
+  "blindInlineHint": "Type each missing word or phrase in place, then check. Colours: word, phrase, sentence.",
+  "blindScore": "{correct} of {total} correct",
+  "@blindScore": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "blindAddMissed": "Add missed items to review",
+  "blindAllCorrect": "All correct. Step marked done.",
+  "shadowReason": "Why: {reason}",
+  "@shadowReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "retellTryToUse": "Try to use",
+  "quizIntro": "Recall each item from its meaning, or fill it back into the sentence where you heard it. Misses go to your review deck.",
+  "quizRecall": "Say it in English",
+  "quizCloze": "Fill the gap",
+  "quizCheck": "Check",
+  "quizNext": "Next",
+  "quizDone": "Quiz finished: {correct} of {total}.",
+  "@quizDone": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "quizRestart": "Try again",
+  "quizEmpty": "This scene has no items to quiz.",
+  "addedToReview": "Added to review",
+  "close": "Close",
+  "delete": "Delete",
+  "edit": "Edit",
+  "save": "Save",
+  "makeCourse": "Make course",
+  "makeCourseBasic": "Basic course",
+  "makeCourseBasicBody": "Offline: words above your level, phrases and sentences, with blind listening and shadowing.",
+  "makeCourseAi": "AI course",
+  "makeCourseAiBody": "Your AI service writes explanations, examples, memory aids and a retelling outline.",
+  "makeCourseNoProvider": "Add an AI provider in Settings to use this.",
+  "makeCourseProvider": "Provider",
+  "makeCourseConsent": "Send this transcript's text to {host}",
+  "@makeCourseConsent": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "makeCourseReplace": "A course from this session already exists. Making it again replaces its content; your progress and review cards are kept.",
+  "makeCourseStart": "Make course",
+  "makeCourseReading": "Reading the transcript…",
+  "makeCourseSelecting": "Choosing clips…",
+  "makeCoursePlanning": "Writing clip {done} of {total}…",
+  "@makeCoursePlanning": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "makeCourseCompiling": "Checking and saving the course…",
+  "makeCourseDone": "Done: {clips} clips are ready.",
+  "@makeCourseDone": {
+    "placeholders": {
+      "clips": {
+        "type": "int"
+      }
+    }
+  },
+  "makeCourseFailed": "Could not make the course: {error}",
+  "@makeCourseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "makeCourseRequests": "{count} AI requests",
+  "@makeCourseRequests": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "makeCourseFallbacks": "{count} clips used Basic content",
+  "@makeCourseFallbacks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "makeCourseOpen": "Open course",
+  "providersTitle": "AI providers",
+  "providersBody": "Used for AI courses: any OpenAI-compatible service with your own key, or a model on this Mac with Ollama or LM Studio.",
+  "providersEmpty": "No providers yet. Basic courses work without one.",
+  "providersPrivacy": "Keys are kept in the macOS Keychain.",
+  "providerAdd": "Add provider",
+  "providerEdit": "Edit provider",
+  "providerPreset": "Service",
+  "providerCustom": "Custom (OpenAI-compatible)",
+  "providerName": "Name",
+  "providerBaseUrl": "Base URL",
+  "providerModel": "Model",
+  "providerModelPick": "Choose a model",
+  "providerApiKey": "API key",
+  "providerApiKeyOptional": "API key (optional)",
+  "providerKeyKeychain": "Saved in the Keychain",
+  "providerKeyKeep": "A key is saved. Leave empty to keep it.",
+  "providerKeySaved": "key saved",
+  "providerKeyMissing": "no key",
+  "providerTest": "Test connection",
+  "providerTestOk": "Connected · {count} models available",
+  "@providerTestOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "providerTestUnauthorized": "The key was rejected.",
+  "providerCloud": "Cloud",
+  "providerLocal": "On this Mac",
+  "providerDefault": "Use for course generation",
+  "providerDeleteTitle": "Delete {name}?",
+  "@providerDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerDeleteBody": "Its key is removed from the Keychain. Courses made with it stay.",
+  "providerUrlInvalid": "Enter a base URL starting with http:// or https://",
+  "providerModelRequired": "Enter a model name.",
+  "providerModelContext": "{tokens} context",
+  "@providerModelContext": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "providerModelPrice": "{input} in / {output} out per 1M tokens",
+  "@providerModelPrice": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "providerModelLocal": "Runs on this Mac: no per-token cost.",
+  "providerModelUnlisted": "Not in the bundled catalog: price unknown.",
+  "providerLitellmHint": "Runs through a LiteLLM Proxy you start yourself.",
+  "makeCourseEstimate": "Estimate: {calls} requests · ~{input} in / ~{output} out tokens · {cost}",
+  "@makeCourseEstimate": {
+    "placeholders": {
+      "calls": {
+        "type": "int"
+      },
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "makeCourseAbout": "about {usd}",
+  "@makeCourseAbout": {
+    "placeholders": {
+      "usd": {
+        "type": "String"
+      }
+    }
+  },
+  "makeCourseLocalFree": "free (runs on this Mac)",
+  "makeCourseNoPrice": "no price data",
+  "makeCourseTokens": "{input} in / {output} out tokens",
+  "@makeCourseTokens": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFileDialog": "Couldn't open the file dialog. Quit and reopen the app, then try again.",
+  "errorFileMissing": "That file is no longer available.",
+  "errorUnsupportedFormat": ".{ext} files aren't supported. Try MP3, M4A, WAV, MP4 or MOV.",
+  "@errorUnsupportedFormat": {
+    "placeholders": {
+      "ext": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoAudio": "This file has no sound to transcribe.",
+  "errorNoTranscriber": "No speech model can transcribe files on this Mac yet. Choose one in Settings → Speech recognition.",
+  "errorWithDetail": "Something went wrong: {detail}",
+  "@errorWithDetail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "importAndTranscribe": "Import and transcribe",
+  "importCancelled": "Import cancelled.",
+  "panelStart": "Start live captions",
+  "panelUnavailable": "Live captions can't start on this Mac right now",
+  "panelHistory": "History and review",
+  "panelMore": "More",
+  "panelAppearance": "Appearance…",
+  "panelOpenApp": "Open main window",
+  "panelSettings": "Settings…",
+  "panelHide": "Hide floating window",
+  "panelQuit": "Quit",
+  "panelListening": "Listening",
+  "panelWaiting": "Waiting for speech…",
+  "panelView": "View",
+  "panelMakeCourse": "Make course",
+  "panelDropHint": "Drop to import and transcribe",
+  "panelNewRecordings": "{count} new recordings",
+  "@panelNewRecordings": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "panelDisplay": "Display",
+  "panelModeCard": "Card",
+  "panelModeText": "Text only",
+  "panelBackground": "Background",
+  "panelBgGlass": "Glass",
+  "panelBgSolid": "Solid",
+  "panelBgClear": "None",
+  "panelOpacity": "Opacity",
+  "panelBackgroundColor": "Background colour",
+  "panelTextColor": "Text colour",
+  "panelTranslationColor": "Translation colour",
+  "panelFontSize": "Size and weight",
+  "panelWeightRegular": "Regular",
+  "panelWeightMedium": "Medium",
+  "panelWeightBold": "Bold",
+  "panelLines": "Lines",
+  "panelShowTranslation": "Show translation",
+  "panelOutline": "Outline text",
+  "panelCenter": "Centre lines",
+  "panelLock": "Lock and click through",
+  "panelUnlock": "Unlock",
+  "panelResetPosition": "Reset position",
+  "panelLayout": "Layout",
+  "panelLayoutStacked": "Stacked",
+  "panelLayoutSideBySide": "Side by side",
+  "panelLocked": "Locked · clicks pass through",
+  "panelLockToggle": "Lock while captioning (clicks pass through)",
+  "panelJumpToLatest": "Back to latest",
+  "panelNewLines": "{count} new",
+  "@panelNewLines": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "panelDockToggle": "Start or stop captions",
+  "panelDockShow": "Show floating window",
+  "panelDockUnlock": "Unlock captions",
+  "panelPreparing": "Getting ready…",
+  "panelDownloading": "Downloading the speech model…",
+  "panelSaved": "Saved",
+  "panelSummary": "{duration} · {words} words",
+  "@panelSummary": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "words": {
+        "type": "String"
+      }
+    }
+  },
+  "panelFailed": "Captions didn't start: {detail}",
+  "@panelFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "panelImporting": "Importing {count} file(s). Progress shows in History.",
+  "@panelImporting": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "panelRetry": "Try again",
+  "navRecords": "History",
+  "tabCaptions": "Captions",
+  "tabReview": "Review",
+  "tabSpeak": "Speak",
+  "tabMine": "Mine",
+  "tabDiscover": "Discover",
+  "tabShared": "Shared",
+  "importAudio": "Import audio",
+  "recordsEmptyTitle": "Nothing captured yet",
+  "recordsEmptyBody": "Start live captions from the floating panel, or import a recording to transcribe it for close listening.",
+  "dayToday": "Today",
+  "dayYesterday": "Yesterday",
+  "liveRunning": "Live captions are running",
+  "originFile": "Imported",
+  "originShared": "Shared",
+  "sessionFailed": "transcription failed",
+  "reviewEmptyHint": "Save useful expressions while studying a course; they come back here when they are due.",
+  "reviewDoneHint": "The next expressions come back when they are due.",
+  "sharedEmptyTitle": "Community sharing is coming",
+  "sharedEmptyBody": "Until then, import .tinglang files that friends export for you.",
+  "importShared": "Import shared file…",
+  "exportShared": "Export share file…",
+  "sharedImported": "Imported.",
+  "sharedExported": "Share file saved.",
+  "shareNotPackage": "This is not a TingLang share file.",
+  "shareNewerVersion": "This file comes from a newer version of TingLang. Update the app and try again.",
+  "shareIncomplete": "The share file is incomplete. Ask for it to be exported again.",
+  "shareTooLarge": "The share file is too large to import.",
+  "shareUnsupportedMedia": "The audio or video in this file is not in a supported format.",
+  "settingsGeneral": "General",
+  "settingsCaptions": "Live captions",
+  "settingsShowPanel": "Show the floating panel",
+  "settingsPanelLayout": "Floating panel layout",
+  "settingsPanelScrollback": "Lines you can scroll back on the panel",
+  "settingsScrollbackLines": "{count} lines",
+  "@settingsScrollbackLines": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsKeepSystemAudio": "Save system audio with captions",
+  "settingsKeepSystemAudioHelp": "Lets you replay what was said. Only for material you may record.",
+  "settingsData": "Data",
+  "settingsBackupHint": "Everything lives in this folder; back it up to keep your history.",
+  "settingsAbout": "About",
+  "voiceMemos": "Voice Memos",
+  "voiceMemosImport": "Import and transcribe ({count})",
+  "@voiceMemosImport": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceMemoImported": "Imported",
+  "voiceMemoUntitled": "Voice memo · {date}",
+  "@voiceMemoUntitled": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceMemosAccessTitle": "Let TingLang read Voice Memos",
+  "voiceMemosAccessBody": "macOS keeps Voice Memos in a protected folder. Turn on TingLang in System Settings › Privacy & Security › Full Disk Access; macOS may ask you to quit and reopen it.",
+  "voiceMemosOpenSettings": "Open System Settings",
+  "voiceMemosCheckAgain": "Check again",
+  "voiceMemosNoLibrary": "No Voice Memos on this Mac yet. Turn on Voice Memos in iCloud on your iPhone and this Mac, and your recordings appear here.",
+  "voiceMemosUnreadable": "Couldn't read the Voice Memos library. Open the Voice Memos app once, then check again.",
+  "voiceMemosEmpty": "No recordings on this Mac yet.",
+  "voiceMemosNewToday": "{count} new voice memos today",
+  "@voiceMemosNewToday": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceMemosImportShort": "Import",
+  "originVoiceMemo": "Voice Memos",
+  "settingsAccount": "Account",
+  "accountSignedOutBody": "Sign in to see your plan and usage. Buying and managing happen on the website; everything on this Mac works without an account.",
+  "accountSignInHost": "Signing in opens {host} in your browser. Nothing is sent before you sign in.",
+  "@accountSignInHost": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSignIn": "Sign in in browser",
+  "accountSigningIn": "Waiting for the browser…",
+  "accountSignOut": "Sign out",
+  "navSignIn": "Sign in",
+  "planFree": "Free",
+  "accountUpgrade": "Upgrade to Pro",
+  "cloudOfficialSoon": "TingLang official (coming soon)",
+  "accountRefresh": "Refresh",
+  "accountManage": "Manage on the website",
+  "accountPlans": "Plans",
+  "accountPlan": "Plan: {plan}",
+  "@accountPlan": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "accountStatusActive": "Active",
+  "accountStatusTrialing": "Trial",
+  "accountStatusPastDue": "Payment due",
+  "accountStatusCanceled": "Canceled",
+  "accountStatusExpired": "Expired",
+  "accountStatusNone": "No plan",
+  "accountStatusUnknown": "Unknown status",
+  "accountServices": "Cloud services",
+  "accountNoServices": "TingLang's own cloud services (transcription, AI courses) are coming soon.",
+  "cloudServiceTranscribe": "Cloud transcription",
+  "cloudServiceTranslate": "Cloud translation",
+  "cloudServiceLlm": "AI courses without your own key",
+  "cloudServiceIncluded": "Included",
+  "cloudServiceNotInPlan": "Not in your plan",
+  "quotaMinutes": "{used} of {limit} minutes used",
+  "@quotaMinutes": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "quotaCredits": "{used} of {limit} credits used",
+  "@quotaCredits": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "quotaOther": "{used} of {limit} used",
+  "@quotaOther": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "quotaResets": "resets {date}",
+  "@quotaResets": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOffline": "Cannot reach {host}. Showing the plan as of {time}.",
+  "@accountOffline": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOfflineUnconfirmed": "Cannot reach {host}, so the plan cannot be confirmed right now. Features on this Mac are not affected.",
+  "@accountOfflineUnconfirmed": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudErrorUnreachable": "Cannot reach {host}. Check the address and your connection; features on this Mac keep working.",
+  "@cloudErrorUnreachable": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudErrorNoAccounts": "This server does not offer accounts.",
+  "cloudErrorNoBrowser": "Signing in through the browser is not available on this system.",
+  "cloudErrorNoKeychain": "There is no secure storage for the sign-in on this system.",
+  "cloudErrorCanceled": "Sign-in was canceled.",
+  "cloudErrorSignIn": "Sign-in did not complete. Try again.",
+  "cloudErrorSessionEnded": "Your session has ended. Sign in again.",
+  "cloudErrorClientTooOld": "This server needs a newer version of TingLang.",
+  "cloudErrorEntitlement": "This needs a plan that includes it.",
+  "cloudErrorQuota": "The quota for this period is used up.",
+  "cloudErrorRateLimited": "Too many requests. Try again in a moment.",
+  "cloudErrorFeatureDisabled": "This server does not offer that.",
+  "cloudErrorMaintenance": "The server is under maintenance. Try again later.",
+  "cloudErrorServer": "The server could not handle the request ({code}).",
+  "@cloudErrorServer": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudErrorBadResponse": "The server sent something TingLang does not understand.",
+  "settingsSpeechModels": "Speech recognition",
+  "speechForLive": "Live captions",
+  "speechForFiles": "File transcription",
+  "speechAuto": "Automatic",
+  "speechModelAppleSpeech": "Apple Speech",
+  "speechModelAppleDictation": "Apple Dictation",
+  "speechModelXasr": "X-ASR Chinese + English",
+  "speechModelSmallEn": "Zipformer English 20M",
+  "speechModelMediumEn": "Zipformer English 66M",
+  "speechModelXasrOffline": "X-ASR Chinese + English (files)",
+  "speechModelParakeet": "Parakeet TDT 0.6B v2",
+  "speechAccuracy": "Accuracy",
+  "speechSpeed": "Speed",
+  "speechSystemAsset": "Part of macOS",
+  "speechInstalled": "Downloaded",
+  "speechNeedsMacos": "Needs macOS {version}",
+  "@speechNeedsMacos": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "speechInUse": "In use",
+  "speechUseThis": "Use",
+  "speechDownload": "Download {size}",
+  "@speechDownload": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDelete": "Delete",
+  "speechCancel": "Cancel",
+  "speechDownloading": "Downloading… {percent}%",
+  "@speechDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDownloadTitle": "Download {name}?",
+  "@speechDownloadTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDownloadBody": "{size} from {host}, kept in TingLang's data folder until you delete it. Licence: {license}.",
+  "@speechDownloadBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      },
+      "license": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDeleteTitle": "Delete {name}?",
+  "@speechDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDeleteBody": "Frees {size}. You can download it again later.",
+  "@speechDeleteBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "speechAccent": "English accent",
+  "speechAccentDownload": "Download from Apple",
+  "speechAccentRemove": "Remove",
+  "speechFarField": "Far-field audio (speakers, across a room)",
+  "speechShortForm": "Short phrases",
+  "speechLatency": "Recognition latency",
+  "latencyPowerSaver": "Power saver",
+  "latencyBalanced": "Balanced",
+  "latencyFastest": "Lowest latency",
+  "latencyPowerSaverHelp": "Uses the least CPU; captions update a little less often.",
+  "latencyBalancedHelp": "Recommended.",
+  "latencyFastestHelp": "Earliest captions, slightly more CPU.",
+  "panelModelNeeded": "{name} needs a one-time download ({size}) before captions can start.",
+  "@panelModelNeeded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "panelDownloadingModel": "Downloading {name}… {percent}%",
+  "@panelDownloadingModel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "panelLanguageUnsupported": "{name} does not recognise {language}. Choose another model in Settings.",
+  "@panelLanguageUnsupported": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "panelOpenSettings": "Settings",
+  "errorModelMissing": "Download {name} in Settings → Speech recognition first.",
+  "@errorModelMissing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSpeechAssetMissing": "macOS needs to download its speech model for {locale} first (Settings → Speech recognition).",
+  "@errorSpeechAssetMissing": {
+    "placeholders": {
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "speechChecksumFailed": "The download did not match its checksum and was removed. The publisher may have changed the file; try again later.",
+  "settingsSyncData": "Sync & data",
+  "speechMode": "Recognition",
+  "speechModeLocal": "On this Mac",
+  "speechModeCloud": "Cloud API",
+  "speechChooseTitle": "How should TingLang recognise speech?",
+  "speechChooseLocal": "Use a model on this Mac",
+  "speechChooseLocalBody": "Recognised on this Mac; no audio is uploaded.",
+  "speechChooseCloud": "Use a cloud API",
+  "speechChooseCloudBody": "For Macs that can't run the models. Your own key; audio is uploaded.",
+  "speechCpuLevel": "CPU {level}",
+  "@speechCpuLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "speechCpuLow": "low",
+  "speechCpuMedium": "medium",
+  "speechCpuHigh": "high",
+  "cloudSpeechService": "Service",
+  "cloudSpeechSendsTo": "Audio is sent to {host}.",
+  "@cloudSpeechSendsTo": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudSpeechGetKey": "Get a key",
+  "cloudSpeechSaved": "Saved.",
+  "cloudSpeechTestOk": "Connected.",
+  "cloudSpeechForget": "Remove keys",
+  "cloudSpeechForgetTitle": "Remove the {service} keys?",
+  "@cloudSpeechForgetTitle": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudSpeechNoLive": "{service} has no live recognition; live captions use the model on this Mac.",
+  "@cloudSpeechNoLive": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudSpeechNoFile": "{service} cannot transcribe files; files use the model on this Mac.",
+  "@cloudSpeechNoFile": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudSpeechFieldRequired": "Enter {field}.",
+  "@cloudSpeechFieldRequired": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudFieldApiKey": "API Key",
+  "cloudFieldApiSecret": "API Secret",
+  "cloudFieldAppId": "App ID",
+  "cloudFieldSecretId": "SecretId",
+  "cloudFieldSecretKey": "SecretKey",
+  "cloudFieldRegion": "Region",
+  "cloudRegionExample": "e.g. eastus",
+  "cloudRegionCn": "Mainland China (Beijing)",
+  "cloudRegionIntl": "International (Singapore)",
+  "cloudRegionUs": "United States",
+  "cloudRegionEu": "European Union",
+  "cloudTencent": "Tencent Cloud",
+  "cloudDashscope": "Alibaba Cloud Model Studio",
+  "cloudXfyun": "iFlytek",
+  "cloudSoniox": "Soniox",
+  "cloudAssemblyai": "AssemblyAI",
+  "cloudAzure": "Azure AI Speech",
+  "panelChooseRecognizer": "Choose how to recognise speech first: a model on this Mac or a cloud API.",
+  "panelCloudNotSetUp": "Add your {service} key in Settings first.",
+  "@panelCloudNotSetUp": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "panelCloudNotChosen": "Choose a cloud service in Settings first.",
+  "panelCloudLanguage": "{service} does not recognise {language}.",
+  "@panelCloudLanguage": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "panelCloudLabel": "Cloud · {service}",
+  "@panelCloudLabel": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedUnauthorized": "{service} refused the key. Check it in Settings.",
+  "@asrFailedUnauthorized": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedQuota": "{service}: no balance left, or the service isn't activated.",
+  "@asrFailedQuota": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedRateLimited": "{service} is busy. Try again shortly.",
+  "@asrFailedRateLimited": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedNetwork": "Can't reach {service}. Check the network.",
+  "@asrFailedNetwork": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedLanguage": "{service} does not support this language.",
+  "@asrFailedLanguage": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedTooLong": "The file is too long for {service}.",
+  "@asrFailedTooLong": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "asrFailedOther": "{service}: {message}",
+  "@asrFailedOther": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCloudNotSetUp": "Cloud recognition is on, but no key is saved. Add one in Settings → Speech recognition.",
+  "accentUS": "United States",
+  "accentGB": "United Kingdom",
+  "accentAU": "Australia",
+  "accentIN": "India",
+  "accentCA": "Canada",
+  "accentIE": "Ireland",
+  "accentNZ": "New Zealand",
+  "accentSG": "Singapore",
+  "accentZA": "South Africa",
+  "syncTitle": "iCloud Drive sync",
+  "syncBadge": "iCloud",
+  "syncBody": "Keep your courses, recordings and learning progress the same on every Mac signed in to your Apple Account. macOS syncs a Tinglang folder in your iCloud Drive; TingLang has no server of its own.",
+  "syncSwitch": "Sync through iCloud Drive",
+  "syncOff": "Off. Nothing is copied to iCloud Drive.",
+  "syncUnavailable": "iCloud Drive is off or not set up on this Mac. Turn it on in System Settings → Apple Account → iCloud → iCloud Drive, then come back here.",
+  "syncNoAccess": "TingLang is not allowed to open iCloud Drive. Allow it in System Settings → Privacy & Security → Files and Folders, then try again.",
+  "syncFailed": "Could not use the Tinglang folder in iCloud Drive. {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "syncSyncing": "Syncing…",
+  "syncUpToDate": "Up to date",
+  "syncNever": "Not synced yet",
+  "syncLast": "Last synced {time}",
+  "@syncLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncWaiting": "Waiting for iCloud to download {count} item(s). They are added as soon as they arrive.",
+  "@syncWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "syncCounts": "{courses} course(s) · {recordings} recording(s) · {records} learning record(s)",
+  "@syncCounts": {
+    "placeholders": {
+      "courses": {
+        "type": "String"
+      },
+      "recordings": {
+        "type": "String"
+      },
+      "records": {
+        "type": "String"
+      }
+    }
+  },
+  "syncOtherMacs": "Shared with {count} other Mac(s)",
+  "@syncOtherMacs": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "syncFolderLabel": "iCloud Drive › Tinglang",
+  "syncShowInFinder": "Show in Finder",
+  "syncNow": "Sync now",
+  "syncProblemNewerFolder": "The Tinglang folder in iCloud Drive was set up by a newer version of TingLang. Update TingLang on this Mac to keep syncing.",
+  "syncProblemNewerState": "{name} uses a newer version of TingLang. Its changes are skipped until you update TingLang on this Mac.",
+  "@syncProblemNewerState": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncProblemUnreadableState": "Changes from another Mac could not be read and were skipped.",
+  "syncProblemNewerPackage": "Skipped {name}: it was made by a newer version of TingLang.",
+  "@syncProblemNewerPackage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncProblemUnreadablePackage": "Skipped {name}: its file in iCloud Drive could not be read.",
+  "@syncProblemUnreadablePackage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syncProblemWriteFailed": "Some changes could not be saved to iCloud Drive. Check that the disk has free space.",
+  "syncUnnamedItem": "an item",
+  "syncMoreProblems": "And {count} more.",
+  "@syncMoreProblems": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "syncFootnote": "Settings and API keys stay on each Mac. Turning sync off keeps what is already in iCloud Drive.",
+  "updateAvailable": "TingLang {version} is available.",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateWhatsNew": "What's new",
+  "updateInstall": "Update and restart",
+  "updateLater": "Later",
+  "updateDownloading": "Downloading TingLang {version}… {percent}%",
+  "@updateDownloading": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCancel": "Cancel",
+  "updateInstalling": "Checking the download and getting it ready…",
+  "updateRestarting": "TingLang is quitting to finish the update and will open again by itself.",
+  "updateTryAgain": "Try again",
+  "updateOpenReleasePage": "Open the release page",
+  "updateErrorNetwork": "The download stopped. Check your internet connection and try again.",
+  "updateErrorChecksum": "The download did not match its published checksum, so it was deleted. Try again later.",
+  "updateErrorPackage": "The download is not TingLang {version}, so nothing was installed. Download it from the release page instead.",
+  "@updateErrorPackage": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateErrorDisk": "The update could not be saved on this Mac. Check that the disk has free space.",
+  "updateErrorBusy": "Finish or save your recording first, then update.",
+  "updateErrorQuitRefused": "TingLang could not quit, so the update was not installed. Try again.",
+  "updateErrorInstall": "The new version could not be put in place. Download it from the release page and replace TingLang yourself.",
+  "updateErrorNotBundle": "TingLang cannot find its own app to replace. Download the new version from the release page.",
+  "updateErrorTranslocated": "macOS is running TingLang from a temporary copy. Move TingLang to the Applications folder, open it from there and try again, or download the new version from the release page.",
+  "updateErrorReadOnly": "TingLang is running from a disk that cannot be changed (a disk image, for example). Move it to the Applications folder first, or download the new version from the release page.",
+  "updateErrorNotWritable": "Your account cannot change the folder TingLang is in ({folder}). Download the new version from the release page and replace TingLang yourself.",
+  "@updateErrorNotWritable": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSettingsTitle": "Updates",
+  "updateAutoCheck": "Check for updates automatically",
+  "updateAutoCheckHelp": "Once a day TingLang asks GitHub (api.github.com) whether a new version is out. Only the app's version is sent, nothing about you or your recordings. When this is off, TingLang checks only when you press Check now.",
+  "updateCurrentVersion": "You have TingLang {version}.",
+  "@updateCurrentVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCheckNow": "Check now",
+  "updateChecking": "Checking…",
+  "updateUpToDate": "This is the latest version.",
+  "updateNoneFound": "No update found.",
+  "updateNeverChecked": "Not checked yet.",
+  "updateLastChecked": "Last checked {time}.",
+  "@updateLastChecked": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "panelHintRecord": "Start live captions (⌘⇧T)",
+  "panelHintStop": "Stop live captions (⌘⇧T)",
+  "panelHintMenu": "TingLang menu: open the app, appearance, settings"
+}

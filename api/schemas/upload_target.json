@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UploadTarget",
+  "description": "A presigned URL the client uploads one file to, directly to storage.",
+  "type": "object",
+  "required": [
+    "name",
+    "url",
+    "method",
+    "expires_at",
+    "max_bytes"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Which input this is, e.g. media."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "PUT",
+        "POST"
+      ]
+    },
+    "headers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "max_bytes": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

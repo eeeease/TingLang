@@ -1,0 +1,13 @@
+name: tinglang_cloud_asr
+description: Pure-Dart cloud speech recognition adapters (bring your own key) behind one interface — live streams and file transcription.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+dependencies:
+  crypto: ^3.0.7
+  meta: ^1.16.0
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

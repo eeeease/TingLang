@@ -1,0 +1,35 @@
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+coverage/
+.DS_Store
+.idea/
+*.iml
+.env
+.env.*
+*.log
+*.bundle
+private/
+user_data/
+recordings/
+daily/
+weekly/
+# Generated on your Mac by scripts/bootstrap_macos.sh.
+/macos/
+# This environment cannot resolve Flutter dependencies; the first verified Mac
+# build produces pubspec.lock. Commit that lock in your own repository.
+
+__pycache__/
+*.py[cod]
+Tinglang-macOS.tar.gz
+
+# FVM Version Cache
+.fvm/
+# Per-developer signing (see Local.xcconfig.example)
+/Local.xcconfig
+
+# finesse build history (local; the stamp in packages/tinglang_ui/lib/src/tokens.dart travels with the code)
+.finesse/
+# Local tool state and agent worktrees
+.claude/

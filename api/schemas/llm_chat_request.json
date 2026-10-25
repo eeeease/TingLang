@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LlmChatRequest",
+  "description": "OpenAI-compatible chat completion request, as the client already sends to BYOK providers (response_format json_schema, then json_object, then none). Other fields pass through; the server may reject them.",
+  "type": "object",
+  "required": [
+    "model",
+    "messages"
+  ],
+  "properties": {
+    "model": {
+      "type": "string"
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "temperature": {
+      "type": "number"
+    },
+    "max_tokens": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "response_format": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

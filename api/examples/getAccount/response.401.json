@@ -1,0 +1,6 @@
+{
+  "type": "https://tinglang.example/problems/unauthorized",
+  "title": "Sign in again",
+  "status": 401,
+  "code": "unauthorized"
+}

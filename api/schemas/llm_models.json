@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LlmModelList",
+  "description": "OpenAI-compatible model list. Extra fields pass through.",
+  "type": "object",
+  "required": [
+    "object",
+    "data"
+  ],
+  "properties": {
+    "object": {
+      "const": "list"
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "owned_by": {
+            "type": "string"
+          },
+          "context_window": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "credits_per_million_input_tokens": {
+            "type": "number",
+            "minimum": 0
+          },
+          "credits_per_million_output_tokens": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

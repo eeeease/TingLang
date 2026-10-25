@@ -1,0 +1,363 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: Tinglang Cloud API
+  version: 1.0.0
+  summary: The contract between the Tinglang desktop client and a Tinglang server.
+  description: |
+    Optional cloud services for Tinglang: accounts and entitlements, cloud jobs
+    (transcription, translation, courses) and an OpenAI-compatible LLM gateway.
+    The desktop client works fully without any of this; it only talks to a
+    server after the user signs in or turns a cloud feature on.
+
+    Design notes, versioning rules and the offline guarantees are in
+    docs/CLOUD.md. Every operation has request/response examples under
+    api/examples/<operationId>/, used as contract fixtures by both sides.
+
+    Conventions: JSON with snake_case keys (embedded transcript.json and
+    course.json keep their own keys); times are RFC 3339 in UTC; media times
+    are integer milliseconds; IDs are opaque strings; errors are RFC 9457
+    problem details with a stable `code`; lists use cursor pagination;
+    429 and 503 carry Retry-After. Clients ignore unknown fields and treat
+    unknown enum values as unknown.
+  license:
+    name: AGPL-3.0-only (a separate licence for this directory is under consideration)
+    identifier: AGPL-3.0-only
+servers:
+  - url: '{server}/v1'
+    description: The server the user configured. The official address is not decided yet.
+    variables:
+      server:
+        default: https://api.tinglang.example
+security:
+  - bearer: []
+tags:
+  - name: meta
+  - name: account
+  - name: jobs
+  - name: llm
+x-problem-codes:
+  unauthorized: 401 — not signed in, or the token is no longer valid
+  forbidden: 403 — signed in but not allowed
+  entitlement_required: 402 — needs a paid plan
+  quota_exceeded: 402 or 429 — the plan's quota is used up
+  rate_limited: 429 — too many requests (Retry-After)
+  validation_failed: 400 or 422 — invalid input (see errors)
+  not_found: 404 — no such resource
+  conflict: 409 — the resource is not in a state that allows this
+  idempotency_key_reused: 409 — same Idempotency-Key, different request
+  upload_expired: 410 — the presigned upload URL expired
+  upload_too_large: 413 — the file exceeds max_bytes
+  job_failed: inside a job's error — the job could not finish
+  client_too_old: 426 — the client is older than min_client_version
+  feature_disabled: 404 or 501 — this server does not offer the feature
+  server_unavailable: 503 — maintenance (Retry-After)
+paths:
+  /meta:
+    get:
+      operationId: getMeta
+      tags: [meta]
+      summary: What this server offers
+      description: |
+        Needs no sign-in. The client requests it only after the user signs in or
+        turns on a cloud feature, never at startup.
+      security: []
+      responses:
+        '200':
+          description: Server capabilities.
+          content:
+            application/json:
+              schema: { $ref: './schemas/meta.json' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /account:
+    get:
+      operationId: getAccount
+      tags: [account]
+      summary: The signed-in account
+      responses:
+        '200':
+          description: The account.
+          content:
+            application/json:
+              schema: { $ref: './schemas/account.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /entitlements:
+    get:
+      operationId: getEntitlements
+      tags: [account]
+      summary: Plan, features and quotas of the signed-in account
+      description: For display only. Every cloud endpoint checks entitlements itself.
+      responses:
+        '200':
+          description: Entitlements.
+          content:
+            application/json:
+              schema: { $ref: './schemas/entitlements.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/revoke:
+    post:
+      operationId: revokeToken
+      tags: [account]
+      summary: Revoke a token (RFC 7009)
+      description: |
+        Advertised as meta.auth.revocation_endpoint. Answers 200 even when the
+        token was already invalid. The client deletes its stored tokens whether
+        or not this call succeeds.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema: { $ref: './schemas/revoke_request.json' }
+      responses:
+        '200':
+          description: Revoked, or nothing to revoke. No body.
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /jobs/estimate:
+    post:
+      operationId: estimateJob
+      tags: [jobs]
+      summary: Estimate a job's cost before creating it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/job_estimate_request.json' }
+      responses:
+        '200':
+          description: The estimate.
+          content:
+            application/json:
+              schema: { $ref: './schemas/job_estimate.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /jobs:
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a job
+      description: |
+        Returns the job in awaiting_upload with presigned upload targets when it
+        needs media, or queued when it needs none. Repeating the request with the
+        same Idempotency-Key returns the same job.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/job_create_request.json' }
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema: { $ref: './schemas/job.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '402': { $ref: '#/components/responses/PaymentRequired' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: The account's jobs, newest first
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: One page.
+          content:
+            application/json:
+              schema: { $ref: './schemas/job_page.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /jobs/{job_id}:
+    parameters:
+      - $ref: '#/components/parameters/JobId'
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: A job's status and progress
+      description: While a job is queued or running, Retry-After suggests when to ask again.
+      responses:
+        '200':
+          description: The job.
+          headers:
+            Retry-After:
+              $ref: '#/components/headers/RetryAfter'
+          content:
+            application/json:
+              schema: { $ref: './schemas/job.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /jobs/{job_id}/start:
+    post:
+      operationId: startJob
+      tags: [jobs]
+      summary: Start a job after its uploads finished
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '202':
+          description: Queued.
+          content:
+            application/json:
+              schema: { $ref: './schemas/job.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '410': { $ref: '#/components/responses/Gone' }
+  /jobs/{job_id}/result:
+    get:
+      operationId: getJobResult
+      tags: [jobs]
+      summary: The result of a succeeded job
+      description: Small results come inline; large ones as a presigned download.
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The result.
+          content:
+            application/json:
+              schema: { $ref: './schemas/job_result.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '410': { $ref: '#/components/responses/Gone' }
+  /jobs/{job_id}/cancel:
+    post:
+      operationId: cancelJob
+      tags: [jobs]
+      summary: Cancel a job (idempotent)
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The job, now canceled (or already finished).
+          content:
+            application/json:
+              schema: { $ref: './schemas/job.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /llm/models:
+    get:
+      operationId: listLlmModels
+      tags: [llm]
+      summary: Models offered by the LLM gateway (OpenAI-compatible)
+      responses:
+        '200':
+          description: The models.
+          content:
+            application/json:
+              schema: { $ref: './schemas/llm_models.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /llm/chat/completions:
+    post:
+      operationId: createLlmChatCompletion
+      tags: [llm]
+      summary: Chat completion through the LLM gateway (OpenAI-compatible)
+      description: |
+        The client uses this exactly like a BYOK OpenAI-compatible provider, with
+        the account's access token as the bearer. The server keeps a model
+        allowlist, caps tokens per call, rate-limits and charges credits.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/llm_chat_request.json' }
+      responses:
+        '200':
+          description: The completion.
+          content:
+            application/json:
+              schema: { $ref: './schemas/llm_chat_response.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '402': { $ref: '#/components/responses/PaymentRequired' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        An OAuth 2.1 access token from meta.auth (authorization code with PKCE,
+        public client). Refresh tokens rotate; store the latest one.
+  parameters:
+    JobId:
+      name: job_id
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: A random value the client keeps until it knows the outcome.
+      schema: { type: string, minLength: 16, maxLength: 128 }
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+  headers:
+    RetryAfter:
+      description: Seconds to wait before asking again.
+      schema: { type: integer, minimum: 0 }
+  responses:
+    BadRequest:
+      description: Invalid request.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    Unauthorized:
+      description: Not signed in, or the token is no longer valid.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    PaymentRequired:
+      description: Needs a paid plan, or the quota is used up.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    NotFound:
+      description: No such resource, or this server does not offer the feature.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    Conflict:
+      description: Not allowed in the current state, or an Idempotency-Key was reused.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    Gone:
+      description: The upload URL or the result expired.
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    TooManyRequests:
+      description: Rate limited.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }
+    Unavailable:
+      description: Maintenance.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema: { $ref: './schemas/problem.json' }

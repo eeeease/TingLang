@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Job",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "description": "transcribe, translate or course; clients ignore jobs of unknown kinds."
+    },
+    "status": {
+      "type": "string",
+      "description": "awaiting_upload, queued, running, succeeded, failed, canceled or expired; unknown values are shown as in progress."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "progress": {
+      "type": "object",
+      "required": [
+        "fraction"
+      ],
+      "properties": {
+        "fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stage": {
+          "type": "string"
+        }
+      }
+    },
+    "uploads": {
+      "type": "array",
+      "items": {
+        "$ref": "upload_target.json"
+      }
+    },
+    "error": {
+      "$ref": "problem.json"
+    }
+  }
+}

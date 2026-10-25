@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RevokeRequest",
+  "description": "RFC 7009 token revocation, sent as application/x-www-form-urlencoded.",
+  "type": "object",
+  "required": [
+    "token",
+    "client_id"
+  ],
+  "properties": {
+    "token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "token_type_hint": {
+      "type": "string",
+      "enum": [
+        "refresh_token",
+        "access_token"
+      ]
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

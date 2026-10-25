@@ -1,0 +1,21 @@
+name: tinglang_native_windows
+description: Windows implementation of Tinglang's native backends (C++ skeleton; real backends arrive in M8).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+  flutter: '>=3.47.7'
+dependencies:
+  flutter:
+    sdk: flutter
+  tinglang_platform_interface: any
+dev_dependencies:
+  flutter_lints: ^6.0.0
+flutter:
+  plugin:
+    implements: tinglang_native
+    platforms:
+      windows:
+        pluginClass: TinglangNativeWindowsPluginCApi
+        dartPluginClass: TinglangNativeWindows

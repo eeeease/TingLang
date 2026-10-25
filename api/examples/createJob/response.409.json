@@ -1,0 +1,6 @@
+{
+  "type": "https://tinglang.example/problems/idempotency_key_reused",
+  "title": "This key was used for a different job",
+  "status": 409,
+  "code": "idempotency_key_reused"
+}

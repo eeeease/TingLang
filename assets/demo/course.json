@@ -1,0 +1,424 @@
+{
+  "schema_version": 2,
+  "design_version": 3,
+  "podcast_id": "tinglang-demo-consistency",
+  "title": "Small reps. Real progress.",
+  "learner_level": "B2 practice demo",
+  "tinglang_source": "原创演示文字 · eSpeak 合成语音 · 非真实 NBA 采访",
+  "playback": {
+    "captions_default": false,
+    "show_clip_boundaries": true,
+    "transcript_default": "hidden"
+  },
+  "overview": {
+    "episode_summary_en": "An original practice demo about showing up, staying consistent, and expressing your own ideas.",
+    "episode_summary_zh": "从坚持训练到表达自己：原创功能演示，不是采访摘录。",
+    "selected_clip_count": 3,
+    "estimated_study_minutes": 12,
+    "main_topics": [
+      "Consistency",
+      "Practice"
+    ],
+    "learning_focus": [
+      "Reusable sentence frames"
+    ]
+  },
+  "clips": [
+    {
+      "id": "clip_001",
+      "title": "Show up, get better",
+      "topic": "Practice and progress",
+      "start": 0.0,
+      "end": 11.07,
+      "difficulty": 5,
+      "learning_value": 8,
+      "why_selected": "Original, self-contained demo of reusable frames.",
+      "transcript": "I used to focus on the final score. These days, I try to get a little better every day. Showing up matters more than having one perfect session.",
+      "learning": {
+        "words": [],
+        "phrases": [
+          {
+            "id": "clip_001_phrase_01",
+            "type": "phrase",
+            "text": "Showing up",
+            "meaning_zh": "出现并坚持参与",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "Showing up matters more than having one perfect session.",
+            "timestamp": "00:00:00.000",
+            "usage_note": null,
+            "common_patterns": [
+              "Showing up"
+            ],
+            "learner_example": "These days, I try to speak English for a few minutes every day.",
+            "memory_aid": {
+              "type": "collocation_chunk",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "subtype": "phrase"
+          }
+        ],
+        "sentences": [
+          {
+            "id": "clip_001_sentence_01",
+            "type": "sentence",
+            "text": "These days, I try to get a little better every day.",
+            "meaning_zh": "现在，我尝试每天进步一点。",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "These days, I try to get a little better every day.",
+            "timestamp": "00:00:00.000",
+            "usage_note": null,
+            "common_patterns": [
+              "These days, I try to ..."
+            ],
+            "learner_example": "These days, I try to speak English for a few minutes every day.",
+            "memory_aid": {
+              "type": "sentence_frame",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "reusable_frame": "These days, I try to ..."
+          }
+        ]
+      },
+      "blind_listening": {
+        "template": "I used to focus on the final {{clip_001_blank_word}}. {{clip_001_blank_sentence}} {{clip_001_blank_phrase}} matters more than having one perfect session.",
+        "blanks": [
+          {
+            "id": "clip_001_blank_word",
+            "type": "word",
+            "answer": "score"
+          },
+          {
+            "id": "clip_001_blank_phrase",
+            "type": "phrase",
+            "answer": "Showing up",
+            "learning_item_id": "clip_001_phrase_01"
+          },
+          {
+            "id": "clip_001_blank_sentence",
+            "type": "sentence",
+            "answer": "These days, I try to get a little better every day.",
+            "learning_item_id": "clip_001_sentence_01"
+          }
+        ]
+      },
+      "shadowing": [
+        {
+          "text": "I used to focus on the final score.",
+          "reason": "Try the complete thought, then compare your recording."
+        },
+        {
+          "text": "These days, I try to get a little better every day.",
+          "reason": "Try the complete thought, then compare your recording."
+        }
+      ],
+      "retelling": {
+        "id": "clip_001_retelling_01",
+        "prompt": "How has your approach to practice changed?",
+        "outline": [
+          "Describe the change or challenge.",
+          "Explain the approach to practice."
+        ],
+        "source_evidence": [
+          "I used to focus on the final score.",
+          "These days, I try to get a little better every day."
+        ],
+        "target_item_ids": [
+          "clip_001_phrase_01",
+          "clip_001_sentence_01"
+        ],
+        "follow_up": "Use one expression to talk about your own life, not the demo speaker."
+      },
+      "tinglang_cues": [
+        {
+          "index": 0,
+          "text": "I used to focus on the final score.",
+          "startTime": 0,
+          "endTime": 2657,
+          "isBookmarked": false
+        },
+        {
+          "index": 1,
+          "text": "These days, I try to get a little better every day.",
+          "startTime": 2937,
+          "endTime": 6667,
+          "isBookmarked": false
+        },
+        {
+          "index": 2,
+          "text": "Showing up matters more than having one perfect session.",
+          "startTime": 6947,
+          "endTime": 10790,
+          "isBookmarked": false
+        }
+      ]
+    },
+    {
+      "id": "clip_002",
+      "title": "Stay consistent",
+      "topic": "Practice and progress",
+      "start": 11.07,
+      "end": 23.667,
+      "difficulty": 5,
+      "learning_value": 8,
+      "why_selected": "Original, self-contained demo of reusable frames.",
+      "transcript": "When I make a mistake, I try to learn from it. The goal is not to be perfect, but to stay consistent. Progress takes patience, especially when things get difficult.",
+      "learning": {
+        "words": [],
+        "phrases": [
+          {
+            "id": "clip_002_phrase_01",
+            "type": "phrase",
+            "text": "learn from it",
+            "meaning_zh": "从这件事中吸取经验",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "When I make a mistake, I try to learn from it.",
+            "timestamp": "00:00:11.070",
+            "usage_note": null,
+            "common_patterns": [
+              "learn from it"
+            ],
+            "learner_example": "The goal is not to sound impressive, but to explain my ideas clearly.",
+            "memory_aid": {
+              "type": "collocation_chunk",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "subtype": "phrase"
+          }
+        ],
+        "sentences": [
+          {
+            "id": "clip_002_sentence_01",
+            "type": "sentence",
+            "text": "The goal is not to be perfect, but to stay consistent.",
+            "meaning_zh": "目标不是完美，而是坚持。",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "The goal is not to be perfect, but to stay consistent.",
+            "timestamp": "00:00:11.070",
+            "usage_note": null,
+            "common_patterns": [
+              "The goal is not to ..., but to ..."
+            ],
+            "learner_example": "The goal is not to sound impressive, but to explain my ideas clearly.",
+            "memory_aid": {
+              "type": "sentence_frame",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "reusable_frame": "The goal is not to ..., but to ..."
+          }
+        ]
+      },
+      "blind_listening": {
+        "template": "When I make a mistake, I try to {{clip_002_blank_phrase}}. {{clip_002_blank_sentence}} Progress takes {{clip_002_blank_word}}, especially when things get difficult.",
+        "blanks": [
+          {
+            "id": "clip_002_blank_word",
+            "type": "word",
+            "answer": "patience"
+          },
+          {
+            "id": "clip_002_blank_phrase",
+            "type": "phrase",
+            "answer": "learn from it",
+            "learning_item_id": "clip_002_phrase_01"
+          },
+          {
+            "id": "clip_002_blank_sentence",
+            "type": "sentence",
+            "answer": "The goal is not to be perfect, but to stay consistent.",
+            "learning_item_id": "clip_002_sentence_01"
+          }
+        ]
+      },
+      "shadowing": [
+        {
+          "text": "When I make a mistake, I try to learn from it.",
+          "reason": "Try the complete thought, then compare your recording."
+        },
+        {
+          "text": "The goal is not to be perfect, but to stay consistent.",
+          "reason": "Try the complete thought, then compare your recording."
+        }
+      ],
+      "retelling": {
+        "id": "clip_002_retelling_01",
+        "prompt": "Describe a recent mistake and what you learned from it.",
+        "outline": [
+          "Describe the change or challenge.",
+          "Explain the approach to practice."
+        ],
+        "source_evidence": [
+          "When I make a mistake, I try to learn from it.",
+          "The goal is not to be perfect, but to stay consistent."
+        ],
+        "target_item_ids": [
+          "clip_002_phrase_01",
+          "clip_002_sentence_01"
+        ],
+        "follow_up": "Use one expression to talk about your own life, not the demo speaker."
+      },
+      "tinglang_cues": [
+        {
+          "index": 0,
+          "text": "When I make a mistake, I try to learn from it.",
+          "startTime": 11070,
+          "endTime": 14354,
+          "isBookmarked": false
+        },
+        {
+          "index": 1,
+          "text": "The goal is not to be perfect, but to stay consistent.",
+          "startTime": 14634,
+          "endTime": 18684,
+          "isBookmarked": false
+        },
+        {
+          "index": 2,
+          "text": "Progress takes patience, especially when things get difficult.",
+          "startTime": 18964,
+          "endTime": 23387,
+          "isBookmarked": false
+        }
+      ]
+    },
+    {
+      "id": "clip_003",
+      "title": "Take it into your life",
+      "topic": "Practice and progress",
+      "start": 23.667,
+      "end": 35.556,
+      "difficulty": 5,
+      "learning_value": 8,
+      "why_selected": "Original, self-contained demo of reusable frames.",
+      "transcript": "That mindset helps me outside the gym, too. I have been working on explaining my ideas more clearly. It takes practice, but I am getting more comfortable.",
+      "learning": {
+        "words": [],
+        "phrases": [
+          {
+            "id": "clip_003_phrase_01",
+            "type": "phrase",
+            "text": "takes practice",
+            "meaning_zh": "需要练习",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "It takes practice, but I am getting more comfortable.",
+            "timestamp": "00:00:23.667",
+            "usage_note": null,
+            "common_patterns": [
+              "takes practice"
+            ],
+            "learner_example": "I have been working on describing my day without switching languages.",
+            "memory_aid": {
+              "type": "collocation_chunk",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "subtype": "phrase"
+          }
+        ],
+        "sentences": [
+          {
+            "id": "clip_003_sentence_01",
+            "type": "sentence",
+            "text": "I have been working on explaining my ideas more clearly.",
+            "meaning_zh": "我一直在练习更清楚地表达想法。",
+            "simple_explanation_en": "Use this expression in a personal example.",
+            "why_useful": "Useful for talking about practice and everyday improvement.",
+            "original_example": "I have been working on explaining my ideas more clearly.",
+            "timestamp": "00:00:23.667",
+            "usage_note": null,
+            "common_patterns": [
+              "I have been working on ..."
+            ],
+            "learner_example": "I have been working on describing my day without switching languages.",
+            "memory_aid": {
+              "type": "sentence_frame",
+              "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+              "note": "A practice cue, not an etymology claim."
+            },
+            "reusable_frame": "I have been working on ..."
+          }
+        ]
+      },
+      "blind_listening": {
+        "template": "That {{clip_003_blank_word}} helps me outside the gym, too. {{clip_003_blank_sentence}} It {{clip_003_blank_phrase}}, but I am getting more comfortable.",
+        "blanks": [
+          {
+            "id": "clip_003_blank_word",
+            "type": "word",
+            "answer": "mindset"
+          },
+          {
+            "id": "clip_003_blank_phrase",
+            "type": "phrase",
+            "answer": "takes practice",
+            "learning_item_id": "clip_003_phrase_01"
+          },
+          {
+            "id": "clip_003_blank_sentence",
+            "type": "sentence",
+            "answer": "I have been working on explaining my ideas more clearly.",
+            "learning_item_id": "clip_003_sentence_01"
+          }
+        ]
+      },
+      "shadowing": [
+        {
+          "text": "That mindset helps me outside the gym, too.",
+          "reason": "Try the complete thought, then compare your recording."
+        },
+        {
+          "text": "I have been working on explaining my ideas more clearly.",
+          "reason": "Try the complete thought, then compare your recording."
+        }
+      ],
+      "retelling": {
+        "id": "clip_003_retelling_01",
+        "prompt": "What is one thing you are working on right now?",
+        "outline": [
+          "Describe the change or challenge.",
+          "Explain the approach to practice."
+        ],
+        "source_evidence": [
+          "That mindset helps me outside the gym, too.",
+          "I have been working on explaining my ideas more clearly."
+        ],
+        "target_item_ids": [
+          "clip_003_phrase_01",
+          "clip_003_sentence_01"
+        ],
+        "follow_up": "Use one expression to talk about your own life, not the demo speaker."
+      },
+      "tinglang_cues": [
+        {
+          "index": 0,
+          "text": "That mindset helps me outside the gym, too.",
+          "startTime": 23667,
+          "endTime": 27408,
+          "isBookmarked": false
+        },
+        {
+          "index": 1,
+          "text": "I have been working on explaining my ideas more clearly.",
+          "startTime": 27688,
+          "endTime": 31251,
+          "isBookmarked": false
+        },
+        {
+          "index": 2,
+          "text": "It takes practice, but I am getting more comfortable.",
+          "startTime": 31531,
+          "endTime": 35276,
+          "isBookmarked": false
+        }
+      ]
+    }
+  ]
+}

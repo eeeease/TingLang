@@ -1,0 +1,17 @@
+{
+  "model": "tinglang-course-standard",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Reply with JSON only."
+    },
+    {
+      "role": "user",
+      "content": "<transcript>…</transcript>"
+    }
+  ],
+  "max_tokens": 16000,
+  "response_format": {
+    "type": "json_object"
+  }
+}

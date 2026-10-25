@@ -1,0 +1,41 @@
+{
+  "api_version": "1.0.0",
+  "server": {
+    "name": "Tinglang Cloud",
+    "terms_url": "https://tinglang.example/en/terms",
+    "privacy_url": "https://tinglang.example/en/privacy"
+  },
+  "min_client_version": {
+    "macos": "0.4.0"
+  },
+  "auth": {
+    "issuer": "https://abcdefghijklmnopqrst.supabase.co/auth/v1",
+    "authorization_endpoint": "https://abcdefghijklmnopqrst.supabase.co/auth/v1/oauth/authorize",
+    "token_endpoint": "https://abcdefghijklmnopqrst.supabase.co/auth/v1/oauth/token",
+    "revocation_endpoint": "https://api.tinglang.example/v1/auth/revoke",
+    "client_id": "9a0e6c1e-4c4f-4d43-9a43-3c7f2f1d8b10",
+    "scopes": [
+      "openid",
+      "email",
+      "profile"
+    ],
+    "redirect_uri": "tinglang://oauth/callback"
+  },
+  "features": {
+    "accounts": true,
+    "entitlements": true,
+    "jobs": {
+      "transcribe": true,
+      "translate": true,
+      "course": false
+    },
+    "llm_gateway": true,
+    "sync": false,
+    "backup": false,
+    "community": false
+  },
+  "web": {
+    "account_url": "https://tinglang.example/en/account",
+    "pricing_url": "https://tinglang.example/en/pricing"
+  }
+}

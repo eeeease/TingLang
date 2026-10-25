@@ -1,0 +1,7 @@
+{
+  "type": "https://tinglang.example/problems/server_unavailable",
+  "title": "Down for maintenance",
+  "status": 503,
+  "code": "server_unavailable",
+  "detail": "Back in about ten minutes."
+}

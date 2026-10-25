@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Meta",
+  "description": "What this server offers. Missing or false features are hidden by the client.",
+  "type": "object",
+  "required": [
+    "api_version",
+    "features"
+  ],
+  "properties": {
+    "api_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "server": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "terms_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "privacy_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "min_client_version": {
+      "type": "object",
+      "description": "Per platform; below it cloud features are disabled.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      },
+      "properties": {
+        "macos": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "windows": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "description": "Absent when the server has no accounts.",
+      "required": [
+        "issuer",
+        "authorization_endpoint",
+        "token_endpoint",
+        "client_id",
+        "redirect_uri"
+      ],
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "format": "uri"
+        },
+        "authorization_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "token_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "revocation_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "client_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "redirect_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Registered callback, e.g. a private-use scheme (RFC 8252 §7.1)."
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "boolean"
+        },
+        "entitlements": {
+          "type": "boolean"
+        },
+        "jobs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "properties": {
+            "transcribe": {
+              "type": "boolean"
+            },
+            "translate": {
+              "type": "boolean"
+            },
+            "course": {
+              "type": "boolean"
+            }
+          }
+        },
+        "llm_gateway": {
+          "type": "boolean"
+        },
+        "sync": {
+          "type": "boolean"
+        },
+        "backup": {
+          "type": "boolean"
+        },
+        "community": {
+          "type": "boolean"
+        }
+      }
+    },
+    "web": {
+      "type": "object",
+      "properties": {
+        "account_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "pricing_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+  }
+}

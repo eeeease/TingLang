@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entitlements",
+  "description": "What the signed-in account may use. Display only on the client; every cloud endpoint checks for itself.",
+  "type": "object",
+  "required": [
+    "plan",
+    "status",
+    "features",
+    "checked_at"
+  ],
+  "properties": {
+    "plan": {
+      "type": "string",
+      "description": "Open set, e.g. free, pro."
+    },
+    "status": {
+      "type": "string",
+      "description": "active, trialing, past_due, canceled, expired or none; unknown values are shown as unknown."
+    },
+    "features": {
+      "type": "object",
+      "description": "Keyed by feature, e.g. jobs.transcribe, llm_gateway.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "quota": {
+            "$ref": "quota.json"
+          }
+        }
+      }
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "grace_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Until then the client may keep showing this result while offline."
+    }
+  }
+}

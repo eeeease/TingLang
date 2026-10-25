@@ -1,0 +1,9 @@
+// Per-developer signing for the generated macOS runner.
+// Copy to Local.xcconfig (gitignored, repository root) and set your team ID.
+// Find it in Xcode > Settings > Accounts, or with:
+//   security find-identity -v -p codesigning
+// Then rerun: python3 scripts/configure_macos.py && flutter build macos
+// Without this file the app is signed ad-hoc ("Sign to Run Locally").
+DEVELOPMENT_TEAM = ABCDE12345
+CODE_SIGN_IDENTITY = Apple Development
+CODE_SIGN_STYLE = Automatic

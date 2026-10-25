@@ -1,0 +1,15 @@
+{
+  "kind": "transcribe",
+  "media": {
+    "name": "memo.m4a",
+    "bytes": 4812345,
+    "content_type": "audio/mp4",
+    "duration_ms": 1262000
+  },
+  "language": "en-US",
+  "target_language": "zh-CN",
+  "consent": {
+    "acknowledged_at": "2026-10-23T08:00:58Z",
+    "host": "api.tinglang.example"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "https://tinglang.example/problems/validation_failed",
+  "title": "Invalid request",
+  "status": 400,
+  "code": "validation_failed",
+  "errors": [
+    {
+      "field": "consent.host",
+      "code": "required"
+    }
+  ]
+}

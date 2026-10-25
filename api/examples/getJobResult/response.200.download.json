@@ -1,0 +1,8 @@
+{
+  "kind": "transcribe",
+  "download": {
+    "url": "https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/sign/results/job_01HZXA3M0F6R.json?token=example",
+    "expires_at": "2026-10-30T08:03:30Z",
+    "content_type": "application/json"
+  }
+}

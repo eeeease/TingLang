@@ -1,0 +1,13 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "tinglang-course-standard",
+      "object": "model",
+      "owned_by": "tinglang",
+      "context_window": 128000,
+      "credits_per_million_input_tokens": 300,
+      "credits_per_million_output_tokens": 1500
+    }
+  ]
+}

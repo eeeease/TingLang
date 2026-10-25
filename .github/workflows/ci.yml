@@ -1,0 +1,67 @@
+name: Tinglang checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  # Pure-Dart packages and delivery checks; no Apple toolchain needed.
+  linux-dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'  # keep in sync with .fvmrc
+          channel: stable
+          cache: true
+      - name: CI Flutter matches .fvmrc
+        run: python3 -c "import json,sys; v=json.load(open('.fvmrc'))['flutter']; sys.exit(0 if v=='3.47.7' else f'.fvmrc is {v}; update ci.yml')"
+      - run: python3 -m unittest discover -s tools/tests -v
+      - run: flutter pub get
+      - name: Platform interface (pure Dart)
+        working-directory: packages/tinglang_platform_interface
+        run: dart test
+      - name: Design tokens
+        working-directory: packages/tinglang_ui
+        run: flutter test
+      - name: Cloud API contract and client (pure Dart)
+        working-directory: packages/tinglang_api
+        run: |
+          dart run tool/validate_api.dart
+          dart test
+      - name: Cloud speech adapters (pure Dart, loopback servers only)
+        working-directory: packages/tinglang_cloud_asr
+        run: dart test
+      - name: Generated code is up to date
+        run: |
+          flutter gen-l10n
+          dart run build_runner build
+          dart format lib/l10n lib/core/db
+          git diff --exit-code -- lib/l10n lib/core/db
+
+  macos:
+    # The speech APIs need the macOS 26 SDK or newer; this image matches the
+    # machine the app is verified on (macOS 27, Xcode 27).
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'  # keep in sync with .fvmrc
+          channel: stable
+          cache: true
+      # No fvm on the runner: scripts/flutter_env.sh falls back to the
+      # flutter-action SDK, which is pinned to the same .fvmrc version.
+      - name: Analyze, test, build (scripts/check.sh --build)
+        run: bash scripts/check.sh --build
+      - run: tar -czf Tinglang-macOS.tar.gz -C build/macos/Build/Products/Release Tinglang.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tinglang-macOS-unsigned
+          path: Tinglang-macOS.tar.gz

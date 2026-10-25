@@ -1,0 +1,12 @@
+name: tinglang_platform_interface
+description: Pure-Dart capability interfaces, backend registries and fakes for Tinglang's native backends.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+dependencies:
+  meta: ^1.16.0
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

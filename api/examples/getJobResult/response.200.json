@@ -1,0 +1,55 @@
+{
+  "kind": "transcribe",
+  "transcript": {
+    "lines": [
+      {
+        "start": 400,
+        "end": 3120,
+        "text": "Small reps add up to real progress.",
+        "translation": "小小的练习会积累成真正的进步。",
+        "words": [
+          {
+            "w": "Small",
+            "s": 400,
+            "e": 720
+          },
+          {
+            "w": "reps",
+            "s": 720,
+            "e": 1100
+          },
+          {
+            "w": "add",
+            "s": 1100,
+            "e": 1350
+          },
+          {
+            "w": "up",
+            "s": 1350,
+            "e": 1500
+          },
+          {
+            "w": "to",
+            "s": 1500,
+            "e": 1620
+          },
+          {
+            "w": "real",
+            "s": 1620,
+            "e": 1980
+          },
+          {
+            "w": "progress.",
+            "s": 1980,
+            "e": 3120
+          }
+        ]
+      },
+      {
+        "start": 3400,
+        "end": 5900,
+        "text": "Listen a little every day."
+      }
+    ]
+  }
+}

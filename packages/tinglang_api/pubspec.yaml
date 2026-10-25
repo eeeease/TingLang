@@ -1,0 +1,14 @@
+name: tinglang_api
+description: Pure-Dart client for the Tinglang Cloud API (api/openapi.yaml) — models, ApiClient, OAuth with PKCE, error mapping.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+dependencies:
+  crypto: ^3.0.7
+dev_dependencies:
+  json_schema: ^5.2.2
+  lints: ^6.0.0
+  test: ^1.26.0
+  yaml: ^3.1.4

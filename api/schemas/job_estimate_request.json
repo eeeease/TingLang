@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobEstimateRequest",
+  "type": "object",
+  "required": [
+    "kind"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "transcribe, translate or course; clients ignore jobs of unknown kinds."
+    },
+    "media": {
+      "type": "object",
+      "required": [
+        "bytes",
+        "content_type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content_type": {
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "language": {
+      "type": "string",
+      "description": "BCP 47, e.g. en-US."
+    },
+    "target_language": {
+      "type": "string"
+    },
+    "line_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "For translate: lines in the transcript."
+    },
+    "character_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

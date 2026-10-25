@@ -1,0 +1,10 @@
+{
+  "plan": "free",
+  "status": "none",
+  "features": {
+    "jobs.transcribe": {
+      "enabled": false
+    }
+  },
+  "checked_at": "2026-10-23T08:00:00Z"
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Course",
+  "description": "An English V3 course document (schema_version 2, design_version 3), as written by the client. Only the envelope is described here; the client validates the rest with CourseCodec(strictSource: true).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "podcast_id",
+    "title",
+    "clips"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "design_version": {
+      "const": 3
+    },
+    "podcast_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clips": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "start"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "end": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

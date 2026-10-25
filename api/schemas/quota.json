@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Quota",
+  "type": "object",
+  "required": [
+    "unit",
+    "limit",
+    "used"
+  ],
+  "properties": {
+    "unit": {
+      "type": "string",
+      "description": "minute, credit or a later unit; unknown units are shown as numbers."
+    },
+    "limit": {
+      "type": "number",
+      "minimum": 0
+    },
+    "used": {
+      "type": "number",
+      "minimum": 0
+    },
+    "resets_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobCreateRequest",
+  "type": "object",
+  "required": [
+    "kind",
+    "consent"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "transcribe, translate or course; clients ignore jobs of unknown kinds."
+    },
+    "media": {
+      "type": "object",
+      "required": [
+        "bytes",
+        "content_type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content_type": {
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "language": {
+      "type": "string"
+    },
+    "target_language": {
+      "type": "string"
+    },
+    "transcript": {
+      "$ref": "transcript.json",
+      "description": "Input for translate and course."
+    },
+    "learner": {
+      "type": "object",
+      "description": "Learner profile for course jobs (fixed-shape keys)."
+    },
+    "consent": {
+      "type": "object",
+      "required": [
+        "acknowledged_at",
+        "host"
+      ],
+      "description": "The user agreed to send this content to host.",
+      "properties": {
+        "acknowledged_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname"
+        }
+      }
+    }
+  }
+}

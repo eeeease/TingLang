@@ -1,0 +1,53 @@
+name: tinglang
+description: A local-first English practice studio. Learn from your scenes; speak in your own words.
+publish_to: 'none'
+version: 0.6.0+5
+environment:
+  sdk: ^3.13.0
+  flutter: '>=3.47.7'
+workspace:
+  - packages/tinglang_platform_interface
+  - packages/tinglang_native
+  - packages/tinglang_native_macos
+  - packages/tinglang_native_windows
+  - packages/tinglang_ui
+  - packages/tinglang_api
+  - packages/tinglang_cloud_asr
+dependencies:
+  flutter:
+    sdk: flutter
+  media_kit: 1.2.6
+  media_kit_video: 2.0.1
+  media_kit_libs_video: 1.0.7
+  file_picker: 10.3.3
+  path_provider: 2.1.6
+  path: 1.9.1
+  crypto: 3.0.7
+  archive: 4.3.0
+  record: 6.1.2
+  webview_flutter: 4.14.1
+  tinglang_native: any
+  tinglang_platform_interface: any
+  tinglang_ui: any
+  tinglang_api: any
+  drift: 2.35.2
+  sqlite3: 3.7.1
+  flutter_localizations:
+    sdk: flutter
+  intl: 0.20.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+  drift_dev: 2.35.1
+  build_runner: 2.16.1
+  integration_test:
+    sdk: flutter
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/demo/
+    - assets/legal/
+    - assets/lexicon/
+    - assets/providers/

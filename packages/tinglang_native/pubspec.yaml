@@ -1,0 +1,32 @@
+name: tinglang_native
+description: App-facing entry point that installs TinglangPlatform.instance with this OS's native backends and shared Dart implementations.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+  flutter: '>=3.47.7'
+dependencies:
+  flutter:
+    sdk: flutter
+  tinglang_platform_interface: any
+  tinglang_cloud_asr: any
+  tinglang_native_macos: any
+  tinglang_native_windows: any
+  # sherpa-onnx runtime (Apache-2.0): live and file recognition in worker
+  # isolates on macOS 14.2+ and Windows. Same version as the M0 benchmark.
+  sherpa_onnx: 1.13.8
+  crypto: 3.0.7
+  ffi: 2.2.0
+  path: 1.9.1
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      macos:
+        default_package: tinglang_native_macos
+      windows:
+        default_package: tinglang_native_windows

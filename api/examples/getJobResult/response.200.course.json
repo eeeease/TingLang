@@ -1,0 +1,163 @@
+{
+  "kind": "course",
+  "course": {
+    "schema_version": 2,
+    "design_version": 3,
+    "podcast_id": "tinglang-demo-consistency",
+    "title": "Small reps. Real progress.",
+    "learner_level": "B2 practice demo",
+    "tinglang_source": "原创演示文字 · eSpeak 合成语音 · 非真实 NBA 采访",
+    "playback": {
+      "captions_default": false,
+      "show_clip_boundaries": true,
+      "transcript_default": "hidden"
+    },
+    "overview": {
+      "episode_summary_en": "An original practice demo about showing up, staying consistent, and expressing your own ideas.",
+      "episode_summary_zh": "从坚持训练到表达自己：原创功能演示，不是采访摘录。",
+      "selected_clip_count": 3,
+      "estimated_study_minutes": 12,
+      "main_topics": [
+        "Consistency",
+        "Practice"
+      ],
+      "learning_focus": [
+        "Reusable sentence frames"
+      ]
+    },
+    "clips": [
+      {
+        "id": "clip_001",
+        "title": "Show up, get better",
+        "topic": "Practice and progress",
+        "start": 0.0,
+        "end": 11.07,
+        "difficulty": 5,
+        "learning_value": 8,
+        "why_selected": "Original, self-contained demo of reusable frames.",
+        "transcript": "I used to focus on the final score. These days, I try to get a little better every day. Showing up matters more than having one perfect session.",
+        "learning": {
+          "words": [],
+          "phrases": [
+            {
+              "id": "clip_001_phrase_01",
+              "type": "phrase",
+              "text": "Showing up",
+              "meaning_zh": "出现并坚持参与",
+              "simple_explanation_en": "Use this expression in a personal example.",
+              "why_useful": "Useful for talking about practice and everyday improvement.",
+              "original_example": "Showing up matters more than having one perfect session.",
+              "timestamp": "00:00:00.000",
+              "usage_note": null,
+              "common_patterns": [
+                "Showing up"
+              ],
+              "learner_example": "These days, I try to speak English for a few minutes every day.",
+              "memory_aid": {
+                "type": "collocation_chunk",
+                "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+                "note": "A practice cue, not an etymology claim."
+              },
+              "subtype": "phrase"
+            }
+          ],
+          "sentences": [
+            {
+              "id": "clip_001_sentence_01",
+              "type": "sentence",
+              "text": "These days, I try to get a little better every day.",
+              "meaning_zh": "现在，我尝试每天进步一点。",
+              "simple_explanation_en": "Use this expression in a personal example.",
+              "why_useful": "Useful for talking about practice and everyday improvement.",
+              "original_example": "These days, I try to get a little better every day.",
+              "timestamp": "00:00:00.000",
+              "usage_note": null,
+              "common_patterns": [
+                "These days, I try to ..."
+              ],
+              "learner_example": "These days, I try to speak English for a few minutes every day.",
+              "memory_aid": {
+                "type": "sentence_frame",
+                "cue_zh": "保留表达骨架，换成你自己的真实经历。",
+                "note": "A practice cue, not an etymology claim."
+              },
+              "reusable_frame": "These days, I try to ..."
+            }
+          ]
+        },
+        "blind_listening": {
+          "template": "I used to focus on the final {{clip_001_blank_word}}. {{clip_001_blank_sentence}} {{clip_001_blank_phrase}} matters more than having one perfect session.",
+          "blanks": [
+            {
+              "id": "clip_001_blank_word",
+              "type": "word",
+              "answer": "score"
+            },
+            {
+              "id": "clip_001_blank_phrase",
+              "type": "phrase",
+              "answer": "Showing up",
+              "learning_item_id": "clip_001_phrase_01"
+            },
+            {
+              "id": "clip_001_blank_sentence",
+              "type": "sentence",
+              "answer": "These days, I try to get a little better every day.",
+              "learning_item_id": "clip_001_sentence_01"
+            }
+          ]
+        },
+        "shadowing": [
+          {
+            "text": "I used to focus on the final score.",
+            "reason": "Try the complete thought, then compare your recording."
+          },
+          {
+            "text": "These days, I try to get a little better every day.",
+            "reason": "Try the complete thought, then compare your recording."
+          }
+        ],
+        "retelling": {
+          "id": "clip_001_retelling_01",
+          "prompt": "How has your approach to practice changed?",
+          "outline": [
+            "Describe the change or challenge.",
+            "Explain the approach to practice."
+          ],
+          "source_evidence": [
+            "I used to focus on the final score.",
+            "These days, I try to get a little better every day."
+          ],
+          "target_item_ids": [
+            "clip_001_phrase_01",
+            "clip_001_sentence_01"
+          ],
+          "follow_up": "Use one expression to talk about your own life, not the demo speaker."
+        },
+        "tinglang_cues": [
+          {
+            "index": 0,
+            "text": "I used to focus on the final score.",
+            "startTime": 0,
+            "endTime": 2657,
+            "isBookmarked": false
+          },
+          {
+            "index": 1,
+            "text": "These days, I try to get a little better every day.",
+            "startTime": 2937,
+            "endTime": 6667,
+            "isBookmarked": false
+          },
+          {
+            "index": 2,
+            "text": "Showing up matters more than having one perfect session.",
+            "startTime": 6947,
+            "endTime": 10790,
+            "isBookmarked": false
+          }
+        ]
+      }
+    ]
+  }
+}

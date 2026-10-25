@@ -1,0 +1,6 @@
+{
+  "type": "https://tinglang.example/problems/quota_exceeded",
+  "title": "Monthly transcription minutes used up",
+  "status": 402,
+  "code": "quota_exceeded"
+}

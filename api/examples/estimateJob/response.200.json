@@ -1,0 +1,15 @@
+{
+  "kind": "transcribe",
+  "allowed": true,
+  "cost": {
+    "unit": "minute",
+    "amount": 22
+  },
+  "quota": {
+    "unit": "minute",
+    "limit": 600,
+    "used": 42,
+    "resets_at": "2026-11-01T00:00:00Z"
+  },
+  "eta_seconds": 90
+}

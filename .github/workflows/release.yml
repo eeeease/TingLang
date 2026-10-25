@@ -1,0 +1,124 @@
+name: Release
+# pubspec.yaml is the one source of the version (scripts/bump_version.sh
+# also sets lib/app.dart and makes the commit and tag). When a push to main
+# changes it:
+#   - the tag v<version> is created on that commit if it is not there yet;
+#   - X.Y.0 versions are checked, built and published as a GitHub Release;
+#   - patch versions (X.Y.Z, Z > 0) get the tag only.
+# Run it by hand (Actions → Release → Run workflow) to publish any existing
+# tag, a patch version included, or to rebuild a release.
+# The app is not signed or notarised yet; the release notes say how to open it.
+on:
+  push:
+    branches: [main]
+    paths: [pubspec.yaml]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: An existing tag to publish or rebuild, e.g. v0.5.1
+        required: true
+permissions:
+  contents: write
+concurrency:
+  # One release run at a time, so a tag and its release are never made twice.
+  group: release
+  cancel-in-progress: false
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      version: ${{ steps.plan.outputs.version }}
+      publish: ${{ steps.plan.outputs.publish }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      INPUT_TAG: ${{ github.event.inputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.sha }}
+          fetch-depth: 0
+      - name: Version, tag and whether to publish
+        id: plan
+        run: |
+          version="$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::pubspec.yaml version '$version' is not X.Y.Z"; exit 1; }
+          grep -q "^const appVersion = '$version';" lib/app.dart || { echo "::error::lib/app.dart appVersion is not $version (use scripts/bump_version.sh)"; exit 1; }
+          tag="v$version"
+          if [[ -n "$INPUT_TAG" ]]; then
+            [[ "$INPUT_TAG" == "$tag" ]] || { echo "::error::Tag $INPUT_TAG holds version $version"; exit 1; }
+            publish=true
+          else
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "Tag $tag exists ($(git rev-list -n1 "$tag"))."
+            else
+              gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" >/dev/null
+              echo "Created tag $tag on $GITHUB_SHA."
+            fi
+            if [[ "$version" != *.0 ]]; then
+              publish=false
+              echo "Patch version $version: tag only, no release." >> "$GITHUB_STEP_SUMMARY"
+            elif gh release view "$tag" >/dev/null 2>&1; then
+              publish=false
+              echo "Release $tag already exists." >> "$GITHUB_STEP_SUMMARY"
+            else
+              publish=true
+            fi
+          fi
+          { echo "tag=$tag"; echo "version=$version"; echo "publish=$publish"; } >> "$GITHUB_OUTPUT"
+
+  macos:
+    needs: version
+    if: needs.version.outputs.publish == 'true'
+    # Same image as the CI macOS job: the speech APIs need the macOS 26 SDK.
+    runs-on: xcode-27
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'  # keep in sync with .fvmrc
+          channel: stable
+          cache: true
+      - name: Checks and release build (scripts/check.sh --build)
+        run: bash scripts/check.sh --build
+      - name: Package
+        run: |
+          zip="Tinglang-$VERSION-macOS.zip"
+          # ditto keeps the bundle's symlinks and signature; plain zip breaks them.
+          ditto -c -k --keepParent build/macos/Build/Products/Release/Tinglang.app "$zip"
+          shasum -a 256 "$zip" > "$zip.sha256"
+          echo "ZIP=$zip" >> "$GITHUB_ENV"
+          echo "SHA256=$(cut -d' ' -f1 "$zip.sha256")" >> "$GITHUB_ENV"
+      - name: Release notes
+        run: |
+          # Changes since the previous release (X.Y.0), patch versions included.
+          previous="$(git describe --tags --abbrev=0 --match 'v*.*.0' "$TAG^" 2>/dev/null || true)"
+          if [ -n "$previous" ]; then
+            changes="$(git log --no-merges --format='- %s' "$previous..$TAG")"
+          else
+            changes="First public release."
+          fi
+          python3 - "$changes" <<'PY'
+          import os, sys
+          text = open('.github/release-notes.md', encoding='utf-8').read()
+          for key in ('VERSION', 'TAG', 'SHA256'):
+              text = text.replace('{%s}' % key, os.environ[key])
+          text = text.replace('{CHANGES}', sys.argv[1])
+          open('release-notes.out.md', 'w', encoding='utf-8').write(text)
+          PY
+      - name: Publish
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" "$ZIP.sha256" --clobber
+            gh release edit "$TAG" --notes-file release-notes.out.md
+          else
+            gh release create "$TAG" "$ZIP" "$ZIP.sha256" --verify-tag \
+              --title "Tinglang $VERSION" --notes-file release-notes.out.md
+          fi

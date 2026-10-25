@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transcript",
+  "description": "The transcript.json of a .tinglang share package, unchanged. Times are integer milliseconds into the complete original media.",
+  "type": "object",
+  "required": [
+    "lines"
+  ],
+  "properties": {
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "text"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "text": {
+            "type": "string"
+          },
+          "translation": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "description": "Only when the recogniser gave word times; never invented.",
+            "items": {
+              "type": "object",
+              "required": [
+                "w",
+                "s",
+                "e"
+              ],
+              "properties": {
+                "w": {
+                  "type": "string"
+                },
+                "s": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "e": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "job_01HZXA3M0F6R",
+  "kind": "transcribe",
+  "status": "awaiting_upload",
+  "created_at": "2026-10-23T08:01:00Z",
+  "updated_at": "2026-10-23T08:01:00Z",
+  "expires_at": "2026-10-24T08:01:00Z",
+  "uploads": [
+    {
+      "name": "media",
+      "url": "https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/upload/sign/jobs/job_01HZXA3M0F6R/media?token=example",
+      "method": "PUT",
+      "headers": {
+        "content-type": "audio/mp4"
+      },
+      "expires_at": "2026-10-23T10:01:00Z",
+      "max_bytes": 2147483648
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Problem",
+  "description": "RFC 9457 problem details. Clients map `code`, never `detail`, to their own messages.",
+  "type": "object",
+  "required": [
+    "code",
+    "status"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599
+    },
+    "detail": {
+      "type": "string"
+    },
+    "instance": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Stable, snake_case. Known values are listed in openapi.yaml (x-problem-codes); clients treat others as unknown."
+    },
+    "errors": {
+      "type": "array",
+      "description": "Per-field details for validation_failed.",
+      "items": {
+        "type": "object",
+        "required": [
+          "field",
+          "code"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
