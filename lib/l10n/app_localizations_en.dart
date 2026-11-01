@@ -1154,7 +1154,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabMine => 'Mine';
 
   @override
-  String get tabDiscover => 'Discover';
+  String get tabDiscover => 'Official';
 
   @override
   String get tabShared => 'Shared';
@@ -2412,4 +2412,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String linkErrorTool(String detail) {
     return 'yt-dlp could not read the page: $detail';
   }
+
+  @override
+  String get officialIntro =>
+      'Courses picked by TingLang: transcripts, explanations and exercises are ready; the video plays in YouTube\'s own player. Opening this page connects to tinglang.app.';
+
+  @override
+  String get officialAdd => 'Add';
+
+  @override
+  String get officialOpen => 'Open';
+
+  @override
+  String get officialUpdate => 'Update';
+
+  @override
+  String get officialUnavailable => 'The official library cannot be reached right now';
 }

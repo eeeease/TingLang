@@ -1,0 +1,6 @@
+{
+  "type": "https://tinglang.example/problems/server_unavailable",
+  "title": "The library is being updated",
+  "status": 503,
+  "code": "server_unavailable"
+}

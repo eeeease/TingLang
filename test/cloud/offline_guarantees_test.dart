@@ -131,7 +131,7 @@ void main() {
     await tap(tester, find.text('复习'));
     await tap(tester, find.text('说说'));
     await tap(tester, find.byKey(const ValueKey('nav-library')));
-    await tap(tester, find.text('发现'));
+    await tap(tester, find.text('官方素材'));
     await tap(tester, find.text('共享'));
     await tap(tester, find.byKey(const ValueKey('nav-settings')));
     // Every settings tab, the cloud speech settings included.

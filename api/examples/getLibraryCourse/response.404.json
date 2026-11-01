@@ -1,0 +1,6 @@
+{
+  "type": "https://tinglang.example/problems/not_found",
+  "title": "No such course",
+  "status": 404,
+  "code": "not_found"
+}

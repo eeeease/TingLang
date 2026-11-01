@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   title: Tinglang Cloud API
-  version: 1.0.0
+  version: 1.1.0
   summary: The contract between the Tinglang desktop client and a Tinglang server.
   description: |
     Optional cloud services for Tinglang: accounts and entitlements, cloud jobs
@@ -36,6 +36,7 @@ tags:
   - name: account
   - name: jobs
   - name: llm
+  - name: library
 x-problem-codes:
   unauthorized: 401 — not signed in, or the token is no longer valid
   forbidden: 403 — signed in but not allowed
@@ -242,6 +243,41 @@ paths:
               schema: { $ref: './schemas/job.json' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /library:
+    get:
+      operationId: getLibrary
+      tags: [library]
+      summary: The official library — courses anyone may add to their own
+      description: |
+        Needs no sign-in. The client asks only when the user opens the official
+        library. Courses carry text only (transcripts, explanations, exercises);
+        their media plays from where it is published (for example the YouTube
+        embedded player), so `cover_url` and the course itself are the only
+        files served.
+      security: []
+      responses:
+        '200':
+          description: Every course on offer, newest first.
+          content:
+            application/json:
+              schema: { $ref: './schemas/library.json' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /library/{course_id}:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    get:
+      operationId: getLibraryCourse
+      tags: [library]
+      summary: One official course, as an English V3 course document
+      security: []
+      responses:
+        '200':
+          description: The course.
+          content:
+            application/json:
+              schema: { $ref: './schemas/course.json' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/Unavailable' }
   /llm/models:
     get:
       operationId: listLlmModels
@@ -289,6 +325,11 @@ components:
         An OAuth 2.1 access token from meta.auth (authorization code with PKCE,
         public client). Refresh tokens rotate; store the latest one.
   parameters:
+    CourseId:
+      name: course_id
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
     JobId:
       name: job_id
       in: path

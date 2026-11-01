@@ -1123,7 +1123,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabMine => '我的';
 
   @override
-  String get tabDiscover => '发现';
+  String get tabDiscover => '官方素材';
 
   @override
   String get tabShared => '共享';
@@ -2335,4 +2335,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String linkErrorTool(String detail) {
     return 'yt-dlp 无法读取这个页面：$detail';
   }
+
+  @override
+  String get officialIntro => '听浪整理的精选课程：字幕、讲解和练习都已备好，视频在 YouTube 官方播放器里播放。打开此页会连接 tinglang.app。';
+
+  @override
+  String get officialAdd => '加入素材库';
+
+  @override
+  String get officialOpen => '打开';
+
+  @override
+  String get officialUpdate => '更新';
+
+  @override
+  String get officialUnavailable => '暂时连不上官方素材库';
 }

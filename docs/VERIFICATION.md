@@ -4,6 +4,14 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.5 · official library
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks 33 OK; analyze no issues; app tests 294 (new: nothing asked before the tab opens, adding a course with its cover, an update offered for a newer version, covers only from the library server, an unreachable server shown as an error, the cards); `tinglang_api` 74 plus the contract check (15 operations, 19 schemas, 38 examples); other packages as before |
+
+Not run: against the real api.tinglang.app (the endpoints and the upload are not live yet); the tab in the running app.
+
 ## 0.7.4 · video links
 
 | Command | Outcome |

@@ -38,7 +38,7 @@ void main() {
 
   test('the contract in api/ is consistent', () {
     expect(base.check(), isEmpty);
-    expect(base.operations, hasLength(13));
+    expect(base.operations, hasLength(15));
   });
 
   test('a document OpenAPI 3.1 rejects is reported', () {

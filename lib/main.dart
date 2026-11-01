@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:tinglang_api/tinglang_api.dart' show ServerUrl, TinglangApi;
 import 'package:tinglang_native/tinglang_native.dart';
 import 'package:tinglang_ui/tinglang_ui.dart';
 
@@ -23,6 +24,7 @@ import 'services/cloud/cloud_services.dart';
 import 'services/course_generation.dart';
 import 'services/app_exit.dart';
 import 'services/link_import.dart';
+import 'services/official_library.dart';
 import 'services/live_controller.dart';
 import 'services/panel_coordinator.dart';
 import 'services/panel_settings.dart' show localizationsFor;
@@ -106,6 +108,14 @@ Future<void> main() async {
       transcription: transcription,
       toolsFolder: Directory(p.join(store.root.path, 'tools')),
       generation: generation,
+    );
+    // The official library: asked only when the user opens it.
+    final official = OfficialLibraryService(
+      app: controller,
+      api: () => TinglangApi(
+        ServerUrl.parse(CloudController.official),
+        userAgent: 'TingLang/$appVersion (macos)',
+      ),
     );
     // Optional cloud account: reads cached settings only; it talks to a
     // server when the user signs in (docs/CLOUD.md §10).
@@ -196,6 +206,7 @@ Future<void> main() async {
         updates: updates,
         openSystemSettings: shell?.openSystemSettings,
         links: links,
+        official: official,
       ),
     );
     // Without the panel (hidden by the user, or no panel on this system) the

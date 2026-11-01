@@ -695,7 +695,7 @@
   "tabReview": "Review",
   "tabSpeak": "Speak",
   "tabMine": "Mine",
-  "tabDiscover": "Discover",
+  "tabDiscover": "Official",
   "tabShared": "Shared",
   "importAudio": "Import audio",
   "recordsEmptyTitle": "Nothing captured yet",
@@ -1568,5 +1568,10 @@
         "type": "String"
       }
     }
-  }
+  },
+  "officialIntro": "Courses picked by TingLang: transcripts, explanations and exercises are ready; the video plays in YouTube's own player. Opening this page connects to tinglang.app.",
+  "officialAdd": "Add",
+  "officialOpen": "Open",
+  "officialUpdate": "Update",
+  "officialUnavailable": "The official library cannot be reached right now"
 }

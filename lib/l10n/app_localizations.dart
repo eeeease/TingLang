@@ -2142,7 +2142,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabDiscover.
   ///
   /// In en, this message translates to:
-  /// **'Discover'**
+  /// **'Official'**
   String get tabDiscover;
 
   /// No description provided for @tabShared.
@@ -4280,6 +4280,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'yt-dlp could not read the page: {detail}'**
   String linkErrorTool(String detail);
+
+  /// No description provided for @officialIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses picked by TingLang: transcripts, explanations and exercises are ready; the video plays in YouTube\'s own player. Opening this page connects to tinglang.app.'**
+  String get officialIntro;
+
+  /// No description provided for @officialAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get officialAdd;
+
+  /// No description provided for @officialOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get officialOpen;
+
+  /// No description provided for @officialUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get officialUpdate;
+
+  /// No description provided for @officialUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The official library cannot be reached right now'**
+  String get officialUnavailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -341,7 +341,7 @@
   "tabReview": "复习",
   "tabSpeak": "说说",
   "tabMine": "我的",
-  "tabDiscover": "发现",
+  "tabDiscover": "官方素材",
   "tabShared": "共享",
   "importAudio": "导入音频",
   "recordsEmptyTitle": "还没有记录",
@@ -697,5 +697,10 @@
   "linkErrorUnsupported": "yt-dlp 不支持这个网站或页面。",
   "linkErrorNoAudio": "这个页面没有听浪能读取的音频。",
   "linkErrorNetwork": "下载失败：{detail}",
-  "linkErrorTool": "yt-dlp 无法读取这个页面：{detail}"
+  "linkErrorTool": "yt-dlp 无法读取这个页面：{detail}",
+  "officialIntro": "听浪整理的精选课程：字幕、讲解和练习都已备好，视频在 YouTube 官方播放器里播放。打开此页会连接 tinglang.app。",
+  "officialAdd": "加入素材库",
+  "officialOpen": "打开",
+  "officialUpdate": "更新",
+  "officialUnavailable": "暂时连不上官方素材库"
 }

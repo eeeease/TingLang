@@ -18,6 +18,9 @@ final Map<String, _RoundTrip> _responses = {
   'startJob': (j) => Job.fromJson(j).toJson(),
   'getJobResult': (j) => JobResult.fromJson(j).toJson(),
   'cancelJob': (j) => Job.fromJson(j).toJson(),
+  'getLibrary': (j) => OfficialLibrary.fromJson(j).toJson(),
+  // Embedded course documents keep their own keys (the app's codec reads them).
+  'getLibraryCourse': (j) => j! as Map<String, Object?>,
 };
 
 final Map<String, _RoundTrip> _requests = {

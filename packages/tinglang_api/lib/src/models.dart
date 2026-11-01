@@ -814,3 +814,83 @@ class ResultDownload {
     'content_type': ?contentType,
   };
 }
+
+/// One course of the official library (GET /library).
+class LibraryEntry {
+  const LibraryEntry({
+    required this.id,
+    required this.title,
+    required this.clipCount,
+    required this.version,
+    this.area,
+    this.sourceLabel,
+    this.youtubeId,
+    this.coverUrl,
+    this.durationMs,
+    this.learnerLevel,
+    this.updatedAt,
+  });
+
+  factory LibraryEntry.fromJson(Object? value) {
+    final r = _Read(value, 'library.courses[]');
+    return LibraryEntry(
+      id: r.str('id'),
+      title: r.str('title'),
+      clipCount: r.number('clip_count').toInt(),
+      version: r.str('version'),
+      area: r.optStr('area'),
+      sourceLabel: r.optStr('source_label'),
+      youtubeId: r.optStr('youtube_id'),
+      coverUrl: r.optUri('cover_url'),
+      durationMs: r.optInt('duration_ms'),
+      learnerLevel: r.optStr('learner_level'),
+      updatedAt: r.optDate('updated_at'),
+    );
+  }
+
+  /// The course's `podcast_id`; [TinglangApi.getLibraryCourse] fetches it.
+  final String id;
+  final String title, version;
+  final int clipCount;
+  final String? area, sourceLabel, youtubeId, learnerLevel;
+  final Uri? coverUrl;
+  final int? durationMs;
+  final DateTime? updatedAt;
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'title': title,
+    'area': ?area,
+    'source_label': ?sourceLabel,
+    'youtube_id': ?youtubeId,
+    'cover_url': ?coverUrl?.toString(),
+    'clip_count': clipCount,
+    'duration_ms': ?durationMs,
+    'learner_level': ?learnerLevel,
+    'version': version,
+    if (updatedAt != null) 'updated_at': rfc3339(updatedAt!),
+  };
+}
+
+/// The official library (GET /library): text-only courses with covers.
+class OfficialLibrary {
+  const OfficialLibrary({required this.courses, this.updatedAt});
+
+  factory OfficialLibrary.fromJson(Object? value) {
+    final r = _Read(value, 'library');
+    final list = r.json['courses'];
+    if (list is! List) throw const ApiBadResponse('library.courses: expected a list');
+    return OfficialLibrary(
+      updatedAt: r.optDate('updated_at'),
+      courses: [for (final c in list) LibraryEntry.fromJson(c)],
+    );
+  }
+
+  final List<LibraryEntry> courses;
+  final DateTime? updatedAt;
+
+  Map<String, Object?> toJson() => {
+    if (updatedAt != null) 'updated_at': rfc3339(updatedAt!),
+    'courses': [for (final c in courses) c.toJson()],
+  };
+}

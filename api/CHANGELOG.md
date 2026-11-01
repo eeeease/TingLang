@@ -2,6 +2,10 @@
 
 Versions of `api/openapi.yaml` (`info.version`). Additive changes raise the minor version; breaking changes start a new URL major version (`/v2`).
 
+## 1.1.0 · 2026-11-01
+
+- `GET /library` and `GET /library/{course_id}`: the official library. No sign-in; the client asks only when the user opens it. Text only (courses and a JPEG `cover_url`); media plays from where it is published.
+
 ## 1.0.0 · unreleased
 
 First version of the contract.

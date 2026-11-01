@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:tinglang_ui/tinglang_ui.dart';
 
 import '../core/models.dart';
 import '../services/app_controller.dart';
+import '../services/official_library.dart';
 import 'brand.dart';
+import 'official_library_view.dart';
 import 'share_import.dart';
 
 enum LibraryTab { mine, discover, shared }
@@ -19,8 +23,12 @@ class LibraryPage extends StatefulWidget {
     required this.onImportShared,
     required this.tab,
     required this.onTab,
+    this.official,
   });
   final AppController app;
+
+  /// The official library (the Official tab); null shows a placeholder.
+  final OfficialLibraryService? official;
   final void Function(Course, String?) onOpen;
   final VoidCallback onImport;
   final Future<void> Function() onImportShared;
@@ -65,6 +73,10 @@ class _LibraryPageState extends State<LibraryPage> {
         Expanded(
           child: switch (widget.tab) {
             LibraryTab.mine => _mine(context),
+            LibraryTab.discover when widget.official != null => OfficialLibraryView(
+              official: widget.official!,
+              onOpen: (course) => widget.onOpen(course, null),
+            ),
             LibraryTab.discover => _placeholder(
               icon: Icons.explore_outlined,
               title: l.discoverEmptyTitle,
@@ -207,79 +219,94 @@ class CourseCard extends StatelessWidget {
         ? 0.0
         : count / (course.clips.length * learningSteps.length);
     final percent = (progress.clamp(0.0, 1.0) * 100).round();
+    // Saved when the course came from the official library.
+    final cover = File(OfficialLibraryService.coverPath(app.store.root.path, course.id));
     return SlPanel(
       padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(color: c.raised, borderRadius: SlRadius.all(8)),
-                    child: Icon(Brand.areaIcon(course.area), size: 16, color: c.inkSoft),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      Brand.areaLabel(l, course.area),
-                      style: SlType.caption.copyWith(color: c.muted),
-                    ),
-                  ),
-                  if (percent > 0)
-                    Text(
-                      l.percentDone(percent),
-                      style: SlType.caption.copyWith(
-                        color: c.accentInk,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  if (onExport != null)
-                    SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: PopupMenuButton<String>(
-                        key: ValueKey('course-menu-${course.id}'),
-                        tooltip: l.panelMore,
-                        padding: EdgeInsets.zero,
-                        iconSize: 18,
-                        icon: Icon(Icons.more_horiz, color: c.muted),
-                        onSelected: (_) => onExport!(),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(value: 'share', child: Text(l.exportShared)),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                course.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: SlType.subtitle.copyWith(color: c.text),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${l.courseScenes(course.clips.length)} · '
-                '${course.mediaPath == null ? l.mediaPending : l.mediaLocal}',
-                style: SlType.caption.copyWith(color: c.muted),
-              ),
-              const SizedBox(height: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (cover.existsSync())
               ClipRRect(
-                borderRadius: SlRadius.all(3),
-                child: LinearProgressIndicator(
-                  value: progress.clamp(0.0, 1.0).toDouble(),
-                  minHeight: 3,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(SlRadius.md)),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.file(cover, fit: BoxFit.cover),
                 ),
               ),
-            ],
-          ),
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(color: c.raised, borderRadius: SlRadius.all(8)),
+                        child: Icon(Brand.areaIcon(course.area), size: 16, color: c.inkSoft),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          Brand.areaLabel(l, course.area),
+                          style: SlType.caption.copyWith(color: c.muted),
+                        ),
+                      ),
+                      if (percent > 0)
+                        Text(
+                          l.percentDone(percent),
+                          style: SlType.caption.copyWith(
+                            color: c.accentInk,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      if (onExport != null)
+                        SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: PopupMenuButton<String>(
+                            key: ValueKey('course-menu-${course.id}'),
+                            tooltip: l.panelMore,
+                            padding: EdgeInsets.zero,
+                            iconSize: 18,
+                            icon: Icon(Icons.more_horiz, color: c.muted),
+                            onSelected: (_) => onExport!(),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(value: 'share', child: Text(l.exportShared)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    course.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: SlType.subtitle.copyWith(color: c.text),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${l.courseScenes(course.clips.length)} · '
+                    '${course.mediaPath == null ? l.mediaPending : l.mediaLocal}',
+                    style: SlType.caption.copyWith(color: c.muted),
+                  ),
+                  const SizedBox(height: 14),
+                  ClipRRect(
+                    borderRadius: SlRadius.all(3),
+                    child: LinearProgressIndicator(
+                      value: progress.clamp(0.0, 1.0).toDouble(),
+                      minHeight: 3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

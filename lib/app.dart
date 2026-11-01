@@ -17,6 +17,7 @@ import 'services/app_controller.dart';
 import 'services/cloud/cloud_controller.dart';
 import 'services/course_generation.dart';
 import 'services/link_import.dart';
+import 'services/official_library.dart';
 import 'services/live_controller.dart';
 import 'services/panel_coordinator.dart';
 import 'services/transcription_controller.dart';
@@ -74,6 +75,7 @@ class TinglangApp extends StatelessWidget {
     this.updates,
     this.openSystemSettings,
     this.links,
+    this.official,
   });
   final AppController controller;
   final PlaybackHub playback;
@@ -100,6 +102,9 @@ class TinglangApp extends StatelessWidget {
 
   /// Video links in the import dialog.
   final LinkImportService? links;
+
+  /// Library → Official.
+  final OfficialLibraryService? official;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -135,6 +140,7 @@ class TinglangApp extends StatelessWidget {
         updates: updates,
         openSystemSettings: openSystemSettings,
         links: links,
+        official: official,
       ),
     ),
   );
@@ -164,6 +170,7 @@ class TinglangShell extends StatefulWidget {
     this.updates,
     this.openSystemSettings,
     this.links,
+    this.official,
   });
   final AppController app;
   final PlaybackHub playback;
@@ -198,6 +205,9 @@ class TinglangShell extends StatefulWidget {
 
   /// Video links in the import dialog.
   final LinkImportService? links;
+
+  /// Library → Official.
+  final OfficialLibraryService? official;
   @override
   State<TinglangShell> createState() => _TinglangShellState();
 }
@@ -504,6 +514,7 @@ class _TinglangShellState extends State<TinglangShell> {
       ),
       Section.library => LibraryPage(
         app: widget.app,
+        official: widget.official,
         onOpen: _open,
         onImport: _showImport,
         onImportShared: _importShared,

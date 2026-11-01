@@ -72,7 +72,7 @@ void main() {
     // Library: mine, discover, shared.
     await tap(find.byKey(const ValueKey('nav-library')));
     expect(find.text('从一段你真正感兴趣的内容开始。'), findsOneWidget);
-    await tap(find.text('发现'));
+    await tap(find.text('官方素材'));
     expect(find.text('精选播客与频道即将加入'), findsOneWidget);
     await tap(find.text('共享'));
     expect(find.text('社区共享即将上线'), findsOneWidget);
