@@ -22,6 +22,7 @@ import 'services/cloud/cloud_controller.dart';
 import 'services/cloud/cloud_services.dart';
 import 'services/course_generation.dart';
 import 'services/app_exit.dart';
+import 'services/link_import.dart';
 import 'services/live_controller.dart';
 import 'services/panel_coordinator.dart';
 import 'services/panel_settings.dart' show localizationsFor;
@@ -98,6 +99,13 @@ Future<void> main() async {
       loadLexicon: () async => Lexicon.fromGzip(
         (await rootBundle.load('assets/lexicon/en.v1.json.gz')).buffer.asUint8List(),
       ),
+    );
+    // Video links: yt-dlp is downloaded only when the user agrees.
+    final links = LinkImportService(
+      app: controller,
+      transcription: transcription,
+      toolsFolder: Directory(p.join(store.root.path, 'tools')),
+      generation: generation,
     );
     // Optional cloud account: reads cached settings only; it talks to a
     // server when the user signs in (docs/CLOUD.md §10).
@@ -187,6 +195,7 @@ Future<void> main() async {
         sync: sync,
         updates: updates,
         openSystemSettings: shell?.openSystemSettings,
+        links: links,
       ),
     );
     // Without the panel (hidden by the user, or no panel on this system) the

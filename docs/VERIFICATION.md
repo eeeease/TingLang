@@ -4,6 +4,15 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.4 · video links
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks 33 OK; analyze no issues; app tests 289 (new: yt-dlp offered, downloaded, checked and made runnable only when asked, against a loopback GitHub; a bad checksum is not kept; only allowed hosts; a fake yt-dlp script for reading a page, fetching the audio, transcribing it as a `link` session; not-a-link, live and unsupported pages; the dialog's link field) |
+| A temporary integration test (not kept) on this Mac, temporary library | Real yt-dlp 2026.10.26 from GitHub (37 MB, SHA-256 checked, 2 s); YouTube "Me at the zoo": title and length read, audio only downloaded, transcribed by Apple SpeechTranscriber into 4 correct lines, a Basic course made, 16 s in all |
+
+Not run: the dialog's buttons in the running app; sites other than YouTube; a long video.
+
 ## 0.7.3 · choosing the languages, no translation-pack prompt
 
 | Command | Outcome |

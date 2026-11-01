@@ -247,7 +247,7 @@ class SyncEngine {
   static const joinedKey = 'sync.joined';
 
   /// Session origins shown in History (the ones that are synced).
-  static const sessionOrigins = ['live_system', 'live_mic', 'file', 'shared', 'voice_memo'];
+  static const sessionOrigins = ['live_system', 'live_mic', 'file', 'shared', 'voice_memo', 'link'];
 
   TinglangDatabase get db => repository.db;
   LibraryStore get store => app.store;

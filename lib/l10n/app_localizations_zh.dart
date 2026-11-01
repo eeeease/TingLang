@@ -2268,4 +2268,71 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageSetupStart => '开始字幕';
+
+  @override
+  String get originLink => '视频链接';
+
+  @override
+  String get linkTitle => '粘贴视频链接';
+
+  @override
+  String get linkHint => 'https://www.youtube.com/watch?v=… 或 B 站等链接';
+
+  @override
+  String get linkImport => '导入';
+
+  @override
+  String get linkNote => '支持 YouTube、B 站等大多数视频网站。只下载音频在本机转写，然后自动生成基础课程。请只导入你有权使用的内容，由你自己负责。';
+
+  @override
+  String get linkOrFile => '或选择文件';
+
+  @override
+  String get linkCheckingTool => '正在查询 yt-dlp…';
+
+  @override
+  String get linkToolTitle => '下载 yt-dlp？';
+
+  @override
+  String linkToolBody(String size, String version) {
+    return '读取视频网站需要开源工具 yt-dlp（Unlicense 许可）。听浪会从 github.com/yt-dlp 下载一次 $version 版（$size），校验后保存在数据文件夹里。从网站下载是你自己发起的行为，由你自己负责，并受该网站条款约束。';
+  }
+
+  @override
+  String linkToolDownload(String size) {
+    return '下载 $size';
+  }
+
+  @override
+  String get linkDownloadingTool => '正在下载 yt-dlp…';
+
+  @override
+  String get linkReading => '正在读取链接…';
+
+  @override
+  String linkDownloadingAudio(String title) {
+    return '正在下载「$title」的音频…';
+  }
+
+  @override
+  String get linkErrorNotALink => '这不是网页链接（应以 http:// 或 https:// 开头）。';
+
+  @override
+  String get linkErrorLive => '直播不能导入，结束后再试。';
+
+  @override
+  String get linkErrorUnsupported => 'yt-dlp 不支持这个网站或页面。';
+
+  @override
+  String get linkErrorNoAudio => '这个页面没有听浪能读取的音频。';
+
+  @override
+  String linkErrorNetwork(String detail) {
+    return '下载失败：$detail';
+  }
+
+  @override
+  String linkErrorTool(String detail) {
+    return 'yt-dlp 无法读取这个页面：$detail';
+  }
 }

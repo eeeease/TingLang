@@ -210,7 +210,14 @@ class LiveRepository {
   Future<List<SessionRow>> recentSessions({int limit = 50}) =>
       (db.select(db.sessions)
             ..where(
-              (s) => s.origin.isIn(['live_system', 'live_mic', 'file', 'shared', 'voice_memo']),
+              (s) => s.origin.isIn([
+                'live_system',
+                'live_mic',
+                'file',
+                'shared',
+                'voice_memo',
+                'link',
+              ]),
             )
             ..orderBy([(s) => OrderingTerm.desc(s.startedAt)])
             ..limit(limit))

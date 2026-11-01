@@ -16,6 +16,7 @@ import 'services/sync_service.dart';
 import 'services/app_controller.dart';
 import 'services/cloud/cloud_controller.dart';
 import 'services/course_generation.dart';
+import 'services/link_import.dart';
 import 'services/live_controller.dart';
 import 'services/panel_coordinator.dart';
 import 'services/transcription_controller.dart';
@@ -72,6 +73,7 @@ class TinglangApp extends StatelessWidget {
     this.sync,
     this.updates,
     this.openSystemSettings,
+    this.links,
   });
   final AppController controller;
   final PlaybackHub playback;
@@ -95,6 +97,9 @@ class TinglangApp extends StatelessWidget {
 
   /// Opens a Privacy & Security pane (the first-start guide).
   final Future<void> Function(SystemSettingsPane pane)? openSystemSettings;
+
+  /// Video links in the import dialog.
+  final LinkImportService? links;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -129,6 +134,7 @@ class TinglangApp extends StatelessWidget {
         sync: sync,
         updates: updates,
         openSystemSettings: openSystemSettings,
+        links: links,
       ),
     ),
   );
@@ -157,6 +163,7 @@ class TinglangShell extends StatefulWidget {
     this.sync,
     this.updates,
     this.openSystemSettings,
+    this.links,
   });
   final AppController app;
   final PlaybackHub playback;
@@ -188,6 +195,9 @@ class TinglangShell extends StatefulWidget {
 
   /// Opens a Privacy & Security pane (the first-start guide).
   final Future<void> Function(SystemSettingsPane pane)? openSystemSettings;
+
+  /// Video links in the import dialog.
+  final LinkImportService? links;
   @override
   State<TinglangShell> createState() => _TinglangShellState();
 }
@@ -405,6 +415,8 @@ class _TinglangShellState extends State<TinglangShell> {
   Future<void> _showImport() => showImportDialog(
     context,
     widget.app,
+    links: widget.links,
+    onLinkImported: () => _navigate(Section.records, records: RecordsTab.captions),
     onTranscribe: (media) async {
       await transcribeMedia(widget.app, widget.transcription, media);
       _navigate(Section.records, records: RecordsTab.captions);

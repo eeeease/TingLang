@@ -9,6 +9,7 @@ import '../core/providers/llm_client.dart';
 import '../core/share_package.dart';
 import '../l10n/app_localizations.dart';
 import '../services/cloud/cloud_services.dart';
+import '../services/link_import.dart';
 import '../services/transcription_controller.dart';
 import 'speech_model_names.dart';
 
@@ -32,6 +33,16 @@ String describeError(AppLocalizations l, Object error) {
   }
   if (error is AsrFailure) return asrFailureMessage(l, error);
   if (error is MissingApiKey) return l.makeCourseNoKey(error.provider);
+  if (error is LinkImportFailure) {
+    return switch (error.problem) {
+      LinkProblem.notALink => l.linkErrorNotALink,
+      LinkProblem.live => l.linkErrorLive,
+      LinkProblem.unsupported => l.linkErrorUnsupported,
+      LinkProblem.noAudio => l.linkErrorNoAudio,
+      LinkProblem.network => l.linkErrorNetwork(error.detail ?? ''),
+      LinkProblem.tool => l.linkErrorTool(error.detail ?? ''),
+    };
+  }
   if (error is LlmException && error.unauthorized) return l.makeCourseKeyRejected;
   if (error is CloudAsrError) {
     // "Test connection" in Settings, where the service is named already.

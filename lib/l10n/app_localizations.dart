@@ -4166,6 +4166,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start captions'**
   String get languageSetupStart;
+
+  /// No description provided for @originLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Video link'**
+  String get originLink;
+
+  /// No description provided for @linkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a video link'**
+  String get linkTitle;
+
+  /// No description provided for @linkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://www.youtube.com/watch?v=…'**
+  String get linkHint;
+
+  /// No description provided for @linkImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get linkImport;
+
+  /// No description provided for @linkNote.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube, Bilibili and many other sites. Only the audio is downloaded and transcribed, then a Basic course is made. Import only what you may use; you are responsible for it.'**
+  String get linkNote;
+
+  /// No description provided for @linkOrFile.
+  ///
+  /// In en, this message translates to:
+  /// **'or choose files'**
+  String get linkOrFile;
+
+  /// No description provided for @linkCheckingTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up yt-dlp…'**
+  String get linkCheckingTool;
+
+  /// No description provided for @linkToolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download yt-dlp?'**
+  String get linkToolTitle;
+
+  /// No description provided for @linkToolBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading video sites needs yt-dlp, an open-source tool (Unlicense). TingLang downloads version {version} ({size}) once from github.com/yt-dlp, checks it and keeps it in its data folder. Downloading from a site is your own action, at your own responsibility, under that site\'s terms.'**
+  String linkToolBody(String size, String version);
+
+  /// No description provided for @linkToolDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {size}'**
+  String linkToolDownload(String size);
+
+  /// No description provided for @linkDownloadingTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading yt-dlp…'**
+  String get linkDownloadingTool;
+
+  /// No description provided for @linkReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the link…'**
+  String get linkReading;
+
+  /// No description provided for @linkDownloadingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading the audio of “{title}”…'**
+  String linkDownloadingAudio(String title);
+
+  /// No description provided for @linkErrorNotALink.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a web link (http:// or https://).'**
+  String get linkErrorNotALink;
+
+  /// No description provided for @linkErrorLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live streams cannot be imported; try again once it is over.'**
+  String get linkErrorLive;
+
+  /// No description provided for @linkErrorUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'yt-dlp does not know this site or page.'**
+  String get linkErrorUnsupported;
+
+  /// No description provided for @linkErrorNoAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'This page offers no audio TingLang can read.'**
+  String get linkErrorNoAudio;
+
+  /// No description provided for @linkErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The download did not work: {detail}'**
+  String linkErrorNetwork(String detail);
+
+  /// No description provided for @linkErrorTool.
+  ///
+  /// In en, this message translates to:
+  /// **'yt-dlp could not read the page: {detail}'**
+  String linkErrorTool(String detail);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

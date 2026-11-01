@@ -2344,4 +2344,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSetupStart => 'Start captions';
+
+  @override
+  String get originLink => 'Video link';
+
+  @override
+  String get linkTitle => 'Paste a video link';
+
+  @override
+  String get linkHint => 'https://www.youtube.com/watch?v=…';
+
+  @override
+  String get linkImport => 'Import';
+
+  @override
+  String get linkNote =>
+      'YouTube, Bilibili and many other sites. Only the audio is downloaded and transcribed, then a Basic course is made. Import only what you may use; you are responsible for it.';
+
+  @override
+  String get linkOrFile => 'or choose files';
+
+  @override
+  String get linkCheckingTool => 'Looking up yt-dlp…';
+
+  @override
+  String get linkToolTitle => 'Download yt-dlp?';
+
+  @override
+  String linkToolBody(String size, String version) {
+    return 'Reading video sites needs yt-dlp, an open-source tool (Unlicense). TingLang downloads version $version ($size) once from github.com/yt-dlp, checks it and keeps it in its data folder. Downloading from a site is your own action, at your own responsibility, under that site\'s terms.';
+  }
+
+  @override
+  String linkToolDownload(String size) {
+    return 'Download $size';
+  }
+
+  @override
+  String get linkDownloadingTool => 'Downloading yt-dlp…';
+
+  @override
+  String get linkReading => 'Reading the link…';
+
+  @override
+  String linkDownloadingAudio(String title) {
+    return 'Downloading the audio of “$title”…';
+  }
+
+  @override
+  String get linkErrorNotALink => 'That is not a web link (http:// or https://).';
+
+  @override
+  String get linkErrorLive => 'Live streams cannot be imported; try again once it is over.';
+
+  @override
+  String get linkErrorUnsupported => 'yt-dlp does not know this site or page.';
+
+  @override
+  String get linkErrorNoAudio => 'This page offers no audio TingLang can read.';
+
+  @override
+  String linkErrorNetwork(String detail) {
+    return 'The download did not work: $detail';
+  }
+
+  @override
+  String linkErrorTool(String detail) {
+    return 'yt-dlp could not read the page: $detail';
+  }
 }

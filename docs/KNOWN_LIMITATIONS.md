@@ -12,7 +12,7 @@ See VERIFICATION.md for what actually ran. Not executed yet: live captions from 
 - Discover is a placeholder. Community sharing has no server yet; the Shared tab imports `.tinglang` files that someone sends you.
 - Only English and Simplified Chinese interface strings. Some parser and native error details are still English technical text.
 - No pronunciation scores or conversation bot. AI course generation only uses providers you add yourself (BYOK); the basic course needs no network.
-- No downloads from YouTube, Twitch or streaming sites; YouTube clips play in the official embedded player.
+- Video links (0.7.4): the audio of a page on YouTube, Bilibili and the other sites yt-dlp knows is downloaded, transcribed and turned into a Basic course; the video itself is not downloaded. yt-dlp is fetched from its GitHub releases when the user agrees (about 37 MB, checked against the release's SHA-256 list) and is not updated by itself: a site change that breaks it needs a newer yt-dlp (delete `<data>/tools/yt-dlp` to fetch the current one). Live streams, playlists and pages without AAC/MP4 audio are refused. What is imported, and under which site terms, is the user's own responsibility. Course clips from YouTube still play in the official embedded player.
 - Six preset Areas; no custom Area editor. Course title and Area change by reimporting the same course ID.
 - Saved sessions can be deleted; courses and copied media cannot be removed in the app yet, so unused media can accumulate after cancelled imports.
 - The Markdown export is not a backup; there is no backup import. Back up the data folder instead (Settings → Data).

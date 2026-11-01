@@ -205,3 +205,7 @@ API contract check) retain their respective licences. Versions are
 locked in `pubspec.lock`. Review the generated dependency licence list and the
 native components before redistributing binaries; this file is not a completed
 third-party binary-licence audit.
+
+## yt-dlp (downloaded on request, not shipped)
+
+Video links use [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense). TingLang does not include it: the app downloads the official macOS build from yt-dlp's GitHub releases when the user agrees, and runs it as a separate program.

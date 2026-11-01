@@ -526,6 +526,7 @@ class _SessionRowTile extends StatelessWidget {
       'live_system' => (Icons.graphic_eq_rounded, l.liveSourceSystem),
       'shared' => (Icons.move_to_inbox_outlined, l.originShared),
       'voice_memo' => (Icons.keyboard_voice_outlined, l.originVoiceMemo),
+      'link' => (Icons.link_rounded, l.originLink),
       _ => (Icons.audio_file_outlined, l.originFile),
     };
     final time = DateFormat.Hm(l.localeName).format(session.startedAt.toLocal());

@@ -1511,5 +1511,62 @@
   "languageSetupRecognise": "Recognise",
   "languageSetupTranslate": "Translate into",
   "languageSetupLater": "Change them later in the menu under the mark at the right of the floating panel. If macOS needs a translation pack, it asks to download it now.",
-  "languageSetupStart": "Start captions"
+  "languageSetupStart": "Start captions",
+  "originLink": "Video link",
+  "linkTitle": "Paste a video link",
+  "linkHint": "https://www.youtube.com/watch?v=…",
+  "linkImport": "Import",
+  "linkNote": "YouTube, Bilibili and many other sites. Only the audio is downloaded and transcribed, then a Basic course is made. Import only what you may use; you are responsible for it.",
+  "linkOrFile": "or choose files",
+  "linkCheckingTool": "Looking up yt-dlp…",
+  "linkToolTitle": "Download yt-dlp?",
+  "linkToolBody": "Reading video sites needs yt-dlp, an open-source tool (Unlicense). TingLang downloads version {version} ({size}) once from github.com/yt-dlp, checks it and keeps it in its data folder. Downloading from a site is your own action, at your own responsibility, under that site's terms.",
+  "@linkToolBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "linkToolDownload": "Download {size}",
+  "@linkToolDownload": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "linkDownloadingTool": "Downloading yt-dlp…",
+  "linkReading": "Reading the link…",
+  "linkDownloadingAudio": "Downloading the audio of “{title}”…",
+  "@linkDownloadingAudio": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "linkErrorNotALink": "That is not a web link (http:// or https://).",
+  "linkErrorLive": "Live streams cannot be imported; try again once it is over.",
+  "linkErrorUnsupported": "yt-dlp does not know this site or page.",
+  "linkErrorNoAudio": "This page offers no audio TingLang can read.",
+  "linkErrorNetwork": "The download did not work: {detail}",
+  "@linkErrorNetwork": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "linkErrorTool": "yt-dlp could not read the page: {detail}",
+  "@linkErrorTool": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }
