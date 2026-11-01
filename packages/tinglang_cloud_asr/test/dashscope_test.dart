@@ -634,8 +634,10 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 150));
       token.cancel();
       await expectLater(call, throwsA(cloudError(CloudAsrErrorKind.cancelled)));
+      // A poll already on its way when cancel came may still reach the server.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       final polled = log.where((l) => l.contains('/tasks/')).length;
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(log.where((l) => l.contains('/tasks/')).length, polled);
     });
 
