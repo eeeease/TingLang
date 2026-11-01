@@ -40,7 +40,7 @@ import 'ui/share_import.dart';
 import 'ui/sync_panel.dart';
 import 'ui/voice_memos_dialog.dart';
 
-const appVersion = '0.7.4';
+const appVersion = '0.7.5';
 
 /// `system` → null (follow the OS); otherwise a supported language code.
 Locale? uiLocaleFor(String setting) => switch (setting) {
