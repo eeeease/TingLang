@@ -194,6 +194,12 @@ enum OverlayAction {
 
   /// Stop a download shown on the panel (sent for `action: cancel`).
   cancel,
+
+  /// The language to recognise, chosen in the mark's menu (value: a code).
+  setLanguage,
+
+  /// The language to translate captions into (value: a code, or `off`).
+  setTranslation,
 }
 
 /// Panel state pushed by the app. Every string is already localised.

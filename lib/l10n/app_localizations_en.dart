@@ -2315,4 +2315,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceMemosRelaunch => 'Quit and reopen';
+
+  @override
+  String get panelLanguageMenu => 'Recognise';
+
+  @override
+  String get panelTranslateMenu => 'Translate into';
+
+  @override
+  String get panelTranslateOff => 'No translation';
+
+  @override
+  String get languageSetupTitle => 'Languages for live captions';
+
+  @override
+  String get languageSetupBody =>
+      'Choose the language people speak in what you listen to, and the language to show translations in.';
+
+  @override
+  String get languageSetupRecognise => 'Recognise';
+
+  @override
+  String get languageSetupTranslate => 'Translate into';
+
+  @override
+  String get languageSetupLater =>
+      'Change them later in the menu under the mark at the right of the floating panel. If macOS needs a translation pack, it asks to download it now.';
+
+  @override
+  String get languageSetupStart => 'Start captions';
 }

@@ -1502,5 +1502,14 @@
   "voiceMemosAccessSteps": "1. Open System Settings (Privacy & Security › Full Disk Access).\n2. If TingLang is not in the list, click + below it and choose TingLang in Applications, or drag TingLang from Finder into the list.\n3. Turn on the switch next to TingLang.\n4. Quit and reopen TingLang: macOS applies it only after a restart.",
   "voiceMemosStillClosed": "Still closed. If the switch is on, quit and reopen TingLang.",
   "voiceMemosRevealApp": "Show TingLang in Finder",
-  "voiceMemosRelaunch": "Quit and reopen"
+  "voiceMemosRelaunch": "Quit and reopen",
+  "panelLanguageMenu": "Recognise",
+  "panelTranslateMenu": "Translate into",
+  "panelTranslateOff": "No translation",
+  "languageSetupTitle": "Languages for live captions",
+  "languageSetupBody": "Choose the language people speak in what you listen to, and the language to show translations in.",
+  "languageSetupRecognise": "Recognise",
+  "languageSetupTranslate": "Translate into",
+  "languageSetupLater": "Change them later in the menu under the mark at the right of the floating panel. If macOS needs a translation pack, it asks to download it now.",
+  "languageSetupStart": "Start captions"
 }

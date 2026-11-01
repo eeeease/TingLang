@@ -142,6 +142,7 @@ Future<void> main() async {
       shell: shell,
       voiceMemos: voiceMemos,
       languageName: (code) => learningLanguages[code] ?? code,
+      languages: learningLanguages,
     ).start();
     // Today's new recordings, once the user has used the import list.
     unawaited(voiceMemos.checkInBackground());

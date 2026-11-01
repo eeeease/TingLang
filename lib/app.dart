@@ -27,6 +27,7 @@ import 'ui/brand.dart';
 import 'ui/update_banner.dart';
 import 'ui/file_picking.dart';
 import 'ui/import_dialog.dart';
+import 'ui/language_setup_dialog.dart';
 import 'ui/learn_page.dart';
 import 'ui/library_page.dart';
 import 'ui/onboarding_dialog.dart';
@@ -257,6 +258,22 @@ class _TinglangShellState extends State<TinglangShell> {
         unawaited(_openSession(sessionId, makeCourse: makeCourse));
       case ImportPackages(:final paths):
         unawaited(_importPackages(paths));
+      case ChooseLanguages():
+        unawaited(_chooseLanguages());
+    }
+  }
+
+  /// Before the first live captions: the languages, then captions start.
+  bool _choosingLanguages = false;
+  Future<void> _chooseLanguages() async {
+    if (_choosingLanguages || !mounted) return;
+    _choosingLanguages = true;
+    try {
+      if (await showLanguageSetup(context, app: widget.app, live: widget.live)) {
+        await widget.live.toggle();
+      }
+    } finally {
+      _choosingLanguages = false;
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:tinglang_native/tinglang_native.dart';
 
 import '../core/share_package.dart';
+import '../l10n/app_localizations.dart';
 import 'app_controller.dart';
 import 'live_controller.dart';
 import 'panel_settings.dart';
@@ -40,6 +41,11 @@ final class OpenSession extends ShellRequest {
   final bool makeCourse;
 }
 
+/// The languages for live captions, asked before the first start.
+final class ChooseLanguages extends ShellRequest {
+  const ChooseLanguages();
+}
+
 /// `.tinglang` files to import, oldest first (opened from Finder or the
 /// Dock, or dropped on the panel or the window).
 final class ImportPackages extends ShellRequest {
@@ -59,6 +65,7 @@ class PanelCoordinator {
     this.shell,
     this.voiceMemos,
     this.languageName = _identity,
+    this.languages = const {'en': 'English', 'zh-Hans': '简体中文'},
   });
 
   final AppController app;
@@ -72,7 +79,10 @@ class PanelCoordinator {
   /// The main window consumes and clears requests.
   final ValueNotifier<ShellRequest?> navigation;
   final String Function(String code) languageName;
-  String? _locale, _theme;
+
+  /// Languages offered in the mark's menu: code → name in that language.
+  final Map<String, String> languages;
+  String? _locale, _theme, _languages;
   bool? _shown;
   StreamSubscription<void>? _opened;
 
@@ -83,6 +93,7 @@ class PanelCoordinator {
   Future<void> start() async {
     live
       ..requestBuilder = (() => liveRequestFrom(app))
+      ..beforeStart = _languagesChosen
       ..onPanelEvent = handle;
     app.addListener(_onSettings);
     voiceMemos?.addListener(_onMemos);
@@ -92,6 +103,20 @@ class PanelCoordinator {
     _opened = shell?.filesOpened.listen((_) => unawaited(_takeOpenedFiles()));
     await _takeOpenedFiles();
   }
+
+  /// The first start asks for the languages in the main window (which then
+  /// starts captions); afterwards they change in the mark's menu.
+  Future<bool> _languagesChosen() async {
+    if (app.setting(languagesChosenKey, '') == 'true') return true;
+    await _open(const ChooseLanguages());
+    return false;
+  }
+
+  /// The panel's strings with the current language choices.
+  Map<String, String> _strings(AppLocalizations l) => {
+    ...panelStrings(l),
+    ...panelLanguageStrings(l, app, languages),
+  };
 
   Future<void> _takeOpenedFiles() async {
     final paths = await shell?.takeOpenedFiles() ?? const <String>[];
@@ -120,7 +145,10 @@ class PanelCoordinator {
       });
     }
     final wanted = panelWanted;
-    if (!force && l.localeName == _locale && wanted == _shown) {
+    final languagesNow = panelLanguageStrings(l, app, languages).toString();
+    final languagesChanged = languagesNow != _languages;
+    _languages = languagesNow;
+    if (!force && l.localeName == _locale && wanted == _shown && !languagesChanged) {
       // A look changed in Settings (layout, lines kept for scrolling back).
       final style = captionStyleFrom(app);
       if (style != live.panelStyle) await live.applyPanelStyle(style);
@@ -129,9 +157,9 @@ class PanelCoordinator {
     _locale = l.localeName;
     _shown = wanted;
     if (wanted) {
-      await live.showPanel(captionStyleFrom(app), panelStrings(l));
+      await live.showPanel(captionStyleFrom(app), _strings(l));
     } else {
-      live.preparePanel(captionStyleFrom(app), panelStrings(l));
+      live.preparePanel(captionStyleFrom(app), _strings(l));
       if (live.panelVisible) await live.hidePanel();
     }
   }
@@ -161,6 +189,22 @@ class PanelCoordinator {
         await app.setSetting(liveSourceKey, 'system');
       case OverlayActionRequested(action: OverlayAction.useMicrophone):
         await app.setSetting(liveSourceKey, 'microphone');
+      case OverlayActionRequested(action: OverlayAction.setLanguage, value: final code?)
+          when languages.containsKey(code):
+        await app.setSettings({
+          AppController.learningLanguageKey: code,
+          languagesChosenKey: 'true',
+        });
+      case OverlayActionRequested(action: OverlayAction.setTranslation, value: final code?):
+        await app.setSettings({
+          if (code == 'off')
+            liveTranslateKey: 'false'
+          else if (languages.containsKey(code)) ...{
+            AppController.nativeLanguageKey: code,
+            liveTranslateKey: 'true',
+          },
+          languagesChosenKey: 'true',
+        });
       case OverlayActionRequested(action: OverlayAction.hide):
         // The panel has already hidden itself.
         _shown = false;
@@ -169,7 +213,7 @@ class PanelCoordinator {
       case OverlayActionRequested(action: OverlayAction.show):
         _shown = true;
         await app.setSetting(PanelKeys.visible, 'true');
-        await live.showPanel(captionStyleFrom(app), panelStrings(localizationsFor(app)));
+        await live.showPanel(captionStyleFrom(app), _strings(localizationsFor(app)));
       case OverlayActionRequested(action: OverlayAction.unlock):
         await _saveStyle(live.panelStyle.copyWith(clickThrough: false));
       case OverlayActionRequested(action: OverlayAction.quit):

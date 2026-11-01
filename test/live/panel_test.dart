@@ -167,30 +167,31 @@ void main() {
     await live.stop();
   });
 
-  test('a missing translation pack is explained while listening and offered after', () async {
-    final setup = _SetupHost(installed: true, packInstalled: false);
-    final live = await controller(pipeline: setup);
-    addTearDown(live.dispose);
-    overlay.emit(const OverlayActionRequested(OverlayAction.toggle));
-    await settle();
-    expect(live.status, LiveStatus.running);
-    expect(overlay.states.last.phase, OverlayPhase.listening);
-    expect(overlay.states.last.message, 'Get the en→zh-Hans pack');
+  test(
+    'a missing translation pack never interrupts: captions run, the panel stays quiet',
+    () async {
+      final setup = _SetupHost(installed: true, packInstalled: false);
+      final live = await controller(pipeline: setup);
+      addTearDown(live.dispose);
+      overlay.emit(const OverlayActionRequested(OverlayAction.toggle));
+      await settle();
+      expect(live.status, LiveStatus.running);
+      expect(overlay.states.last.phase, OverlayPhase.listening);
+      expect(overlay.states.last.message, isNull);
 
-    // Nothing was said, so no summary: the panel offers the pack instead.
-    overlay.emit(const OverlayActionRequested(OverlayAction.toggle));
-    await settle();
-    final offer = overlay.states.last;
-    expect(offer.phase, OverlayPhase.needsSetup);
-    expect(offer.message, 'Get the en→zh-Hans pack');
-    expect(offer.action, OverlayAction.install);
-    overlay.emit(const OverlayActionRequested(OverlayAction.install));
-    await settle();
-    expect(setup.packInstalled, isTrue);
-    expect(live.setupNeed, isNull);
-    // Fetching the pack does not start another capture by itself.
-    expect(live.status, LiveStatus.idle);
-  });
+      // Stopping offers nothing either.
+      overlay.emit(const OverlayActionRequested(OverlayAction.toggle));
+      await settle();
+      expect(overlay.states.last.phase, isNot(OverlayPhase.needsSetup));
+
+      // The pack is fetched where the languages are chosen.
+      expect(await live.translationPackMissing('en', 'zh-Hans'), isTrue);
+      await live.installTranslationPack('en', 'zh-Hans');
+      expect(setup.packInstalled, isTrue);
+      expect(await live.translationPackMissing('en', 'zh-Hans'), isFalse);
+      expect(live.status, LiveStatus.idle);
+    },
+  );
 
   test('requests that are not about captions go to the app', () async {
     final live = await controller();
@@ -271,7 +272,7 @@ void main() {
       dir = await Directory.systemTemp.createTemp('tinglang-panel-');
       app = AppController(
         LibraryStore(dir),
-        LibraryState(settings: {AppController.uiLocaleKey: 'en'}),
+        LibraryState(settings: {AppController.uiLocaleKey: 'en', languagesChosenKey: 'true'}),
       );
       live = await controller();
       transcriber = FakeFileTranscriber(BackendCatalog.speechAnalyzerFile.id);
@@ -308,6 +309,39 @@ void main() {
         isA<OpenSession>().having((r) => r.makeCourse, 'makeCourse', isTrue),
       );
       expect(shell.mainWindowShown, 2);
+    });
+
+    test('the first start asks for the languages; the mark menu changes them later', () async {
+      await app.setSetting(languagesChosenKey, '');
+      await live.toggle();
+      expect(navigation.value, isA<ChooseLanguages>());
+      expect(live.status, LiveStatus.idle, reason: 'captions wait for the choice');
+      expect(shell.mainWindowShown, 1);
+
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.setLanguage, 'zh-Hans'));
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.setTranslation, 'off'));
+      expect(app.setting(AppController.learningLanguageKey, ''), 'zh-Hans');
+      expect(app.setting(languagesChosenKey, ''), 'true');
+      var request = liveRequestFrom(app);
+      expect((request.language, request.translateTo), ('zh-Hans', null));
+
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.setTranslation, 'en'));
+      request = liveRequestFrom(app);
+      expect(request.translateTo, 'en');
+      // Only offered languages are taken.
+      await coordinator.handle(const OverlayActionRequested(OverlayAction.setLanguage, 'xx'));
+      expect(app.setting(AppController.learningLanguageKey, ''), 'zh-Hans');
+
+      // The menu shows the choice; chosen, captions start straight away.
+      await settle();
+      expect(overlay.strings['currentLanguage'], 'zh-Hans');
+      expect(overlay.strings['currentTranslation'], 'en');
+      expect(overlay.strings['languageOptions'], 'en=English;zh-Hans=简体中文');
+      navigation.value = null;
+      await live.toggle();
+      expect(navigation.value, isNull);
+      expect(live.status, LiveStatus.running);
+      await live.stop();
     });
 
     test('a refused capture permission opens its System Settings pane, not the app', () async {

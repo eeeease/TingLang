@@ -4,6 +4,14 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.3 · choosing the languages, no translation-pack prompt
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh --build` | Python checks 33 OK; analyze no issues; app tests 283 (new: the first start asks for the languages and the mark menu changes them, the language dialog saves and lets captions start, a missing pack never shows on the panel); packages as before; release build 172.6 MB (the Swift menu compiles without warnings); `integration_test/app_test.dart` 1 passed, 2 skipped |
+
+Not seen on screen: the Recognise and Translate into submenus of the panel's mark (native SwiftUI menu), and macOS's own translation-pack download sheet opened from the dialog.
+
 ## 0.7.2 · course generation, renaming, the panel under the Dock, Voice Memos access
 
 | Command | Outcome |

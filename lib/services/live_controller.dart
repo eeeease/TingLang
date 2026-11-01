@@ -250,6 +250,10 @@ class LiveController extends ChangeNotifier {
   /// asks only once; afterwards this just reports the answer). Without it
   /// capture opens and macOS asks by itself, where it can.
   Future<bool> Function()? requestMicrophone;
+
+  /// Asked before captions start: false when the app first asks for the
+  /// languages (it starts captions itself once they are chosen).
+  Future<bool> Function()? beforeStart;
   final issues = <AudioCaptureIssue>[];
   final lines = <LiveLine>[];
   final level = ValueNotifier<double>(0);
@@ -489,12 +493,8 @@ class LiveController extends ChangeNotifier {
       ),
       LiveStatus.idle when _notice != null => state(OverlayPhase.notice, message: _notice),
       // Not blocking: captions can start again without translation.
-      LiveStatus.idle when need is TranslationPackNeeded => state(
-        OverlayPhase.needsSetup,
-        message: text?.translationPackNeeded(need.pair.source, need.pair.target),
-        action: OverlayAction.install,
-        actionLabel: text?.download,
-      ),
+      // A missing translation pack is not shown: captions run untranslated,
+      // and the pack is offered where the languages are chosen.
       LiveStatus.idle => state(OverlayPhase.idle),
     };
   }
@@ -506,15 +506,10 @@ class LiveController extends ChangeNotifier {
   }
 
   /// One line under the listening header: why capture moved to screen
-  /// recording (macOS may ask for that permission), or why there is no
-  /// translation yet.
+  /// recording (macOS may ask for that permission).
   String? _listeningNotice(LivePanelText? text) {
     if (text == null) return null;
-    final need = setupNeed;
     if (issues.any((i) => i is SilentTapDetected)) return text.silentSystemAudio;
-    if (need is TranslationPackNeeded) {
-      return text.translationPackNeeded(need.pair.source, need.pair.target);
-    }
     if (issues.any((i) => i is CaptureDeviceChanged)) return text.screenRecordingCapture;
     // Audio leaves this Mac: say where, for as long as it does.
     final backend = currentBackendId, names = modelText;
@@ -733,6 +728,8 @@ class LiveController extends ChangeNotifier {
     _clearTransient();
     final build = requestBuilder;
     if (build == null || status != LiveStatus.idle || !_canStart || _installing) return;
+    final ask = beforeStart;
+    if (ask != null && !await ask()) return;
     final request = build();
     final need = await checkSetup(request);
     if (need != null && need is! TranslationPackNeeded) {
@@ -748,6 +745,19 @@ class LiveController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Whether Apple's translation pack for [source] → [target] still has to
+  /// be downloaded (false where the pipeline cannot tell).
+  Future<bool> translationPackMissing(String source, String target) async {
+    final setup = _host;
+    if (setup is! LiveSetupSupport) return false;
+    final pair = LanguagePair(_baseLanguage(source), target);
+    return await (setup as LiveSetupSupport).translationPack(pair) == AssetState.downloadable;
+  }
+
+  /// Asks macOS to download that pack; the user pressed a button for it.
+  Future<void> installTranslationPack(String source, String target) =>
+      install(TranslationPackNeeded(LanguagePair(_baseLanguage(source), target)));
 
   /// Downloads what [need] names. Only called for a button the user pressed.
   Future<void> install(LiveSetupNeed need) async {

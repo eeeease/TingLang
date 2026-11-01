@@ -4112,6 +4112,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quit and reopen'**
   String get voiceMemosRelaunch;
+
+  /// No description provided for @panelLanguageMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognise'**
+  String get panelLanguageMenu;
+
+  /// No description provided for @panelTranslateMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate into'**
+  String get panelTranslateMenu;
+
+  /// No description provided for @panelTranslateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'No translation'**
+  String get panelTranslateOff;
+
+  /// No description provided for @languageSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages for live captions'**
+  String get languageSetupTitle;
+
+  /// No description provided for @languageSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the language people speak in what you listen to, and the language to show translations in.'**
+  String get languageSetupBody;
+
+  /// No description provided for @languageSetupRecognise.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognise'**
+  String get languageSetupRecognise;
+
+  /// No description provided for @languageSetupTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate into'**
+  String get languageSetupTranslate;
+
+  /// No description provided for @languageSetupLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Change them later in the menu under the mark at the right of the floating panel. If macOS needs a translation pack, it asks to download it now.'**
+  String get languageSetupLater;
+
+  /// No description provided for @languageSetupStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start captions'**
+  String get languageSetupStart;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

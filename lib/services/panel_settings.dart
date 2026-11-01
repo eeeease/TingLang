@@ -31,18 +31,45 @@ const liveSourceKey = 'live_source';
 const keepSystemAudioKey = 'live_keep_system_audio';
 
 /// The next live request from saved settings (source and languages).
+/// `false` when live captions are not translated (the mark's menu or the
+/// first-start language choice); the target is the native language.
+const liveTranslateKey = 'live_translate';
+
+/// `true` once the languages for live captions were chosen; until then the
+/// first start asks for them in the main window.
+const languagesChosenKey = 'languages_chosen';
+
 LiveRequest liveRequestFrom(AppController app) {
   final language = app.setting(AppController.learningLanguageKey, 'en');
   final native = app.setting(AppController.nativeLanguageKey, 'zh-Hans');
+  final translate = app.setting(liveTranslateKey, 'true') != 'false';
   final mic = app.setting(liveSourceKey, 'system') == 'microphone';
   return LiveRequest(
     source: mic ? AudioSourceKind.microphone : AudioSourceKind.systemAudio,
     // Your own voice is always kept for practice; system audio only on request.
     recordAudio: mic || app.setting(keepSystemAudioKey, 'false') == 'true',
     language: language,
-    translateTo: native == language ? null : native,
+    translateTo: !translate || native == language ? null : native,
   );
 }
+
+/// The mark menu's language choices, for CapturePanelView.swift:
+/// `languageOptions` is `code=name;code=name`, and the current recognition
+/// language and translation target (`off` when not translating).
+Map<String, String> panelLanguageStrings(
+  AppLocalizations l,
+  AppController app,
+  Map<String, String> languages,
+) => {
+  'languageMenu': l.panelLanguageMenu,
+  'translateMenu': l.panelTranslateMenu,
+  'translateOff': l.panelTranslateOff,
+  'languageOptions': [for (final e in languages.entries) '${e.key}=${e.value}'].join(';'),
+  'currentLanguage': app.setting(AppController.learningLanguageKey, 'en'),
+  'currentTranslation': app.setting(liveTranslateKey, 'true') == 'false'
+      ? 'off'
+      : app.setting(AppController.nativeLanguageKey, 'zh-Hans'),
+};
 
 /// The panel's saved look; anything missing or malformed falls back to the
 /// default style.

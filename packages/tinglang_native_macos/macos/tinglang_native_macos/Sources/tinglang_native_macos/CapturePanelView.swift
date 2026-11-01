@@ -1074,6 +1074,19 @@ private struct BrandMenu: View {
     return hovering ? [.white, Color(argb: 0xFFF6_F4EF)] : [Color(argb: 0xFFFB_FAF7), Color(argb: 0xFFEF_ECE5)]
   }
 
+  /// `code=name;code=name` from the app (panelLanguageStrings).
+  private var languageOptions: [LanguageOption] {
+    model.text("languageOptions", "").split(separator: ";").compactMap { pair in
+      let parts = pair.split(separator: "=", maxSplits: 1)
+      return parts.count == 2 ? LanguageOption(code: String(parts[0]), name: String(parts[1])) : nil
+    }
+  }
+
+  /// A menu item with a check mark when chosen.
+  private func choice(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+    Toggle(title, isOn: Binding(get: { selected }, set: { _ in action() }))
+  }
+
   private func isOwnMenu(_ note: Notification) -> Bool {
     guard let menu = note.object as? NSMenu else { return false }
     let titles = Set(menu.items.map(\.title))
@@ -1084,6 +1097,26 @@ private struct BrandMenu: View {
   var body: some View {
     Menu {
       Button(model.text("appearance", "Appearance…")) { model.showAppearance = true }
+      // Languages for the next captions; the app keeps the choice.
+      Menu(model.text("languageMenu", "Recognise")) {
+        ForEach(languageOptions, id: \.code) { option in
+          choice(option.name, selected: option.code == model.text("currentLanguage", "")) {
+            send("setLanguage", option.code)
+          }
+        }
+      }
+      Menu(model.text("translateMenu", "Translate into")) {
+        choice(model.text("translateOff", "No translation"), selected: model.text("currentTranslation", "") == "off") {
+          send("setTranslation", "off")
+        }
+        Divider()
+        ForEach(languageOptions, id: \.code) { option in
+          choice(option.name, selected: option.code == model.text("currentTranslation", "")) {
+            send("setTranslation", option.code)
+          }
+        }
+      }
+      Divider()
       Button(model.text("openApp", "Open main window")) { send("openHistory", nil) }
       Button(model.text("settings", "Settings…")) { send("openSettings", nil) }
       Divider()
@@ -1278,4 +1311,9 @@ private struct VisualEffectBlur: NSViewRepresentable {
   }
 
   func updateNSView(_ view: NSVisualEffectView, context: Context) {}
+}
+
+private struct LanguageOption: Hashable {
+  let code: String
+  let name: String
 }

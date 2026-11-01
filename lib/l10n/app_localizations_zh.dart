@@ -2241,4 +2241,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get voiceMemosRelaunch => '退出并重新打开';
+
+  @override
+  String get panelLanguageMenu => '识别语言';
+
+  @override
+  String get panelTranslateMenu => '翻译成';
+
+  @override
+  String get panelTranslateOff => '不翻译';
+
+  @override
+  String get languageSetupTitle => '实时字幕的语言';
+
+  @override
+  String get languageSetupBody => '选择你要听的内容说的是哪种语言，以及字幕翻译成哪种语言。';
+
+  @override
+  String get languageSetupRecognise => '识别语言';
+
+  @override
+  String get languageSetupTranslate => '翻译成';
+
+  @override
+  String get languageSetupLater => '之后可以在浮窗右侧 logo 的菜单里修改。如果 macOS 需要翻译语言包，会在这里先下载。';
+
+  @override
+  String get languageSetupStart => '开始字幕';
 }

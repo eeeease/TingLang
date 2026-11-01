@@ -669,5 +669,14 @@
   "voiceMemosAccessSteps": "1. 打开系统设置（隐私与安全性 › 完全磁盘访问权限）。\n2. 列表里没有听浪时，点列表下方的「+」，在「应用程序」里选中听浪；也可以点「在访达中显示听浪」，把它拖进列表。\n3. 打开听浪旁边的开关。\n4. 退出并重新打开听浪：macOS 要重启 App 后才生效。",
   "voiceMemosStillClosed": "仍然无法读取。如果开关已经打开，请退出并重新打开听浪。",
   "voiceMemosRevealApp": "在访达中显示听浪",
-  "voiceMemosRelaunch": "退出并重新打开"
+  "voiceMemosRelaunch": "退出并重新打开",
+  "panelLanguageMenu": "识别语言",
+  "panelTranslateMenu": "翻译成",
+  "panelTranslateOff": "不翻译",
+  "languageSetupTitle": "实时字幕的语言",
+  "languageSetupBody": "选择你要听的内容说的是哪种语言，以及字幕翻译成哪种语言。",
+  "languageSetupRecognise": "识别语言",
+  "languageSetupTranslate": "翻译成",
+  "languageSetupLater": "之后可以在浮窗右侧 logo 的菜单里修改。如果 macOS 需要翻译语言包，会在这里先下载。",
+  "languageSetupStart": "开始字幕"
 }
