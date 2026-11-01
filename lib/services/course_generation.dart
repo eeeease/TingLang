@@ -280,6 +280,12 @@ class CourseGenerationService {
       overview: overview,
     );
     if (provider == null) json['tinglang_generator'] = 'basic';
+    // A video link keeps no copy of its sound: the course plays the page.
+    final link = session.origin == 'link' ? Uri.tryParse(session.sourceRef ?? '') : null;
+    if (link != null && link.isScheme('https')) {
+      final videoId = youtubeVideoId(link);
+      json[videoId == null ? Course.sourceUrlKey : Course.youtubeIdKey] = videoId ?? '$link';
+    }
     final course = validateCompiled(
       json,
       mediaPath: media?.relPath,

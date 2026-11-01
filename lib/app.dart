@@ -255,6 +255,7 @@ class _TinglangShellState extends State<TinglangShell> {
           store: widget.app.store,
           playback: widget.playback,
           generation: widget.generation,
+          links: widget.links,
         ),
       ),
     );
@@ -338,6 +339,7 @@ class _TinglangShellState extends State<TinglangShell> {
           store: widget.app.store,
           playback: widget.playback,
           generation: widget.generation,
+          links: widget.links,
           openMakeCourse: makeCourse,
         ),
       ),
@@ -495,6 +497,7 @@ class _TinglangShellState extends State<TinglangShell> {
         recorder: widget.recorder,
         onClip: (id) => _open(course, id),
         onBack: () => _navigate(Section.library),
+        links: widget.links,
       );
     }
     return switch (_section) {

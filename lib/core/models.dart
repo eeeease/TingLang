@@ -1,4 +1,5 @@
 import 'json_helpers.dart';
+import 'legacy.dart';
 import 'sentence.dart';
 
 /// Interest areas. Display names are localised in the UI (Brand.areaLabel).
@@ -15,6 +16,24 @@ enum Area {
 }
 
 const learningSteps = ['words', 'phrases', 'sentences', 'blind', 'shadowing', 'retelling', 'quiz'];
+
+/// The video id of a YouTube page (`watch?v=`, `youtu.be/`, `/shorts/`,
+/// `/embed/`, `/live/`), or null for any other page.
+String? youtubeVideoId(Uri url) {
+  final host = url.host.toLowerCase().replaceFirst(RegExp(r'^(www|m|music)\.'), '');
+  String? id;
+  if (host == 'youtu.be') {
+    id = url.pathSegments.firstOrNull;
+  } else if (host == 'youtube.com' || host == 'youtube-nocookie.com') {
+    final path = url.pathSegments;
+    id = path.length == 1 && path.first == 'watch'
+        ? url.queryParameters['v']
+        : path.length >= 2 && const {'shorts', 'embed', 'live', 'v'}.contains(path.first)
+        ? path[1]
+        : null;
+  }
+  return id != null && RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id) ? id : null;
+}
 
 class LearningItem {
   const LearningItem({
@@ -142,11 +161,25 @@ class Course {
   final Map<String, Object?> raw;
   final DateTime importedAt;
 
+  /// `raw` keys of a course that plays online instead of from a local file.
+  static const youtubeIdKey = 'tinglang_youtube_id', sourceUrlKey = 'tinglang_source_url';
+
   /// YouTube video for courses without local media (courses that come with a YouTube id).
   String? get youtubeId {
-    final id = raw['tinglang_youtube_id'];
+    final id = raw[youtubeIdKey] ?? raw[legacyYoutubeIdKey];
     return id is String && RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id) ? id : null;
   }
+
+  /// The page a course imported from a video link came from (not YouTube,
+  /// which [youtubeId] plays); streamed when the course is opened.
+  Uri? get sourceUrl {
+    final url = raw[sourceUrlKey];
+    final uri = url is String ? Uri.tryParse(url) : null;
+    return uri != null && uri.isScheme('https') && uri.host.isNotEmpty ? uri : null;
+  }
+
+  /// Plays online: YouTube's player or the source page's stream.
+  bool get playsOnline => mediaPath == null && (youtubeId != null || sourceUrl != null);
 
   String get summary {
     final overview = raw['overview'];

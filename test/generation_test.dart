@@ -309,6 +309,35 @@ void main() {
       );
     });
 
+    test('a video link course plays its page: YouTube by id, other sites by address', () async {
+      for (final (id, url) in [
+        ('y1', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
+        ('b1', 'https://www.bilibili.com/video/BV1xx411c7mD'),
+      ]) {
+        await live.createSession(
+          id: id,
+          origin: 'link',
+          language: 'en',
+          title: 'A talk',
+          startedAt: DateTime.utc(2026, 11, 1),
+          timeBase: 'media',
+          sourceRef: url,
+        );
+        await live.addSegments(id, _segments(id));
+        final job = await finish(service().start(id));
+        expect(job.stage, GenerationStage.done, reason: job.error);
+        expect(job.course!.mediaPath, isNull);
+        expect(job.course!.playsOnline, isTrue);
+      }
+      final courses = {for (final c in app.state.courses) c.id: c};
+      expect(courses['gen-y1']!.youtubeId, 'dQw4w9WgXcQ');
+      expect(courses['gen-b1']!.youtubeId, isNull);
+      expect(
+        courses['gen-b1']!.sourceUrl,
+        Uri.parse('https://www.bilibili.com/video/BV1xx411c7mD'),
+      );
+    });
+
     test('a cloud provider without a saved key sends nothing and says so', () async {
       // A cloud address (not localhost) with no key in the secret store.
       const provider = LlmProvider(

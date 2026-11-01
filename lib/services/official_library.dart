@@ -40,11 +40,8 @@ class OfficialLibraryService extends ChangeNotifier {
   static String coverPath(String libraryRoot, String courseId) =>
       p.join(libraryRoot, 'covers', '$courseId.jpg');
 
-  /// The saved cover of [courseId], if any.
-  File? coverFor(String courseId) {
-    final file = File(coverPath(app.store.root.path, courseId));
-    return file.existsSync() ? file : null;
-  }
+  /// The saved cover of [courseId], if any (or the user's own picture).
+  File? coverFor(String courseId) => app.covers.image(courseId);
 
   Map<String, String> get _versions {
     try {
@@ -130,10 +127,7 @@ class OfficialLibraryService extends ChangeNotifier {
       if (data.length > 2 * 1024 * 1024 || data.length < 3 || data[0] != 0xFF || data[1] != 0xD8) {
         return;
       }
-      final file = File(coverPath(app.store.root.path, entry.id));
-      await file.parent.create(recursive: true);
-      await file.writeAsBytes(data, flush: true);
-      notifyListeners();
+      if (await app.covers.saveOwn(entry.id, data)) notifyListeners();
     } on Object catch (e) {
       debugPrint('Cover not saved: $e');
     } finally {

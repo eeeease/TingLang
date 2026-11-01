@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 import 'app_controller.dart';
+import 'course_covers.dart';
 import 'course_generation.dart';
 import 'transcription_controller.dart';
 import 'update_service.dart' show UpdateEndpoints;
@@ -39,17 +41,38 @@ final class LinkToolOffer {
 /// What a page holds, as yt-dlp reads it.
 @immutable
 final class LinkInfo {
-  const LinkInfo({required this.url, required this.title, this.duration, this.site});
+  const LinkInfo({
+    required this.url,
+    required this.title,
+    this.duration,
+    this.site,
+    this.thumbnail,
+  });
   final String url, title;
   final Duration? duration;
 
   /// yt-dlp's name for the site (`Youtube`, `BiliBili`…).
   final String? site;
+
+  /// The page's picture, which becomes the course cover.
+  final Uri? thumbnail;
+}
+
+/// Where a page's video plays from right now (such addresses expire) and
+/// the headers its site wants with each request.
+@immutable
+final class LinkStream {
+  const LinkStream({required this.url, this.headers = const {}, this.hasVideo = true});
+  final String url;
+  final Map<String, String> headers;
+  final bool hasVideo;
 }
 
 /// Imports the sound of a video page (YouTube, Bilibili and the other sites
 /// yt-dlp knows): only the audio is downloaded, transcribed like a file and
-/// turned into a Basic course. yt-dlp (Unlicense) is not shipped: it is
+/// turned into a Basic course. The audio is deleted afterwards: the course
+/// plays the page itself, YouTube in its own player and other sites from
+/// the stream [stream] finds. yt-dlp (Unlicense) is not shipped: it is
 /// downloaded from its GitHub releases when the user agrees, checked
 /// against the release's SHA2-256SUMS and kept in `<data>/tools`. What is
 /// imported is the user's own choice and responsibility.
@@ -214,17 +237,20 @@ class LinkImportService extends ChangeNotifier {
     if (json['is_live'] == true) throw const LinkImportFailure(LinkProblem.live);
     final seconds = json['duration'];
     final title = '${json['title'] ?? ''}'.trim();
+    final thumbnail = Uri.tryParse('${json['thumbnail'] ?? ''}');
     return LinkInfo(
       url: '${json['webpage_url'] ?? uri}',
       title: title.isEmpty ? uri.host : title,
       duration: seconds is num ? Duration(milliseconds: (seconds * 1000).round()) : null,
       site: json['extractor_key'] as String?,
+      thumbnail: thumbnail != null && thumbnail.isScheme('https') ? thumbnail : null,
     );
   }
 
   /// Imports [info]'s audio: downloads it into a temporary folder, hands it to
-  /// [transcription] (which copies it into the library) and, once the
-  /// transcript is done, makes a Basic course from it.
+  /// [transcription] (which reads it there, keeping no copy) and, once the
+  /// transcript is done, deletes it and makes a Basic course. The page's
+  /// picture becomes the cover.
   Future<ImportJob> import(LinkInfo info) async {
     _cancelled = false;
     final work = await _workFolder();
@@ -237,10 +263,14 @@ class LinkImportService extends ChangeNotifier {
         origin: 'link',
         sourceRef: info.url,
         title: info.title,
+        keepMedia: false,
       );
-      // The library has its own copy once copying is over.
+      final thumbnail = info.thumbnail;
+      if (thumbnail != null) {
+        unawaited(_saveCover(CourseGenerationService.courseIdFor(job.sessionId), thumbnail));
+      }
       void cleanUp() {
-        if (job.status == ImportStatus.copying) return;
+        if (job.status == ImportStatus.copying || job.status == ImportStatus.transcribing) return;
         job.removeListener(cleanUp);
         unawaited(work.delete(recursive: true).catchError((Object _) => work));
       }
@@ -263,6 +293,71 @@ class LinkImportService extends ChangeNotifier {
       unawaited(work.delete(recursive: true).catchError((Object _) => work));
       rethrow;
     }
+  }
+
+  /// Saves the page's picture as the cover of [courseId]; a cover is not worth
+  /// failing an import for.
+  Future<void> _saveCover(String courseId, Uri url) async {
+    final client = _httpClient();
+    try {
+      final response = await (await client.getUrl(url)).close();
+      if (response.statusCode != 200) return;
+      final bytes = BytesBuilder(copy: false);
+      await for (final chunk in response) {
+        bytes.add(chunk);
+        if (bytes.length > CourseCovers.maxBytes) return;
+      }
+      await app.covers.saveOwn(courseId, bytes.takeBytes());
+    } on Object catch (e) {
+      debugPrint('Cover not saved: $e');
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  /// Playback formats: one file with picture and sound (mp4 first), else
+  /// sound alone; never two streams that would need merging.
+  static const streamFormat =
+      'best[ext=mp4][vcodec!=none][acodec!=none]/best[vcodec!=none][acodec!=none]/'
+      'bestaudio[ext=m4a]/bestaudio';
+
+  final _streams = <String, ({LinkStream stream, DateTime at})>{};
+
+  /// Where [page]'s video plays from: asked of yt-dlp, kept for half an hour
+  /// (sites' stream addresses expire after a few hours).
+  Future<LinkStream> stream(Uri page) async {
+    final cached = _streams['$page'];
+    if (cached != null && DateTime.now().difference(cached.at) < const Duration(minutes: 30)) {
+      return cached.stream;
+    }
+    if (!installed) throw const LinkImportFailure(LinkProblem.tool, 'yt-dlp is not installed');
+    final result = await Process.run(
+      tool.path,
+      ['-J', '-f', streamFormat, '--no-playlist', '--no-warnings', '$page'],
+      stdoutEncoding: utf8,
+      stderrEncoding: utf8,
+    );
+    if (result.exitCode != 0) throw _failure('${result.stderr}');
+    final Map<String, Object?> json;
+    try {
+      json = jsonDecode('${result.stdout}') as Map<String, Object?>;
+    } on FormatException {
+      throw const LinkImportFailure(LinkProblem.unsupported);
+    }
+    final url = Uri.tryParse('${json['url'] ?? ''}');
+    if (url == null || !(url.isScheme('https') || url.isScheme('http'))) {
+      throw const LinkImportFailure(LinkProblem.noAudio);
+    }
+    final headers = json['http_headers'];
+    final stream = LinkStream(
+      url: '$url',
+      headers: headers is Map
+          ? {for (final e in headers.entries) '${e.key}': '${e.value}'}
+          : const {},
+      hasVideo: json['vcodec'] != null && json['vcodec'] != 'none',
+    );
+    _streams['$page'] = (stream: stream, at: DateTime.now());
+    return stream;
   }
 
   /// Stops a download of yt-dlp's audio.

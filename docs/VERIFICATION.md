@@ -4,6 +4,16 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.6 · video back, online playback for links, covers
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh --build` | Python checks 33 OK; analyze no issues; app tests 303 (new: courses made before the rename find their YouTube video again; YouTube ids from the usual page addresses; a link's audio is transcribed in place, nothing is kept in the library and the temporary folder goes; its thumbnail becomes the cover, from a loopback server; a page's stream and headers from a stand-in yt-dlp; link courses carry the YouTube id or the page address and no media; covers: pattern seed per course, reshuffle, chosen picture first and removable, only JPEG/PNG/WebP kept; the card draws its pattern and offers the cover menu); `tinglang_api` 74 plus the contract check (15 operations, 19 schemas, 38 examples); Release and Debug builds |
+| A temporary widget test (not kept) | 20 pattern covers rendered and looked at: stripes, waves, rings, rays and tiles in different palettes |
+| Read-only query of this Mac's library | 30 of 32 courses carry the video id under the key from before the rename, none under the current one: the cause of the missing video |
+
+Not run: the running app (the YouTube player for those courses, the cover menu, a link course or session streaming); real yt-dlp against Bilibili or other non-YouTube pages for the stream address.
+
 ## 0.7.5 · official library
 
 | Command | Outcome |

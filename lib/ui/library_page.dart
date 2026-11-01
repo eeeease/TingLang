@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,8 +6,11 @@ import 'package:tinglang_ui/tinglang_ui.dart';
 
 import '../core/models.dart';
 import '../services/app_controller.dart';
+import '../services/course_covers.dart';
 import '../services/official_library.dart';
 import 'brand.dart';
+import 'course_cover.dart';
+import 'file_picking.dart';
 import 'official_library_view.dart';
 import 'share_import.dart';
 
@@ -219,8 +223,7 @@ class CourseCard extends StatelessWidget {
         ? 0.0
         : count / (course.clips.length * learningSteps.length);
     final percent = (progress.clamp(0.0, 1.0) * 100).round();
-    // Saved when the course came from the official library.
-    final cover = File(OfficialLibraryService.coverPath(app.store.root.path, course.id));
+    final covers = app.covers;
     return SlPanel(
       padding: EdgeInsets.zero,
       child: InkWell(
@@ -228,14 +231,10 @@ class CourseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (cover.existsSync())
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(SlRadius.md)),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.file(cover, fit: BoxFit.cover),
-                ),
-              ),
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(SlRadius.md)),
+              child: CourseCover(app: app, course: course),
+            ),
             Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
@@ -264,22 +263,45 @@ class CourseCard extends StatelessWidget {
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                      if (onExport != null)
-                        SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: PopupMenuButton<String>(
-                            key: ValueKey('course-menu-${course.id}'),
-                            tooltip: l.panelMore,
-                            padding: EdgeInsets.zero,
-                            iconSize: 18,
-                            icon: Icon(Icons.more_horiz, color: c.muted),
-                            onSelected: (_) => onExport!(),
-                            itemBuilder: (context) => [
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: PopupMenuButton<String>(
+                          key: ValueKey('course-menu-${course.id}'),
+                          tooltip: l.panelMore,
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          icon: Icon(Icons.more_horiz, color: c.muted),
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'share':
+                                onExport!();
+                              case 'cover':
+                                unawaited(
+                                  reportAction(context, () async {
+                                    final path = await pickFile(CourseCovers.extensions);
+                                    if (path != null) await covers.choose(course.id, File(path));
+                                  }),
+                                );
+                              case 'pattern':
+                                unawaited(reportAction(context, () => covers.shuffle(course.id)));
+                              default:
+                                unawaited(
+                                  reportAction(context, () => covers.clearCustom(course.id)),
+                                );
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            if (onExport != null)
                               PopupMenuItem(value: 'share', child: Text(l.exportShared)),
-                            ],
-                          ),
+                            PopupMenuItem(value: 'cover', child: Text(l.coverChoose)),
+                            if (covers.image(course.id) == null)
+                              PopupMenuItem(value: 'pattern', child: Text(l.coverShuffle)),
+                            if (covers.custom(course.id) != null)
+                              PopupMenuItem(value: 'reset', child: Text(l.coverReset)),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -292,7 +314,11 @@ class CourseCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     '${l.courseScenes(course.clips.length)} · '
-                    '${course.mediaPath == null ? l.mediaPending : l.mediaLocal}',
+                    '${course.mediaPath != null
+                        ? l.mediaLocal
+                        : course.playsOnline
+                        ? l.mediaOnline
+                        : l.mediaPending}',
                     style: SlType.caption.copyWith(color: c.muted),
                   ),
                   const SizedBox(height: 14),

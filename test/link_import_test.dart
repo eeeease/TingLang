@@ -7,6 +7,7 @@ import 'package:tinglang/core/db/database.dart';
 import 'package:tinglang/core/library_store.dart';
 import 'package:tinglang/core/live_repository.dart';
 import 'package:tinglang/services/app_controller.dart';
+import 'package:tinglang/services/course_generation.dart';
 import 'package:tinglang/services/link_import.dart';
 import 'package:tinglang/services/transcription_controller.dart';
 import 'package:tinglang_native/tinglang_native.dart';
@@ -20,10 +21,17 @@ case "$last" in
   *unsupported*) echo "ERROR: Unsupported URL: $last" >&2; exit 1 ;;
 esac
 for a in "$@"; do
+  if [ "$a" = "-f" ] && [ "$json" = 1 ]; then
+    echo '{"url":"https://cdn.example.com/v.mp4","http_headers":{"Referer":"https://www.bilibili.com/"},"vcodec":"avc1"}'
+    exit 0
+  fi
+  if [ "$a" = "-J" ]; then json=1; fi
+done
+for a in "$@"; do
   if [ "$a" = "-J" ]; then
     case "$last" in
       *live*) echo '{"title":"Live now","is_live":true}' ;;
-      *) echo '{"title":"A talk about listening","duration":95.5,"webpage_url":"https://www.youtube.com/watch?v=abc","extractor_key":"Youtube"}' ;;
+      *) echo '{"title":"A talk about listening","duration":95.5,"webpage_url":"https://www.youtube.com/watch?v=abc","extractor_key":"Youtube","thumbnail":"https://i.ytimg.com/vi/abc/hq.jpg"}' ;;
     esac
     exit 0
   fi
@@ -77,10 +85,11 @@ void main() {
     await dir.delete(recursive: true);
   });
 
-  LinkImportService service({Uri? releaseApi}) => LinkImportService(
+  LinkImportService service({Uri? releaseApi, Directory? workFolder}) => LinkImportService(
     app: app,
     transcription: transcription,
     toolsFolder: Directory('${dir.path}/tools'),
+    workFolder: workFolder == null ? null : () async => workFolder,
     releaseApi: releaseApi,
     allowDownload: (uri) => uri.host == '127.0.0.1',
   );
@@ -172,14 +181,30 @@ void main() {
 
   group('a link', () {
     test('only the audio is fetched and transcribed under History, with the link kept', () async {
-      final links = service();
+      final work = await Directory.systemTemp.createTemp('tinglang-link-work-');
+      final links = service(workFolder: work);
       await installFakeTool(links);
       final info = await links.inspect('https://youtu.be/abc');
       expect(info.title, 'A talk about listening');
       expect(info.duration, const Duration(milliseconds: 95500));
       expect(info.site, 'Youtube');
+      expect(info.thumbnail, Uri.parse('https://i.ytimg.com/vi/abc/hq.jpg'));
 
-      final job = await links.import(info);
+      // The page's picture comes from a local stand-in, as the cover.
+      final pictures = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => pictures.close(force: true));
+      final jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3];
+      pictures.listen((request) async {
+        request.response.add(jpeg);
+        await request.response.close();
+      });
+      final job = await links.import(
+        LinkInfo(
+          url: info.url,
+          title: info.title,
+          thumbnail: Uri.parse('http://127.0.0.1:${pictures.port}/hq.jpg'),
+        ),
+      );
       while (job.status == ImportStatus.copying || job.status == ImportStatus.transcribing) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
@@ -192,6 +217,32 @@ void main() {
         (await transcription.repository.lines(session.id)).single.text,
         'Listening is a skill.',
       );
+      // The sound was only lent to the transcriber: the page plays instead.
+      expect(session.mediaId, isNull);
+      expect(Directory('${dir.path}/library/media').existsSync(), isFalse);
+      for (var i = 0; i < 50 && work.existsSync(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(work.existsSync(), isFalse);
+      final courseId = CourseGenerationService.courseIdFor(session.id);
+      for (var i = 0; i < 50 && app.covers.image(courseId) == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(app.covers.image(courseId)!.readAsBytesSync(), jpeg);
+    });
+
+    test('a page plays from the stream yt-dlp finds, with its headers', () async {
+      final links = service();
+      expect(
+        () => links.stream(Uri.parse('https://www.bilibili.com/video/BV1')),
+        throwsA(isA<LinkImportFailure>()),
+        reason: 'no yt-dlp yet',
+      );
+      await installFakeTool(links);
+      final stream = await links.stream(Uri.parse('https://www.bilibili.com/video/BV1'));
+      expect(stream.url, 'https://cdn.example.com/v.mp4');
+      expect(stream.headers, {'Referer': 'https://www.bilibili.com/'});
+      expect(stream.hasVideo, isTrue);
     });
 
     test('not a link, a live stream and an unknown site each say why', () async {

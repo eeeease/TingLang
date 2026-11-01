@@ -13,9 +13,11 @@ import '../l10n/app_localizations.dart';
 import '../core/live_repository.dart';
 import '../core/transcript_export.dart';
 import '../services/course_generation.dart';
+import '../services/link_import.dart';
 import '../services/media_session.dart';
 import '../services/playback_hub.dart';
 import 'brand.dart';
+import 'errors.dart';
 import 'records_page.dart' show askSessionTitle;
 import 'share_import.dart';
 import 'make_course_sheet.dart';
@@ -31,6 +33,7 @@ class SessionPage extends StatefulWidget {
     required this.playback,
     this.generation,
     this.openMakeCourse = false,
+    this.links,
   });
   final String sessionId;
   final LiveRepository repository;
@@ -44,6 +47,9 @@ class SessionPage extends StatefulWidget {
   /// floating panel's button).
   final bool openMakeCourse;
 
+  /// Plays a video link's page; such sessions keep no copy of the sound.
+  final LinkImportService? links;
+
   @override
   State<SessionPage> createState() => _SessionPageState();
 }
@@ -52,6 +58,10 @@ class _SessionPageState extends State<SessionPage> {
   SessionRow? _session;
   MediaRow? _media;
   String? _mediaPath;
+
+  /// Set for a video link: the stream [_mediaPath] points at, or why there is none.
+  LinkStream? _stream;
+  Object? _streamError;
   List<SavedLine> _lines = const [];
   bool _loading = true;
   String? _loadError;
@@ -103,6 +113,8 @@ class _SessionPageState extends State<SessionPage> {
         _mediaPath = path;
         _loading = false;
       });
+      final page = session?.origin == 'link' ? Uri.tryParse(session?.sourceRef ?? '') : null;
+      if (path == null && page != null && page.isScheme('https')) unawaited(_openStream(page));
       if (widget.openMakeCourse && widget.generation != null && lines.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) unawaited(_makeCourse());
@@ -110,6 +122,26 @@ class _SessionPageState extends State<SessionPage> {
       }
     } catch (e) {
       if (mounted) setState(() => _loadError = '$e');
+    }
+  }
+
+  Future<void> _openStream(Uri page) async {
+    final links = widget.links;
+    try {
+      if (links == null || !links.installed) {
+        throw const LinkImportFailure(LinkProblem.tool, 'yt-dlp is not installed');
+      }
+      final stream = await links.stream(page);
+      player.setLoop(false);
+      await player.open(stream.url, 0, null, headers: stream.headers);
+      if (mounted) {
+        setState(() {
+          _stream = stream;
+          _mediaPath = stream.url;
+        });
+      }
+    } on Object catch (e) {
+      if (mounted) setState(() => _streamError = e);
     }
   }
 
@@ -121,7 +153,7 @@ class _SessionPageState extends State<SessionPage> {
       _pendingA = null;
     });
     player.setLoop(loop != null);
-    await player.open(path, loop?.startMs ?? 0, loop?.endMs);
+    await player.open(path, loop?.startMs ?? 0, loop?.endMs, headers: _stream?.headers);
   }
 
   Future<void> _seekTo(int ms) async {
@@ -276,12 +308,24 @@ class _SessionPageState extends State<SessionPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (_mediaPath == null)
-          Padding(padding: const EdgeInsets.all(SlSpace.lg), child: SlNotice(l.sessionNoMedia))
+          Padding(
+            padding: const EdgeInsets.all(SlSpace.lg),
+            child: _session?.origin != 'link'
+                ? SlNotice(l.sessionNoMedia)
+                : _streamError == null
+                ? SlNotice(l.linkStreamLoading)
+                : SlNotice(
+                    widget.links?.installed != true
+                        ? l.linkStreamNeedsTool
+                        : describeError(l, _streamError!),
+                    error: true,
+                  ),
+          )
         else
           _PlayerBar(
             player: player,
             playback: widget.playback,
-            isVideo: _media?.kind == 'video',
+            isVideo: _stream?.hasVideo ?? _media?.kind == 'video',
             loop: _loop,
             pendingA: _pendingA,
             onSetA: () => setState(() => _pendingA = player.positionMs),

@@ -113,6 +113,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mediaLocal => '本地媒体';
 
   @override
+  String get mediaOnline => '在线播放';
+
+  @override
+  String get coverChoose => '更换封面图片…';
+
+  @override
+  String get coverShuffle => '换一个花纹';
+
+  @override
+  String get coverReset => '移除封面图片';
+
+  @override
+  String get linkStreamNeedsTool => '播放这个链接需要 yt-dlp。请在「导入素材 → 视频链接」里安装后再打开。';
+
+  @override
+  String get linkStreamLoading => '正在打开原视频…';
+
+  @override
+  String get linkStreamOpenPage => '打开原网页';
+
+  @override
   String percentDone(int percent) {
     return '已完成 $percent%';
   }

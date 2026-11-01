@@ -10,6 +10,7 @@ import '../core/library_store.dart';
 import '../core/models.dart';
 import '../core/review.dart';
 import '../l10n/app_localizations.dart';
+import 'course_covers.dart';
 
 class AppController extends ChangeNotifier {
   AppController(this.store, this.state);
@@ -17,6 +18,9 @@ class AppController extends ChangeNotifier {
   LibraryState state;
   Future<void> _tail = Future.value();
   String? persistenceError;
+
+  /// Pictures and patterns on the course cards.
+  late final covers = CourseCovers(this);
   PracticeAttempt? pendingAttempt;
 
   /// 所有修改按提交顺序执行；保存失败时不发布未持久化的 UI 状态。

@@ -10,9 +10,11 @@ import '../core/course_codec.dart' hide normalizeAnswer;
 import '../core/dictation.dart';
 import '../core/models.dart';
 import '../services/app_controller.dart';
+import '../services/link_import.dart';
 import '../services/playback_hub.dart';
 import '../services/recording_service.dart';
 import 'brand.dart';
+import 'errors.dart';
 import 'file_picking.dart';
 import 'practice_panel.dart';
 import 'quiz_view.dart';
@@ -29,6 +31,7 @@ class LearnPage extends StatefulWidget {
     required this.recorder,
     required this.onClip,
     required this.onBack,
+    this.links,
   });
   final AppController app;
   final Course course;
@@ -37,6 +40,9 @@ class LearnPage extends StatefulWidget {
   final RecordingService recorder;
   final void Function(String) onClip;
   final VoidCallback onBack;
+
+  /// Streams a course imported from a video link (not YouTube's).
+  final LinkImportService? links;
   @override
   State<LearnPage> createState() => _LearnPageState();
 }
@@ -46,6 +52,10 @@ class _LearnPageState extends State<LearnPage> {
   bool _showTranscript = false, _showAnswers = false, _checked = false;
   final Map<String, String> _answers = {};
   YouTubeClipController? _youtube;
+
+  /// The source page's stream, once found, or why it is not.
+  LinkStream? _stream;
+  Object? _streamError;
   CourseClip get clip => widget.course.clips.firstWhere(
     (c) => c.id == widget.clipId,
     orElse: () => widget.course.clips.first,
@@ -175,7 +185,56 @@ class _LearnPageState extends State<LearnPage> {
       unawaited(
         widget.playback.lesson.open(widget.app.store.resolve(relative), clip.startMs, clip.endMs),
       );
+    } else if (_youtube == null && widget.course.sourceUrl != null) {
+      unawaited(_openStream(widget.course.sourceUrl!));
     }
+  }
+
+  Future<void> _openStream(Uri page) async {
+    final links = widget.links;
+    try {
+      if (links == null || !links.installed) {
+        throw const LinkImportFailure(LinkProblem.tool, 'yt-dlp is not installed');
+      }
+      final stream = await links.stream(page);
+      if (!mounted) return;
+      setState(() => _stream = stream);
+      await widget.playback.lesson.open(
+        stream.url,
+        clip.startMs,
+        clip.endMs,
+        headers: stream.headers,
+      );
+    } on Object catch (e) {
+      if (mounted) setState(() => _streamError = e);
+    }
+  }
+
+  Widget _streamPending(Uri page) {
+    final l = context.l10n;
+    final error = _streamError;
+    final needsTool = widget.links?.installed != true;
+    return SlPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (error == null) ...[
+            const LinearProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(l.linkStreamLoading, textAlign: TextAlign.center),
+          ] else
+            SlNotice(needsTool ? l.linkStreamNeedsTool : describeError(l, error), error: true),
+          const SizedBox(height: 12),
+          Align(
+            child: TextButton.icon(
+              onPressed: () => Process.run('open', ['$page']),
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: Text(l.linkStreamOpenPage),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _attach() => reportAction(context, () async {
@@ -188,7 +247,9 @@ class _LearnPageState extends State<LearnPage> {
     final c = context.sl;
     final youtube = _youtube;
     if (youtube != null) return _youtubePlayer(youtube);
-    if (widget.course.mediaPath == null) {
+    final page = widget.course.mediaPath == null ? widget.course.sourceUrl : null;
+    if (page != null && _stream == null) return _streamPending(page);
+    if (widget.course.mediaPath == null && page == null) {
       return SlPanel(
         child: Column(
           children: [
@@ -207,7 +268,9 @@ class _LearnPageState extends State<LearnPage> {
     }
     final session = widget.playback.lesson;
     final ext = p.extension(widget.course.mediaPath ?? '').toLowerCase();
-    final video = {'.mp4', '.mov', '.m4v', '.mkv', '.webm'}.contains(ext);
+    final video = page != null
+        ? _stream?.hasVideo ?? false
+        : {'.mp4', '.mov', '.m4v', '.mkv', '.webm'}.contains(ext);
     return SlPanel(
       padding: EdgeInsets.zero,
       child: Column(
@@ -352,7 +415,11 @@ class _LearnPageState extends State<LearnPage> {
                       ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
-                        onTap: locked || widget.course.mediaPath == null
+                        onTap: locked
+                            ? null
+                            : _youtube != null
+                            ? () => _youtube!.seek(cue.startTime.inMilliseconds)
+                            : widget.course.mediaPath == null && _stream == null
                             ? null
                             : () => widget.playback.lesson.seek(cue.startTime.inMilliseconds),
                         leading: Text(

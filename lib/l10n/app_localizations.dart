@@ -291,6 +291,48 @@ abstract class AppLocalizations {
   /// **'Local media'**
   String get mediaLocal;
 
+  /// No description provided for @mediaOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays online'**
+  String get mediaOnline;
+
+  /// No description provided for @coverChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose cover picture…'**
+  String get coverChoose;
+
+  /// No description provided for @coverShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'New pattern'**
+  String get coverShuffle;
+
+  /// No description provided for @coverReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove cover picture'**
+  String get coverReset;
+
+  /// No description provided for @linkStreamNeedsTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing this link needs yt-dlp. Install it under Import material → Video link, then open this again.'**
+  String get linkStreamNeedsTool;
+
+  /// No description provided for @linkStreamLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the original video…'**
+  String get linkStreamLoading;
+
+  /// No description provided for @linkStreamOpenPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the page'**
+  String get linkStreamOpenPage;
+
   /// No description provided for @percentDone.
   ///
   /// In en, this message translates to:

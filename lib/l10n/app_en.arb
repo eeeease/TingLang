@@ -47,6 +47,13 @@
   },
   "mediaPending": "Media not attached",
   "mediaLocal": "Local media",
+  "mediaOnline": "Plays online",
+  "coverChoose": "Choose cover picture…",
+  "coverShuffle": "New pattern",
+  "coverReset": "Remove cover picture",
+  "linkStreamNeedsTool": "Playing this link needs yt-dlp. Install it under Import material → Video link, then open this again.",
+  "linkStreamLoading": "Opening the original video…",
+  "linkStreamOpenPage": "Open the page",
   "percentDone": "{percent}% done",
   "@percentDone": {
     "placeholders": {

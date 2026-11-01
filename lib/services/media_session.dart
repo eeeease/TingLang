@@ -60,7 +60,8 @@ class MediaSession extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
-  Future<void> open(String path, int start, int? end) {
+  /// Opens a file, or a stream with the [headers] its site asks for.
+  Future<void> open(String path, int start, int? end, {Map<String, String>? headers}) {
     final token = ++_token;
     loading = true;
     error = null;
@@ -73,7 +74,7 @@ class MediaSession extends ChangeNotifier {
         durationMs = 0;
         positionMs = start;
         _path = null;
-        await player.open(Media(path), play: false);
+        await player.open(Media(path, httpHeaders: headers), play: false);
         // 记录播放器的真实装载状态，即使本次请求已过期；否则 A→B→A 可能误播 B。
         _path = path;
         if (_disposed || token != _token) return;

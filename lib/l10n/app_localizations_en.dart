@@ -123,6 +123,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mediaLocal => 'Local media';
 
   @override
+  String get mediaOnline => 'Plays online';
+
+  @override
+  String get coverChoose => 'Choose cover picture…';
+
+  @override
+  String get coverShuffle => 'New pattern';
+
+  @override
+  String get coverReset => 'Remove cover picture';
+
+  @override
+  String get linkStreamNeedsTool =>
+      'Playing this link needs yt-dlp. Install it under Import material → Video link, then open this again.';
+
+  @override
+  String get linkStreamLoading => 'Opening the original video…';
+
+  @override
+  String get linkStreamOpenPage => 'Open the page';
+
+  @override
   String percentDone(int percent) {
     return '$percent% done';
   }

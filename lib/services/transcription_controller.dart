@@ -96,6 +96,7 @@ Future<ImportJob> transcribeMedia(
   String? sourceRef,
   String? title,
   DateTime? recordedAt,
+  bool keepMedia = true,
 }) {
   final language = app.setting(AppController.learningLanguageKey, 'en');
   final native = app.setting(AppController.nativeLanguageKey, 'zh-Hans');
@@ -107,6 +108,7 @@ Future<ImportJob> transcribeMedia(
     sourceRef: sourceRef,
     title: title,
     recordedAt: recordedAt,
+    keepMedia: keepMedia,
   );
 }
 
@@ -198,6 +200,8 @@ class TranscriptionController extends ChangeNotifier {
   /// Returns the new session id; progress is reported through the job.
   /// [origin], [sourceRef], [title] and [recordedAt] describe where the file
   /// came from (a Voice Memo keeps its own title and recording time).
+  /// Without [keepMedia] the library keeps no copy: [source] is read in place
+  /// and must stay until the job ends (a video link plays its page instead).
   Future<ImportJob> importFile(
     File source, {
     required String language,
@@ -206,6 +210,7 @@ class TranscriptionController extends ChangeNotifier {
     String? sourceRef,
     String? title,
     DateTime? recordedAt,
+    bool keepMedia = true,
   }) async {
     final name = title == null || title.trim().isEmpty
         ? p.basenameWithoutExtension(source.path)
@@ -221,6 +226,7 @@ class TranscriptionController extends ChangeNotifier {
         translateTo == language ? null : translateTo,
         origin: origin,
         startedAt: (recordedAt ?? DateTime.now()).toUtc(),
+        keepMedia: keepMedia,
       ),
     );
     return job;
@@ -233,6 +239,7 @@ class TranscriptionController extends ChangeNotifier {
     String? translateTo, {
     required String origin,
     required DateTime startedAt,
+    required bool keepMedia,
   }) async {
     var sessionCreated = false;
     try {
@@ -241,19 +248,21 @@ class TranscriptionController extends ChangeNotifier {
         throw ImportFailure(ImportProblem.unsupportedFormat, extension);
       }
       final transcriber = await _transcriber(language);
-      final relative = await store.importMedia(source);
-      final absolute = store.resolve(relative);
+      final relative = keepMedia ? await store.importMedia(source) : null;
+      final absolute = relative == null ? source.path : store.resolve(relative);
       final info = await transcriber.inspect(absolute);
       if (!info.hasAudio) throw const ImportFailure(ImportProblem.noAudio);
-      final mediaId = p.basenameWithoutExtension(relative);
-      await repository.addMedia(
-        id: mediaId,
-        kind: info.hasVideo ? 'video' : 'audio',
-        relPath: relative,
-        sha256: mediaId,
-        durationMs: info.durationMs,
-        title: job.title,
-      );
+      final mediaId = relative == null ? null : p.basenameWithoutExtension(relative);
+      if (relative != null && mediaId != null) {
+        await repository.addMedia(
+          id: mediaId,
+          kind: info.hasVideo ? 'video' : 'audio',
+          relPath: relative,
+          sha256: mediaId,
+          durationMs: info.durationMs,
+          title: job.title,
+        );
+      }
       await repository.createSession(
         id: job.sessionId,
         origin: origin,
