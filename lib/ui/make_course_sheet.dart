@@ -6,7 +6,9 @@ import 'package:tinglang_ui/tinglang_ui.dart';
 import '../core/models.dart';
 import '../core/providers/provider_repository.dart';
 import '../services/course_generation.dart';
+import '../l10n/app_localizations.dart';
 import 'brand.dart';
+import 'errors.dart';
 
 /// Chooses Basic (offline, dictionary-based) or AI (a BYOK provider), shows
 /// progress and returns the finished course.
@@ -102,6 +104,12 @@ class _MakeCourseDialogState extends State<_MakeCourseDialog> {
     setState(() => _job = job);
   }
 
+  /// Why the run failed, in the user's words.
+  String _failure(AppLocalizations l, GenerationJob job) {
+    final failure = job.failure;
+    return failure == null ? job.error ?? '' : describeError(l, failure);
+  }
+
   String _stage(GenerationJob job) {
     final l = context.l10n;
     return switch (job.stage) {
@@ -113,7 +121,7 @@ class _MakeCourseDialogState extends State<_MakeCourseDialog> {
       ),
       GenerationStage.compiling => l.makeCourseCompiling,
       GenerationStage.done => l.makeCourseDone(job.course?.clips.length ?? 0),
-      GenerationStage.failed => job.error ?? '',
+      GenerationStage.failed => _failure(l, job),
     };
   }
 
@@ -143,7 +151,7 @@ class _MakeCourseDialogState extends State<_MakeCourseDialog> {
                     ),
                   const SizedBox(height: 14),
                   job.stage == GenerationStage.failed
-                      ? SlNotice(l.makeCourseFailed(job.error ?? ''), error: true)
+                      ? SlNotice(l.makeCourseFailed(_failure(l, job)), error: true)
                       : Text(_stage(job)),
                   if (job.provider != null && job.stage == GenerationStage.done) ...[
                     const SizedBox(height: 8),

@@ -245,6 +245,13 @@ class _SessionsViewState extends State<SessionsView> {
     });
   }
 
+  Future<void> _rename(BuildContext context, SessionRow session) async {
+    final title = await askSessionTitle(context, session.title);
+    if (title == null || !context.mounted) return;
+    await reportAction(context, () => repository.renameSession(session.id, title));
+    _reload();
+  }
+
   Future<void> _delete(BuildContext context, SessionRow session) async {
     final l = context.l10n;
     final ok = await showDialog<bool>(
@@ -373,6 +380,7 @@ class _SessionsViewState extends State<SessionsView> {
                               ? previews[session.id] ?? _title(context, session)
                               : session.title,
                         ),
+                        onRename: () => _rename(context, session),
                         onDelete: () => _delete(context, session),
                       ),
                     ],
@@ -434,6 +442,64 @@ class _SessionsViewState extends State<SessionsView> {
   }
 }
 
+/// Asks for a new name for a recording or transcript; null when cancelled.
+/// An empty name goes back to the automatic one (first line or time).
+Future<String?> askSessionTitle(BuildContext context, String current) => showDialog<String>(
+  context: context,
+  builder: (_) => _RenameDialog(current: current),
+);
+
+class _RenameDialog extends StatefulWidget {
+  const _RenameDialog({required this.current});
+  final String current;
+
+  @override
+  State<_RenameDialog> createState() => _RenameDialogState();
+}
+
+class _RenameDialogState extends State<_RenameDialog> {
+  // Owned by the dialog, so it outlives the closing animation.
+  late final _controller = TextEditingController(text: widget.current);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.pop(context, _controller.text.trim());
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return AlertDialog(
+      title: Text(l.sessionRenameTitle),
+      content: SizedBox(
+        width: 420,
+        child: TextField(
+          key: const ValueKey('session-rename-field'),
+          controller: _controller,
+          autofocus: true,
+          maxLength: 200,
+          decoration: InputDecoration(hintText: l.sessionRenameHint),
+          onSubmitted: (_) => _submit(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        FilledButton(
+          key: const ValueKey('session-rename-save'),
+          onPressed: _submit,
+          child: Text(l.sessionRenameSave),
+        ),
+      ],
+    );
+  }
+}
+
 class _SessionRowTile extends StatelessWidget {
   const _SessionRowTile({
     required this.session,
@@ -441,6 +507,7 @@ class _SessionRowTile extends StatelessWidget {
     required this.onTap,
     required this.onExport,
     required this.onShare,
+    required this.onRename,
     required this.onDelete,
   });
   final SessionRow session;
@@ -448,7 +515,7 @@ class _SessionRowTile extends StatelessWidget {
 
   /// [onExport] saves the transcript as text; [onShare] saves a `.tinglang`
   /// file with the lines, translations and audio or video.
-  final VoidCallback onTap, onExport, onShare, onDelete;
+  final VoidCallback onTap, onExport, onShare, onRename, onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -511,9 +578,15 @@ class _SessionRowTile extends StatelessWidget {
               onSelected: (value) => switch (value) {
                 'export' => onExport(),
                 'share' => onShare(),
+                'rename' => onRename(),
                 _ => onDelete(),
               },
               itemBuilder: (context) => [
+                PopupMenuItem(
+                  key: const ValueKey('session-rename'),
+                  value: 'rename',
+                  child: Text(l.sessionRename),
+                ),
                 PopupMenuItem(value: 'export', child: Text(l.liveExport)),
                 PopupMenuItem(
                   key: const ValueKey('session-share'),

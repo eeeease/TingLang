@@ -174,7 +174,7 @@ class _VoiceMemosDialogState extends State<_VoiceMemosDialog> {
   Widget _access(BuildContext context) {
     final l = context.l10n;
     final c = context.sl;
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -194,6 +194,16 @@ class _VoiceMemosDialogState extends State<_VoiceMemosDialog> {
           ),
           const SizedBox(height: SlSpace.sm),
           Text(l.voiceMemosAccessBody, style: SlType.body.copyWith(color: c.inkSoft)),
+          const SizedBox(height: SlSpace.sm),
+          Text(l.voiceMemosAccessSteps, style: SlType.body.copyWith(color: c.inkSoft)),
+          if (service.refusedChecks > 0) ...[
+            const SizedBox(height: SlSpace.md),
+            Text(
+              l.voiceMemosStillClosed,
+              key: const ValueKey('voice-memos-still-closed'),
+              style: SlType.body.copyWith(color: c.warning, fontWeight: FontWeight.w600),
+            ),
+          ],
           const SizedBox(height: SlSpace.lg),
           Wrap(
             spacing: SlSpace.sm,
@@ -203,7 +213,26 @@ class _VoiceMemosDialogState extends State<_VoiceMemosDialog> {
                 onPressed: service.openPrivacySettings,
                 child: Text(l.voiceMemosOpenSettings),
               ),
-              OutlinedButton(onPressed: service.refresh, child: Text(l.voiceMemosCheckAgain)),
+              OutlinedButton(
+                key: const ValueKey('voice-memos-reveal'),
+                onPressed: service.revealApp,
+                child: Text(l.voiceMemosRevealApp),
+              ),
+              OutlinedButton(
+                key: const ValueKey('voice-memos-check'),
+                onPressed: service.loading ? null : service.checkAgain,
+                child: service.loading
+                    ? const SizedBox.square(
+                        dimension: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l.voiceMemosCheckAgain),
+              ),
+              OutlinedButton(
+                key: const ValueKey('voice-memos-relaunch'),
+                onPressed: service.relaunch,
+                child: Text(l.voiceMemosRelaunch),
+              ),
             ],
           ),
         ],

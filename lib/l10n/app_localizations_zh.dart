@@ -1250,7 +1250,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get voiceMemosAccessBody =>
-      'macOS 把语音备忘录放在受保护的文件夹里。请在「系统设置 › 隐私与安全性 › 完全磁盘访问权限」中打开听浪；macOS 可能会要求退出并重新打开。';
+      'macOS 把语音备忘录放在受保护的文件夹里，听浪需要「完全磁盘访问权限」才能读取。这个权限 macOS 不会弹窗询问，需要你自己把听浪加进去。';
 
   @override
   String get voiceMemosOpenSettings => '打开系统设置';
@@ -2208,4 +2208,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get panelSystemAudioDenied => 'macOS 不允许听浪录制系统音频。请在 系统设置 → 隐私与安全性 的屏幕与系统录音里允许听浪。';
+
+  @override
+  String makeCourseNoKey(String provider) {
+    return '还没有保存 $provider 的 API 密钥（或者读取失败）。请在 设置 → AI 服务 里重新填写。';
+  }
+
+  @override
+  String get makeCourseKeyRejected => 'AI 服务拒绝了这个密钥。请在 设置 → AI 服务 里检查。';
+
+  @override
+  String get sessionRename => '重命名';
+
+  @override
+  String get sessionRenameTitle => '重命名';
+
+  @override
+  String get sessionRenameHint => '留空则显示第一句话';
+
+  @override
+  String get sessionRenameSave => '保存';
+
+  @override
+  String get voiceMemosAccessSteps =>
+      '1. 打开系统设置（隐私与安全性 › 完全磁盘访问权限）。\n2. 列表里没有听浪时，点列表下方的「+」，在「应用程序」里选中听浪；也可以点「在访达中显示听浪」，把它拖进列表。\n3. 打开听浪旁边的开关。\n4. 退出并重新打开听浪：macOS 要重启 App 后才生效。';
+
+  @override
+  String get voiceMemosStillClosed => '仍然无法读取。如果开关已经打开，请退出并重新打开听浪。';
+
+  @override
+  String get voiceMemosRevealApp => '在访达中显示听浪';
+
+  @override
+  String get voiceMemosRelaunch => '退出并重新打开';
 }

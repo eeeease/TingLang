@@ -290,6 +290,42 @@ void main() {
       expect(stub.calls, 1 + 2 * course.clips.length);
     });
 
+    test('untitled live captions get their first sentence as the course title', () async {
+      await live.createSession(
+        id: 's2',
+        origin: 'live_system',
+        language: 'en',
+        title: '',
+        startedAt: DateTime.utc(2026, 11, 1, 1, 13),
+      );
+      await live.addSegments('s2', _segments('s2'));
+      final job = await finish(service().start('s2'));
+      expect(job.stage, GenerationStage.done, reason: job.error);
+      final first = (await live.lines('s2')).first.text.trim();
+      expect(job.course!.title, startsWith(first.substring(0, 20)));
+      expect(
+        courseTitleFor('  ', const [], DateTime.utc(2026, 11, 1, 1, 13)),
+        startsWith('Session 2026-11-01'),
+      );
+    });
+
+    test('a cloud provider without a saved key sends nothing and says so', () async {
+      // A cloud address (not localhost) with no key in the secret store.
+      const provider = LlmProvider(
+        id: 'claude',
+        preset: 'anthropic',
+        label: 'Anthropic',
+        baseUrl: 'https://api.anthropic.com',
+        model: 'claude-sonnet-5-5',
+        enabled: true,
+      );
+      await providers.save(provider);
+      final job = await finish(service().start('s1', provider: provider));
+      expect(job.stage, GenerationStage.failed);
+      expect(job.failure, isA<MissingApiKey>().having((e) => e.provider, 'provider', 'Anthropic'));
+      expect(job.requests, 0, reason: 'nothing is sent without a key');
+    });
+
     test('runs end to end over HTTP against an OpenAI-compatible server', () async {
       final stub = StubModel();
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);

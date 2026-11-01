@@ -18,6 +18,17 @@ class LlmException implements Exception {
   String toString() => status == null ? message : '$message (HTTP $status)';
 }
 
+/// A cloud provider has no API key saved (or the Keychain gave none back):
+/// nothing is sent, since every call would be refused.
+class MissingApiKey implements Exception {
+  const MissingApiKey(this.provider);
+
+  /// The provider's label, for the message.
+  final String provider;
+  @override
+  String toString() => 'No API key for $provider';
+}
+
 /// The wire protocol a provider speaks.
 enum LlmProtocol {
   /// OpenAI Chat Completions: OpenAI, DeepSeek, Qwen, Kimi, GLM, Gemini,

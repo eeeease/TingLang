@@ -4,6 +4,17 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.7.2 · course generation, renaming, the panel under the Dock, Voice Memos access
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh --build` | Python checks 33 OK; analyze no issues; app tests 281 (new: untitled captions give a course title, a cloud provider without a key sends nothing, renaming from History, Voice Memos "Check again" says the folder is still closed); packages as in 0.7.1; release build 172.5 MB; `integration_test/app_test.dart` 1 passed, 2 skipped |
+
+- Basic and AI courses from live captions failed with `FormatException: title must contain 1–2000 characters`: live sessions are saved untitled. The course now takes the session's name, else its first sentence, else the date.
+- An AI course with no key in the Keychain sent the request without one (`x-api-key header is required (HTTP 401)`). It now stops before sending and says to enter the key again in Settings → AI services.
+- The panel could be dropped under the Dock, which then hid it and took its clicks. Letting go, starting the app and a change of displays or the Dock now bring it fully into the visible area. Compiled in the release build; not dragged by hand on a real screen.
+- Voice Memos: macOS never lists an app under Full Disk Access by itself. The dialog now says to add TingLang with + (with "Show TingLang in Finder" to drag it), says so when "Check again" still finds the folder closed, and offers "Quit and reopen". Reveal and relaunch are faked in tests; not run in the real app.
+
 ## 0.7.1 · captions from downloaded and cloud models start again
 
 A user on macOS 15.6 got `Bad state: No usable microphone backend` with the microphone allowed. The portable pipeline (every downloaded or cloud model, so all of macOS 14.2–15) refused capture unless the probe said the permission was granted: the probe never reports system audio recording (macOS cannot be asked), and an ad-hoc build that macOS has not asked yet reads "not determined". Nothing asked macOS, so captions from that pipeline could not start.

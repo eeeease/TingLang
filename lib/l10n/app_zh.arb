@@ -381,7 +381,7 @@
   "voiceMemoImported": "已导入",
   "voiceMemoUntitled": "语音备忘录 · {date}",
   "voiceMemosAccessTitle": "允许听浪读取语音备忘录",
-  "voiceMemosAccessBody": "macOS 把语音备忘录放在受保护的文件夹里。请在「系统设置 › 隐私与安全性 › 完全磁盘访问权限」中打开听浪；macOS 可能会要求退出并重新打开。",
+  "voiceMemosAccessBody": "macOS 把语音备忘录放在受保护的文件夹里，听浪需要「完全磁盘访问权限」才能读取。这个权限 macOS 不会弹窗询问，需要你自己把听浪加进去。",
   "voiceMemosOpenSettings": "打开系统设置",
   "voiceMemosCheckAgain": "重新检查",
   "voiceMemosNoLibrary": "这台 Mac 上还没有语音备忘录。在 iPhone 和这台 Mac 的 iCloud 设置里打开「语音备忘录」，录音就会出现在这里。",
@@ -659,5 +659,15 @@
   "onboardingSettingsBody": "一步步完成授权、选择识别模型，了解基本用法。",
   "onboardingSettingsOpen": "重新查看",
   "panelMicrophoneDenied": "macOS 不允许听浪使用麦克风。请在 系统设置 → 隐私与安全性 → 麦克风 里打开听浪；如果已经打开，先关掉再打开一次。",
-  "panelSystemAudioDenied": "macOS 不允许听浪录制系统音频。请在 系统设置 → 隐私与安全性 的屏幕与系统录音里允许听浪。"
+  "panelSystemAudioDenied": "macOS 不允许听浪录制系统音频。请在 系统设置 → 隐私与安全性 的屏幕与系统录音里允许听浪。",
+  "makeCourseNoKey": "还没有保存 {provider} 的 API 密钥（或者读取失败）。请在 设置 → AI 服务 里重新填写。",
+  "makeCourseKeyRejected": "AI 服务拒绝了这个密钥。请在 设置 → AI 服务 里检查。",
+  "sessionRename": "重命名",
+  "sessionRenameTitle": "重命名",
+  "sessionRenameHint": "留空则显示第一句话",
+  "sessionRenameSave": "保存",
+  "voiceMemosAccessSteps": "1. 打开系统设置（隐私与安全性 › 完全磁盘访问权限）。\n2. 列表里没有听浪时，点列表下方的「+」，在「应用程序」里选中听浪；也可以点「在访达中显示听浪」，把它拖进列表。\n3. 打开听浪旁边的开关。\n4. 退出并重新打开听浪：macOS 要重启 App 后才生效。",
+  "voiceMemosStillClosed": "仍然无法读取。如果开关已经打开，请退出并重新打开听浪。",
+  "voiceMemosRevealApp": "在访达中显示听浪",
+  "voiceMemosRelaunch": "退出并重新打开"
 }

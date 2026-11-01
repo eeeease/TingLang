@@ -38,6 +38,9 @@ class GenerationJob extends ChangeNotifier {
   Course? course;
   String? error;
 
+  /// What [error] came from, for a sentence in the user's words.
+  Object? failure;
+
   void _changed() => notifyListeners();
 
   void _set(GenerationStage s) {
@@ -107,6 +110,10 @@ class CourseGenerationService {
 
   Future<JsonModel> _model(LlmProvider provider) async {
     final key = await providers.apiKey(provider.id);
+    // Local servers (Ollama, LM Studio) need none.
+    if (provider.cloud && (key == null || key.trim().isEmpty)) {
+      throw MissingApiKey(provider.label);
+    }
     final make = _modelFor;
     if (make != null) return make(provider, key);
     return ClientJsonModel(provider.id, await providers.client(provider));
@@ -139,6 +146,7 @@ class CourseGenerationService {
       job._set(GenerationStage.done);
     } catch (e) {
       job.error = '$e';
+      job.failure = e;
       job._set(GenerationStage.failed);
     }
   }
@@ -258,7 +266,7 @@ class CourseGenerationService {
     job._set(GenerationStage.compiling);
     final input = GenerationInput(
       courseId: courseIdFor(job.sessionId),
-      title: session.title,
+      title: courseTitleFor(session.title, sentences, session.startedAt),
       sentences: sentences,
       learnerLevel: level,
       sourceLabel: provider == null
@@ -280,6 +288,18 @@ class CourseGenerationService {
     await app.upsertCourse(course);
     return course;
   }
+}
+
+/// A course needs a title; live captions are saved untitled, so they give
+/// their first sentence (as History shows them), else the date.
+String courseTitleFor(String title, List<GenSentence> sentences, DateTime startedAt) {
+  final own = title.trim();
+  if (own.isNotEmpty) return own;
+  final first = sentences.isEmpty ? '' : sentences.first.text.trim();
+  if (first.isNotEmpty) return first.length > 80 ? '${first.substring(0, 80).trimRight()}…' : first;
+  final t = startedAt.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return 'Session ${t.year}-${two(t.month)}-${two(t.day)} ${two(t.hour)}:${two(t.minute)}';
 }
 
 class _Prepared {

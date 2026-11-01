@@ -1287,7 +1287,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceMemosAccessBody =>
-      'macOS keeps Voice Memos in a protected folder. Turn on TingLang in System Settings › Privacy & Security › Full Disk Access; macOS may ask you to quit and reopen it.';
+      'macOS keeps Voice Memos in a protected folder that TingLang may read only with Full Disk Access. macOS does not ask for it: you add TingLang yourself.';
 
   @override
   String get voiceMemosOpenSettings => 'Open System Settings';
@@ -2280,4 +2280,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get panelSystemAudioDenied =>
       'macOS doesn\'t let TingLang record system audio. Allow TingLang in System Settings → Privacy & Security, under screen and system audio recording.';
+
+  @override
+  String makeCourseNoKey(String provider) {
+    return 'No API key is saved for $provider. Enter it again in Settings → AI services.';
+  }
+
+  @override
+  String get makeCourseKeyRejected =>
+      'The AI service refused the key. Check it in Settings → AI services.';
+
+  @override
+  String get sessionRename => 'Rename';
+
+  @override
+  String get sessionRenameTitle => 'Rename';
+
+  @override
+  String get sessionRenameHint => 'Leave empty to use the first line';
+
+  @override
+  String get sessionRenameSave => 'Save';
+
+  @override
+  String get voiceMemosAccessSteps =>
+      '1. Open System Settings (Privacy & Security › Full Disk Access).\n2. If TingLang is not in the list, click + below it and choose TingLang in Applications, or drag TingLang from Finder into the list.\n3. Turn on the switch next to TingLang.\n4. Quit and reopen TingLang: macOS applies it only after a restart.';
+
+  @override
+  String get voiceMemosStillClosed =>
+      'Still closed. If the switch is on, quit and reopen TingLang.';
+
+  @override
+  String get voiceMemosRevealApp => 'Show TingLang in Finder';
+
+  @override
+  String get voiceMemosRelaunch => 'Quit and reopen';
 }

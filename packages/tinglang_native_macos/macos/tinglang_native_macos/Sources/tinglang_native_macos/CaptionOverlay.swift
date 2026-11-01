@@ -137,6 +137,7 @@ final class CaptionOverlayController {
     panel.isReleasedWhenClosed = false
     // A click (or the start of a drag) puts the hint away, like a tooltip.
     panel.onMouseDown = { [weak self] in self?.hideHint(suppress: true) }
+    panel.onMoveEnded = { [weak self] in self?.keepOnScreen(animate: true) }
 
     let view = CapturePanelView(
       model: model,
@@ -152,6 +153,12 @@ final class CaptionOverlayController {
     self.panel = panel
     self.host = host
 
+    // A display, its resolution or the Dock changed: the panel stays reachable.
+    NotificationCenter.default.addObserver(
+      forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
+    ) { [weak self] _ in
+      MainActor.assumeIsolated { self?.keepOnScreen(animate: true) }
+    }
     NotificationCenter.default.addObserver(forName: NSWindow.didMoveNotification, object: panel, queue: .main) {
       [weak self] _ in
       MainActor.assumeIsolated {
@@ -166,6 +173,9 @@ final class CaptionOverlayController {
       let frame = NSRect(x: point.x - size.width / 2, y: point.y, width: size.width, height: size.height)
       if NSScreen.screens.contains(where: { $0.visibleFrame.intersects(frame) }) {
         panel.setFrameOrigin(frame.origin)
+        // Saved partly under the Dock or the menu bar (before 0.7.2): bring
+        // it back where it can be grabbed.
+        keepOnScreen(animate: false)
       } else {
         resetPosition()
       }
@@ -195,6 +205,7 @@ final class CaptionOverlayController {
     guard let panel else { return }
     guard let translation else {
       dragStart = nil
+      keepOnScreen(animate: true)
       saveAnchor()
       return
     }
@@ -213,6 +224,25 @@ final class CaptionOverlayController {
       return window.convertPoint(toScreen: event.locationInWindow)
     }
     return NSEvent.mouseLocation
+  }
+
+  /// Moves the panel entirely into the visible part of the screen it is
+  /// mostly on: never under the Dock (which would hide it and take its
+  /// clicks) or the menu bar. Drags may pass there; letting go brings it back.
+  func keepOnScreen(animate: Bool) {
+    guard let panel else { return }
+    let frame = panel.frame
+    func overlap(_ screen: NSScreen) -> CGFloat {
+      let part = screen.frame.intersection(frame)
+      return part.isNull ? 0 : part.width * part.height
+    }
+    guard let visible = (NSScreen.screens.max(by: { overlap($0) < overlap($1) }) ?? NSScreen.main)?.visibleFrame
+    else { return }
+    var origin = frame.origin
+    origin.x = min(max(origin.x, visible.minX), max(visible.minX, visible.maxX - frame.width))
+    origin.y = min(max(origin.y, visible.minY), max(visible.minY, visible.maxY - frame.height))
+    guard origin != frame.origin else { return }
+    panel.setFrame(NSRect(origin: origin, size: frame.size), display: true, animate: animate)
   }
 
   private func saveAnchor() {
@@ -372,6 +402,8 @@ final class CapturePanelWindow: NSPanel {
 
   /// Any press on the panel.
   var onMouseDown: (() -> Void)?
+  /// A move that started on the captions has ended.
+  var onMoveEnded: (() -> Void)?
   /// A press on the captions that may become a move of the panel.
   private var captionDrag: (mouse: NSPoint, origin: NSPoint, moving: Bool)?
 
@@ -397,6 +429,7 @@ final class CapturePanelWindow: NSPanel {
         }
       }
     case .leftMouseUp:
+      if captionDrag?.moving == true { onMoveEnded?() }
       captionDrag = nil
     default:
       break

@@ -2382,7 +2382,7 @@ abstract class AppLocalizations {
   /// No description provided for @voiceMemosAccessBody.
   ///
   /// In en, this message translates to:
-  /// **'macOS keeps Voice Memos in a protected folder. Turn on TingLang in System Settings › Privacy & Security › Full Disk Access; macOS may ask you to quit and reopen it.'**
+  /// **'macOS keeps Voice Memos in a protected folder that TingLang may read only with Full Disk Access. macOS does not ask for it: you add TingLang yourself.'**
   String get voiceMemosAccessBody;
 
   /// No description provided for @voiceMemosOpenSettings.
@@ -4052,6 +4052,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'macOS doesn\'t let TingLang record system audio. Allow TingLang in System Settings → Privacy & Security, under screen and system audio recording.'**
   String get panelSystemAudioDenied;
+
+  /// No description provided for @makeCourseNoKey.
+  ///
+  /// In en, this message translates to:
+  /// **'No API key is saved for {provider}. Enter it again in Settings → AI services.'**
+  String makeCourseNoKey(String provider);
+
+  /// No description provided for @makeCourseKeyRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI service refused the key. Check it in Settings → AI services.'**
+  String get makeCourseKeyRejected;
+
+  /// No description provided for @sessionRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get sessionRename;
+
+  /// No description provided for @sessionRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get sessionRenameTitle;
+
+  /// No description provided for @sessionRenameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the first line'**
+  String get sessionRenameHint;
+
+  /// No description provided for @sessionRenameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get sessionRenameSave;
+
+  /// No description provided for @voiceMemosAccessSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open System Settings (Privacy & Security › Full Disk Access).\n2. If TingLang is not in the list, click + below it and choose TingLang in Applications, or drag TingLang from Finder into the list.\n3. Turn on the switch next to TingLang.\n4. Quit and reopen TingLang: macOS applies it only after a restart.'**
+  String get voiceMemosAccessSteps;
+
+  /// No description provided for @voiceMemosStillClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Still closed. If the switch is on, quit and reopen TingLang.'**
+  String get voiceMemosStillClosed;
+
+  /// No description provided for @voiceMemosRevealApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Show TingLang in Finder'**
+  String get voiceMemosRevealApp;
+
+  /// No description provided for @voiceMemosRelaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit and reopen'**
+  String get voiceMemosRelaunch;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

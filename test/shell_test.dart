@@ -167,6 +167,76 @@ void main() {
     expect(find.text('TingLang 99.0.0 is available'), findsOneWidget);
   });
 
+  testWidgets(
+    'a recording can be renamed from History; an empty name goes back to the first line',
+    (tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('com.llfbandit.record/messages'),
+        (call) async => null,
+      );
+      tester.view.physicalSize = const Size(1400, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final store = MemoryStore();
+      final app = AppController(store, LibraryState(settings: {AppController.uiLocaleKey: 'en'}));
+      final db = TinglangDatabase.memory();
+      addTearDown(() => tester.runAsync(db.close));
+      final repository = LiveRepository(db);
+      await tester.runAsync(() async {
+        await repository.createSession(
+          id: 's1',
+          origin: 'live_system',
+          language: 'en',
+          title: '',
+          startedAt: DateTime.now().toUtc(),
+        );
+        await repository.addSegments('s1', [
+          (
+            id: 's1-0',
+            startMs: 0,
+            endMs: 2000,
+            text: 'Hello from the panel.',
+            language: 'en',
+            wordsJson: null,
+          ),
+        ]);
+        await repository.endSession('s1', status: 'completed', endedAt: DateTime.now().toUtc());
+      });
+      final live = LiveController(repository: repository);
+      await tester.pumpWidget(
+        TinglangApp(
+          controller: app,
+          playback: PlaybackHub(),
+          recorder: RecordingService(store),
+          live: live,
+          transcription: TranscriptionController(repository: repository, store: store),
+          navigation: ValueNotifier(null),
+          exitNotice: ValueNotifier(null),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Hello from the panel.'), findsOneWidget);
+
+      Future<void> rename(String name) async {
+        await tester.tap(find.byTooltip('More'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('session-rename')));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byKey(const ValueKey('session-rename-field')), name);
+        await tester.tap(find.byKey(const ValueKey('session-rename-save')));
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+      }
+
+      await rename('  Lakers recap  ');
+      expect(find.text('Lakers recap'), findsOneWidget);
+      expect((await tester.runAsync(() => repository.session('s1')))!.title, 'Lakers recap');
+
+      await rename('');
+      expect(find.text('Hello from the panel.'), findsOneWidget);
+    },
+  );
+
   test('settings map to locale and theme mode', () {
     expect(uiLocaleFor('system'), isNull);
     expect(uiLocaleFor('zh'), const Locale('zh'));

@@ -22,6 +22,8 @@ void main() {
   late FakeVoiceMemoLibrary library;
   late FakeDesktopShell shell;
   late VoiceMemoService service;
+  late List<List<String>> opened;
+  late int relaunches;
 
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('tinglang-memo-dialog-');
@@ -61,7 +63,11 @@ void main() {
       ),
       platform: platform,
       shell: shell,
+      open: (arguments) async => opened.add(arguments),
+      relaunch: () async => relaunches++,
     );
+    opened = [];
+    relaunches = 0;
   });
   tearDown(() async {
     app.dispose();
@@ -120,8 +126,24 @@ void main() {
     await tester.pump();
     expect(shell.openedSettings, [SystemSettingsPane.fullDiskAccess]);
 
+    // Still closed: checking again says so, instead of nothing happening.
+    expect(find.byKey(const ValueKey('voice-memos-still-closed')), findsNothing);
+    await tester.ensureVisible(find.text('Check again'));
+    await tester.tap(find.text('Check again'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('voice-memos-still-closed')), findsOneWidget);
+    expect(find.textContaining('click + below it'), findsOneWidget);
+
+    // TingLang in Finder (to drag into the list), and quit and reopen.
+    await tester.ensureVisible(find.byKey(const ValueKey('voice-memos-relaunch')));
+    await tester.tap(find.byKey(const ValueKey('voice-memos-reveal')));
+    await tester.tap(find.byKey(const ValueKey('voice-memos-relaunch')));
+    await tester.pump();
+    expect(relaunches, 1);
+
     // After granting access, checking again shows the list.
     library.problem = null;
+    await tester.ensureVisible(find.text('Check again'));
     await tester.tap(find.text('Check again'));
     await tester.pumpAndSettle();
     expect(find.text('Standup'), findsOneWidget);

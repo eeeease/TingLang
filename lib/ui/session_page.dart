@@ -16,6 +16,7 @@ import '../services/course_generation.dart';
 import '../services/media_session.dart';
 import '../services/playback_hub.dart';
 import 'brand.dart';
+import 'records_page.dart' show askSessionTitle;
 import 'share_import.dart';
 import 'make_course_sheet.dart';
 
@@ -69,6 +70,15 @@ class _SessionPageState extends State<SessionPage> {
   void dispose() {
     unawaited(widget.playback.pauseAll());
     super.dispose();
+  }
+
+  Future<void> _rename() async {
+    final session = _session;
+    if (session == null) return;
+    final title = await askSessionTitle(context, session.title);
+    if (title == null || !mounted) return;
+    await reportAction(context, () => widget.repository.renameSession(session.id, title));
+    await _load();
   }
 
   Future<void> _load() async {
@@ -168,7 +178,7 @@ class _SessionPageState extends State<SessionPage> {
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
                     const SizedBox(width: SlSpace.xs),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         title,
                         maxLines: 1,
@@ -176,6 +186,15 @@ class _SessionPageState extends State<SessionPage> {
                         style: SlType.title.copyWith(color: c.text),
                       ),
                     ),
+                    if (_session != null)
+                      IconButton(
+                        key: const ValueKey('session-title-rename'),
+                        tooltip: l.sessionRename,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: _rename,
+                        icon: Icon(Icons.edit_outlined, size: 16, color: c.muted),
+                      ),
+                    const Spacer(),
                     // Lines, translations and the audio or video in one
                     // file (also a recording whose transcript is empty).
                     if (_session != null && (_lines.isNotEmpty || _media != null))
