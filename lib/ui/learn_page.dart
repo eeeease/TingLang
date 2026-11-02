@@ -51,6 +51,9 @@ class _LearnPageState extends State<LearnPage> {
   int _tab = 0;
   bool _showTranscript = false, _showAnswers = false, _checked = false;
   final Map<String, String> _answers = {};
+
+  /// The word or phrase card shown, by kind.
+  final Map<String, int> _itemIndex = {};
   YouTubeClipController? _youtube;
 
   /// The source page's stream, once found, or why it is not.
@@ -449,129 +452,166 @@ class _LearnPageState extends State<LearnPage> {
     );
   }
 
+  /// Words and phrases one card at a time: small tabs pick one, Previous
+  /// and Next step through them. Sentences stay a list.
   Widget _learningItems(String kind) {
     final l = context.l10n;
     final c = context.sl;
     final items = clip.items.where((item) => item.kind == kind).toList();
+    if (items.isEmpty) return SlNotice(l.noItems);
+    if (kind == 'sentences') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final item in items)
+            Padding(padding: const EdgeInsets.only(bottom: 14), child: _itemCard(item)),
+        ],
+      );
+    }
+    final index = (_itemIndex[kind] ?? 0).clamp(0, items.length - 1);
+    void go(int i) => setState(() => _itemIndex[kind] = i);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          kind == 'words'
-              ? l.wordsTitle
-              : kind == 'phrases'
-              ? l.phrasesTitle
-              : l.sentencesTitle,
-          style: Theme.of(context).textTheme.titleLarge,
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (var i = 0; i < items.length; i++)
+              ChoiceChip(
+                key: ValueKey('item-$kind-$i'),
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                labelStyle: const TextStyle(fontSize: 13),
+                label: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 180),
+                  child: Text(items[i].text, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+                selected: i == index,
+                onSelected: (_) => go(i),
+              ),
+          ],
         ),
-        const SizedBox(height: 16),
-        if (items.isEmpty) SlNotice(l.noItems),
-        for (final item in items)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: SlPanel(
-              color: c.canvas,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 14),
+        KeyedSubtree(key: ValueKey('item-card-$kind-$index'), child: _itemCard(items[index])),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            OutlinedButton.icon(
+              key: ValueKey('item-$kind-previous'),
+              onPressed: index > 0 ? () => go(index - 1) : null,
+              icon: const Icon(Icons.chevron_left, size: 18),
+              label: Text(l.previousItem),
+            ),
+            Expanded(
+              child: Text(
+                '${index + 1} / ${items.length}',
+                textAlign: TextAlign.center,
+                style: SlType.micro.copyWith(color: c.muted),
+              ),
+            ),
+            OutlinedButton.icon(
+              key: ValueKey('item-$kind-next'),
+              onPressed: index + 1 < items.length ? () => go(index + 1) : null,
+              iconAlignment: IconAlignment.end,
+              icon: const Icon(Icons.chevron_right, size: 18),
+              label: Text(l.nextItem),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _itemCard(LearningItem item) {
+    final l = context.l10n;
+    final c = context.sl;
+    return SlPanel(
+      color: c.canvas,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SelectableText(
+                  item.text,
+                  style: TextStyle(fontSize: 20, color: c.accentInk, fontWeight: FontWeight.w600),
+                ),
+              ),
+              IconButton(
+                tooltip: l.saveToReview,
+                onPressed: () => reportAction(
+                  context,
+                  () => widget.app.saveExpression(widget.course, clip, item.text, item.meaning),
+                  success: l.savedToReview,
+                ),
+                icon: Icon(
+                  widget.app.isSaved(widget.course, clip, item.text)
+                      ? Icons.bookmark
+                      : Icons.bookmark_border,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+          if (item.cefr.isNotEmpty || item.subtype.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Wrap(
+                spacing: 6,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: SelectableText(
-                          item.text,
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: c.accentInk,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: l.saveToReview,
-                        onPressed: () => reportAction(
-                          context,
-                          () => widget.app.saveExpression(
-                            widget.course,
-                            clip,
-                            item.text,
-                            item.meaning,
-                          ),
-                          success: l.savedToReview,
-                        ),
-                        icon: Icon(
-                          widget.app.isSaved(widget.course, clip, item.text)
-                              ? Icons.bookmark
-                              : Icons.bookmark_border,
-                          size: 22,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (item.cefr.isNotEmpty || item.subtype.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Wrap(
-                        spacing: 6,
-                        children: [
-                          if (item.cefr.isNotEmpty) SlBadge(item.cefr),
-                          if (item.subtype.isNotEmpty) SlBadge(item.subtype.replaceAll('_', ' ')),
-                        ],
-                      ),
-                    ),
-                  if (item.meaning.isNotEmpty)
-                    Padding(padding: const EdgeInsets.only(top: 8), child: Text(item.meaning)),
-                  if (item.whyUseful.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(item.whyUseful, style: TextStyle(color: c.muted, fontSize: 13)),
-                    ),
-                  if (item.patterns.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        item.patterns.join('  ·  '),
-                        style: TextStyle(color: c.accentInk, fontSize: 13),
-                      ),
-                    ),
-                  if (item.explanation.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(item.explanation, style: TextStyle(color: c.muted)),
-                    ),
-                  if (item.original.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        l.inThisScene(item.original),
-                        style: TextStyle(color: c.muted, fontSize: 13),
-                      ),
-                    ),
-                  if (item.example.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: Text(
-                        l.makeItYours(item.example),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  if (item.frame.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: Text(l.frameLabel(item.frame), style: TextStyle(color: c.accentInk)),
-                    ),
-                  if (item.memory.isNotEmpty || item.memoryNote.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: SlNotice(
-                        [item.memory, item.memoryNote].where((t) => t.isNotEmpty).join('\n'),
-                      ),
-                    ),
+                  if (item.cefr.isNotEmpty) SlBadge(item.cefr),
+                  if (item.subtype.isNotEmpty) SlBadge(item.subtype.replaceAll('_', ' ')),
                 ],
               ),
             ),
-          ),
-      ],
+          if (item.meaning.isNotEmpty)
+            Padding(padding: const EdgeInsets.only(top: 8), child: Text(item.meaning)),
+          if (item.whyUseful.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(item.whyUseful, style: TextStyle(color: c.muted, fontSize: 13)),
+            ),
+          if (item.patterns.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                item.patterns.join('  ·  '),
+                style: TextStyle(color: c.accentInk, fontSize: 13),
+              ),
+            ),
+          if (item.explanation.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(item.explanation, style: TextStyle(color: c.muted)),
+            ),
+          if (item.original.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Text(
+                l.inThisScene(item.original),
+                style: TextStyle(color: c.muted, fontSize: 13),
+              ),
+            ),
+          if (item.example.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Text(l.makeItYours(item.example), style: const TextStyle(fontSize: 14)),
+            ),
+          if (item.frame.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Text(l.frameLabel(item.frame), style: TextStyle(color: c.accentInk)),
+            ),
+          if (item.memory.isNotEmpty || item.memoryNote.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: SlNotice([item.memory, item.memoryNote].where((t) => t.isNotEmpty).join('\n')),
+            ),
+        ],
+      ),
     );
   }
 
@@ -617,8 +657,6 @@ class _LearnPageState extends State<LearnPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l.blindTitle, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
         Text(l.blindInlineHint, style: SlType.caption.copyWith(color: c.muted)),
         const SizedBox(height: 12),
         if (clip.blanks.isEmpty)
@@ -689,8 +727,6 @@ class _LearnPageState extends State<LearnPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(shadow ? l.shadowTitle : l.retellTitle, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 12),
         if (shadow) ...[
           if (clip.transcript.isEmpty)
             Text(l.shadowFallback)

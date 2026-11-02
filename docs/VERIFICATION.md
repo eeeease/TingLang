@@ -4,6 +4,16 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.3 · YouTube captions off, words and phrases as cards
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks OK; analyze no issues; app tests 315 (new: words show one card at a time, the small tabs and Previous / Next move between them, Previous is off on the first and Next on the last, phrases keep their own place, no heading above a tab's content); other packages as before |
+| `fvm flutter build macos --debug` | Built `Tinglang.app`; it starts |
+| The player page of `lib/ui/youtube_player.dart` in the in-app browser on localhost, Steve Jobs' Stanford address, clip 1:10–2:12, with Arabic captions forced on (`cc_load_policy: 1`, `cc_lang_pref: 'ar'`) as a stand-in for a saved caption choice | Before: Arabic captions on the video while playing (the reported bug). `setOption('captions', 'track', {})` left them on. Unloading the captions module on every tick: no captions while playing, after a seek or after the loop back to the clip start; position messages still sent |
+
+Not run: a YouTube course in the running app (WKWebView) with a saved caption choice; the new cards in the running app.
+
 ## 0.8.2 · the count by History explained, denser official courses
 
 | Command | Outcome |

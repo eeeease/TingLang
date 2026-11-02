@@ -236,17 +236,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listenFirst => 'Listen once first; let the words appear a little later.';
 
   @override
-  String get wordsTitle => 'Words worth keeping';
-
-  @override
-  String get phrasesTitle => 'Expressions you can reuse';
-
-  @override
-  String get sentencesTitle => 'A frame for your own words';
-
-  @override
   String get noItems =>
       'No prepared words or patterns for this clip. You can still listen, shadow and record.';
+
+  @override
+  String get previousItem => 'Previous';
+
+  @override
+  String get nextItem => 'Next';
 
   @override
   String get saveToReview => 'Save to review';
@@ -270,9 +267,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get blindTitle => 'Listen before you look';
-
-  @override
   String get noBlanks =>
       'No prepared blanks. Hide the transcript, listen to the whole clip, then say what you heard.';
 
@@ -284,12 +278,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showAnswers => 'Show answers';
-
-  @override
-  String get shadowTitle => 'Borrow the rhythm';
-
-  @override
-  String get retellTitle => 'Now, make it yours';
 
   @override
   String get shadowFallback => 'Play the original, pause, then record your shadowing.';

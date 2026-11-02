@@ -501,29 +501,23 @@ abstract class AppLocalizations {
   /// **'Listen once first; let the words appear a little later.'**
   String get listenFirst;
 
-  /// No description provided for @wordsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Words worth keeping'**
-  String get wordsTitle;
-
-  /// No description provided for @phrasesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Expressions you can reuse'**
-  String get phrasesTitle;
-
-  /// No description provided for @sentencesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'A frame for your own words'**
-  String get sentencesTitle;
-
   /// No description provided for @noItems.
   ///
   /// In en, this message translates to:
   /// **'No prepared words or patterns for this clip. You can still listen, shadow and record.'**
   String get noItems;
+
+  /// No description provided for @previousItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previousItem;
+
+  /// No description provided for @nextItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get nextItem;
 
   /// No description provided for @saveToReview.
   ///
@@ -555,12 +549,6 @@ abstract class AppLocalizations {
   /// **'Frame: {frame}'**
   String frameLabel(String frame);
 
-  /// No description provided for @blindTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Listen before you look'**
-  String get blindTitle;
-
   /// No description provided for @noBlanks.
   ///
   /// In en, this message translates to:
@@ -584,18 +572,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show answers'**
   String get showAnswers;
-
-  /// No description provided for @shadowTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Borrow the rhythm'**
-  String get shadowTitle;
-
-  /// No description provided for @retellTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Now, make it yours'**
-  String get retellTitle;
 
   /// No description provided for @shadowFallback.
   ///

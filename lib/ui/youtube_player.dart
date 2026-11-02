@@ -91,6 +91,13 @@ var tinglang = {
   start: $start, end: $end, loop: ${c.loop},
   send: function (m) { Tinglang.postMessage(JSON.stringify(m)); },
   setRange: function (s, e) { this.start = s; this.end = e; },
+  // Captions stay off: the course reveals text only after listening. The
+  // player loads them again from YouTube's saved choice (any language) on
+  // play, after a seek and on each loop, so the module is unloaded on every
+  // tick, not once; setOption('captions', 'track', {}) does not hide them.
+  hideCaptions: function () {
+    try { player.unloadModule('captions'); } catch (e) {}
+  },
   play: function () {
     var t = player.getCurrentTime();
     if (t < this.start - 0.25 || (this.end !== null && t >= this.end - 0.1)) player.seekTo(this.start, true);
@@ -100,19 +107,20 @@ var tinglang = {
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('p', {
     videoId: '${c.videoId}',
-    playerVars: { start: Math.floor($start), playsinline: 1, rel: 0, modestbranding: 1, cc_load_policy: 0, iv_load_policy: 3, origin: '${youtubeEmbedOrigin.substring(0, youtubeEmbedOrigin.length - 1)}' },
+    playerVars: { start: Math.floor($start), playsinline: 1, rel: 0, modestbranding: 1, cc_lang_pref: 'en', iv_load_policy: 3, origin: '${youtubeEmbedOrigin.substring(0, youtubeEmbedOrigin.length - 1)}' },
     events: {
       onReady: function () {
-        try { player.unloadModule('captions'); player.setOption('captions', 'track', {}); } catch (e) {}
+        tinglang.hideCaptions();
         player.seekTo(tinglang.start, true); player.pauseVideo(); tinglang.send({t: 'ready'});
       },
-      // Captions stay hidden: the course reveals text only after listening.
-      onApiChange: function () { try { player.unloadModule('captions'); } catch (e) {} },
+      onApiChange: function () { tinglang.hideCaptions(); },
+      onStateChange: function () { tinglang.hideCaptions(); },
       onError: function (e) { tinglang.send({t: 'error', v: e.data}); }
     }
   });
   setInterval(function () {
     if (!player || !player.getCurrentTime) return;
+    tinglang.hideCaptions();
     var t = player.getCurrentTime(), playing = player.getPlayerState() === 1;
     if (playing && tinglang.end !== null && t >= tinglang.end) {
       if (tinglang.loop) player.seekTo(tinglang.start, true); else player.pauseVideo();

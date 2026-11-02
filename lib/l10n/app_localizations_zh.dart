@@ -222,16 +222,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get listenFirst => '先听一遍，让字幕晚一点出现。';
 
   @override
-  String get wordsTitle => '值得留下的词';
-
-  @override
-  String get phrasesTitle => '可以复用的表达';
-
-  @override
-  String get sentencesTitle => '用来说自己的句型';
-
-  @override
   String get noItems => '这段没有预制的词汇或句型，仍然可以听原声、跟读和录音。';
+
+  @override
+  String get previousItem => '上一个';
+
+  @override
+  String get nextItem => '下一个';
 
   @override
   String get saveToReview => '保存到复习';
@@ -255,9 +252,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get blindTitle => '先听，再看';
-
-  @override
   String get noBlanks => '没有预制挖空题。隐藏原文，先听完整片段，再说说你听到了什么。';
 
   @override
@@ -268,12 +262,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get showAnswers => '展开答案';
-
-  @override
-  String get shadowTitle => '借用原声的节奏';
-
-  @override
-  String get retellTitle => '现在，说成你自己的';
 
   @override
   String get shadowFallback => '播放原声，暂停后录下你的跟读。';
