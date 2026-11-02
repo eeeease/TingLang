@@ -37,10 +37,13 @@ Future<(HttpServer, List<HttpHeaders>, List<Map<String, Object?>>)> _server(
 }
 
 Map<String, Object?> _message(String text, {String stop = 'end_turn'}) => {
+  'id': 'msg_1',
+  'model': 'claude-opus-5-5',
+  'stop_sequence': null,
   'type': 'message',
   'role': 'assistant',
   'content': [
-    {'type': 'thinking', 'thinking': ''},
+    {'type': 'thinking', 'thinking': '', 'signature': 'sig'},
     {'type': 'text', 'text': text},
   ],
   'stop_reason': stop,
@@ -83,7 +86,7 @@ void main() {
     expect(headers.every((h) => h.value('anthropic-version') == '2023-06-01'), isTrue);
     final body = bodies.single;
     expect(body['system'], 'sys');
-    expect(body['max_tokens'], AnthropicClient.maxTokens);
+    expect(body['max_tokens'], LlmClient.anthropicMaxTokens);
     expect(body['output_config'], {
       'format': {'type': 'json_schema', 'schema': schema},
     });
@@ -109,7 +112,8 @@ void main() {
           : (200, _message('{"title": "partial', stop: 'max_tokens')),
     );
     addTearDown(() => server.close(force: true));
-    final client = AnthropicClient(
+    final client = LlmClient(
+      protocol: LlmProtocol.anthropic,
       baseUrl: 'http://127.0.0.1:${server.port}/v1',
       model: 'claude-opus-5-5',
       apiKey: 'k',
@@ -136,7 +140,8 @@ void main() {
       ),
     );
     addTearDown(() => server.close(force: true));
-    final client = AnthropicClient(
+    final client = LlmClient(
+      protocol: LlmProtocol.anthropic,
       baseUrl: 'http://127.0.0.1:${server.port}/v1',
       model: 'm',
       apiKey: 'sk-ant-SECRET',

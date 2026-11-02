@@ -133,11 +133,14 @@ class ProviderRepository {
   /// Catalog facts (price, context) for the provider's model, if listed.
   CatalogModel? modelInfo(LlmProvider provider) => catalog.model(provider.preset, provider.model);
 
+  /// A model the catalog lists without native JSON-schema output (DeepSeek,
+  /// for one) starts at `json_object` instead of spending a refused request.
   Future<LlmClient> client(LlmProvider provider) async => LlmClient(
     baseUrl: provider.baseUrl,
     model: provider.model,
     apiKey: await apiKey(provider.id),
     protocol: protocolOf(provider),
+    jsonMode: modelInfo(provider)?.jsonSchema == false ? JsonMode.jsonObject : JsonMode.schema,
   );
 
   /// The provider a feature uses, if the user picked an enabled one.

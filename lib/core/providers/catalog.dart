@@ -116,13 +116,15 @@ class CostEstimate {
     required int transcriptChars,
     CatalogModel? model,
   }) {
-    // ~4 characters per token; prompts add ~800 tokens of instructions.
+    // ~4 characters per token; prompts add ~800 tokens of instructions and
+    // L1 sees the first 400 characters of each window.
     final selection = windows > clips ? 1 : 0;
-    final selectionIn = selection * (800 + windows * 160);
+    final selectionIn = selection * (800 + windows * 110);
     final clipIn = clips == 0 ? 0 : clips * 900 + transcriptChars ~/ 4;
-    // One clip plan is ~2.5k JSON tokens plus thinking; repairs add ~25 %.
-    final clipOut = (clips * 4000 * 1.25).round();
-    final input = selectionIn + (clipIn * 1.25).round();
+    // One clip plan is ~2.5k JSON tokens plus thinking. A quote repair
+    // resends the transcript but asks only for the quotes (~10 % more).
+    final clipOut = (clips * 4000 * 1.05).round();
+    final input = selectionIn + (clipIn * 1.1).round();
     final output = selection * 600 + clipOut;
     return CostEstimate(
       calls: selection + clips,

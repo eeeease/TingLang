@@ -2,6 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as claude_sdk;
+import 'package:genkit/genkit.dart'
+    show GenkitException, GenkitPlugin, Model;
+import 'package:genkit/lite.dart' as genkit;
+import 'package:genkit_anthropic/genkit_anthropic.dart';
+import 'package:genkit_openai/genkit_openai.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+import 'package:openai_dart/openai_dart.dart' as openai_sdk;
+import 'package:schemantic/schemantic.dart';
+
 /// A failed LLM call. Messages never contain the API key or the prompt.
 class LlmException implements Exception {
   const LlmException(this.message, {this.status, this.refused = false, this.truncated = false});
@@ -46,76 +57,202 @@ class LlmUsage {
   int inputTokens = 0, outputTokens = 0, calls = 0;
 }
 
-/// One provider endpoint that answers JSON prompts. Uses `dart:io` only; the
-/// key goes in the provider's auth header and nowhere else.
-abstract class LlmClient {
-  LlmClient._(String baseUrl, this.model, this._apiKey, HttpClient? http, this.timeout)
-    : baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl,
-      _http = http ?? (HttpClient()..connectionTimeout = const Duration(seconds: 10));
+/// How a reply is held to its JSON schema, strongest first. A server that
+/// rejects one steps the client down to the next for the rest of its calls.
+enum JsonMode {
+  /// The provider enforces the schema (`json_schema`, Anthropic structured
+  /// outputs).
+  schema,
 
-  /// The client for [protocol].
-  factory LlmClient({
+  /// The schema goes in the prompt; the provider only guarantees JSON
+  /// (`json_object`).
+  jsonObject,
+
+  /// The schema goes in the prompt and nothing is enforced.
+  prompt,
+}
+
+/// One provider endpoint that answers JSON prompts, through Genkit's model
+/// plugins (`genkit_openai` for OpenAI-compatible servers, `genkit_anthropic`
+/// for Claude). The key goes in the provider's auth header and nowhere else.
+class LlmClient {
+  LlmClient({
     required String baseUrl,
-    required String model,
-    String? apiKey,
-    LlmProtocol protocol = LlmProtocol.openai,
+    required this.model,
+    this._apiKey,
+    this.protocol = LlmProtocol.openai,
     HttpClient? http,
-    Duration timeout = const Duration(minutes: 5),
-  }) => switch (protocol) {
-    LlmProtocol.openai => OpenAiCompatibleClient(
-      baseUrl: baseUrl,
-      model: model,
-      apiKey: apiKey,
-      http: http,
-      timeout: timeout,
-    ),
-    LlmProtocol.anthropic => AnthropicClient(
-      baseUrl: baseUrl,
-      model: model,
-      apiKey: apiKey,
-      http: http,
-      timeout: timeout,
-    ),
-  };
+    this.timeout = const Duration(minutes: 5),
+    JsonMode jsonMode = JsonMode.schema,
+  }) : baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl,
+       _http = http ?? (HttpClient()..connectionTimeout = const Duration(seconds: 10)),
+       _mode = protocol == LlmProtocol.anthropic ? JsonMode.schema : jsonMode;
 
   final String baseUrl, model;
+  final LlmProtocol protocol;
   final String? _apiKey;
   final HttpClient _http;
 
   /// Per request. Reasoning models can take minutes on a long JSON reply.
   final Duration timeout;
   final usage = LlmUsage();
+  JsonMode _mode;
 
-  void _auth(HttpClientRequest request, String key);
+  /// The structured-output mode the next call uses.
+  JsonMode get jsonMode => _mode;
 
-  Future<(int, String)> _send(
-    String method,
-    String path, [
-    Map<String, Object?>? body,
-    Map<String, String>? headers,
-  ]) async {
+  /// Claude's reply limit; non-streaming requests stay well under HTTP
+  /// timeouts at this size.
+  static const anthropicMaxTokens = 16000;
+
+  Uri _url(String path) {
     final Uri uri;
     try {
       uri = Uri.parse('$baseUrl$path');
     } on FormatException {
       throw const LlmException('Invalid base URL');
     }
-    if (uri.scheme != 'http' && uri.scheme != 'https') {
+    if (uri.scheme != 'http' && uri.scheme != 'https' || uri.host.isEmpty) {
       throw const LlmException('Base URL must start with http:// or https://');
     }
+    return uri;
+  }
+
+  late final Model<dynamic> _model = _plugin().model(model);
+
+  GenkitPlugin _plugin() {
+    _url('');
+    final io = IOClient(_http);
+    // Local servers (Ollama, LM Studio) take any key.
+    final key = _apiKey == null || _apiKey.isEmpty ? 'none' : _apiKey;
+    return switch (protocol) {
+      LlmProtocol.openai => openAI(
+        name: 'tinglang',
+        apiKey: key,
+        baseUrl: baseUrl,
+        httpClient: PlainTextMessages(io),
+      ),
+      // The SDK adds `/v1/messages` itself; presets store the `/v1` base.
+      LlmProtocol.anthropic => anthropic(
+        apiKey: key,
+        baseUrl: baseUrl.replaceFirst(RegExp(r'/v1$'), ''),
+        httpClient: io,
+      ),
+    };
+  }
+
+  /// One request whose reply must be a JSON object matching [schema].
+  Future<Map<String, Object?>> completeJson({
+    required String system,
+    required String user,
+    required String schemaName,
+    required Map<String, Object?> schema,
+  }) async {
+    final output = SchemanticType.from<Map<String, Object?>>(
+      jsonSchema: schema,
+      parse: (json) => json is Map<String, Object?> ? json : const {},
+    );
+    while (true) {
+      final mode = _mode;
+      final genkit.GenerateResult<Map<String, Object?>> result;
+      try {
+        result = await genkit
+            .generate<Map<String, Object?>, dynamic>(
+              model: _model,
+              // Without native enforcement the schema goes in the prompt,
+              // on one line: an indented schema costs several times the tokens.
+              system: mode == JsonMode.schema ? system : '$system\n\n${schemaInstructions(schema)}',
+              prompt: user,
+              config: switch (protocol) {
+                LlmProtocol.anthropic => AnthropicOptions(maxTokens: anthropicMaxTokens),
+                LlmProtocol.openai => OpenAIChatOptions(jsonMode: mode == JsonMode.jsonObject),
+              },
+              outputSchema: mode == JsonMode.schema ? output : null,
+            )
+            .timeout(timeout);
+      } on TimeoutException {
+        throw const LlmException('The provider did not answer in time');
+      } on GenkitException catch (e) {
+        throw _failure(e);
+      }
+      final reason = result.finishReason.value;
+      if (reason == 'failed' || reason == 'aborted') {
+        final failure = _failure(result.cause);
+        final next = _stepDown(failure);
+        if (next != null) {
+          _mode = next;
+          continue;
+        }
+        throw failure;
+      }
+      usage.calls++;
+      usage.inputTokens += result.usage?.inputTokens ?? 0;
+      usage.outputTokens += result.usage?.outputTokens ?? 0;
+      if (reason == 'blocked') {
+        final why = result.finishMessage;
+        throw LlmException(
+          'The model declined this request${why == null || why.isEmpty ? '' : ' ($why)'}',
+          refused: true,
+        );
+      }
+      if (reason == 'length') {
+        throw const LlmException('The reply was cut off at the output limit', truncated: true);
+      }
+      final text = result.text;
+      if (text.trim().isEmpty) throw const LlmException('The reply had no text');
+      return parseJsonObject(text);
+    }
+  }
+
+  /// The weaker mode to retry in when the server rejected the output format.
+  JsonMode? _stepDown(LlmException failure) {
+    if (protocol != LlmProtocol.openai || _mode == JsonMode.prompt) return null;
+    if (failure.status != 400 && failure.status != 422) return null;
+    final text = failure.message.toLowerCase();
+    if (!text.contains('response_format') && !text.contains('json') && !text.contains('schema')) {
+      return null;
+    }
+    return JsonMode.values[_mode.index + 1];
+  }
+
+  /// The provider's own message and HTTP status, from whichever layer failed.
+  static LlmException _failure(Object? error) {
+    Object? e = error;
+    while (e is GenkitException && e.cause != null) {
+      e = e.cause;
+    }
+    return switch (e) {
+      openai_sdk.ApiException() => LlmException(e.message, status: e.statusCode),
+      claude_sdk.ApiException() => LlmException(e.message, status: e.statusCode),
+      LlmException() => e,
+      SocketException() => LlmException(
+        'Cannot reach the provider: ${e.osError?.message ?? e.message}',
+      ),
+      HandshakeException() => const LlmException('TLS handshake with the provider failed'),
+      TimeoutException() => const LlmException('The provider did not answer in time'),
+      GenkitException() => LlmException(e.message),
+      _ => LlmException('$e'.replaceFirst(RegExp(r'^\w*(Exception|Error): '), '')),
+    };
+  }
+
+  /// "Test connection": lists model ids (also proves the key works).
+  Future<List<String>> models() async {
+    final uri = _url('/models');
+    final String body;
+    final int status;
     try {
-      final request = await _http.openUrl(method, uri).timeout(timeout);
+      final request = await _http.getUrl(uri).timeout(timeout);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       final key = _apiKey;
-      if (key != null && key.isNotEmpty) _auth(request, key);
-      headers?.forEach(request.headers.set);
-      if (body != null) {
-        request.headers.contentType = ContentType.json;
-        request.add(utf8.encode(jsonEncode(body)));
+      if (protocol == LlmProtocol.anthropic) {
+        request.headers.set('anthropic-version', '2023-06-01');
+        if (key != null && key.isNotEmpty) request.headers.set('x-api-key', key);
+      } else if (key != null && key.isNotEmpty) {
+        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $key');
       }
       final response = await request.close().timeout(timeout);
-      final text = await response.transform(utf8.decoder).join().timeout(timeout);
-      return (response.statusCode, text);
+      body = await response.transform(utf8.decoder).join().timeout(timeout);
+      status = response.statusCode;
     } on TimeoutException {
       throw const LlmException('The provider did not answer in time');
     } on SocketException catch (e) {
@@ -125,225 +262,78 @@ abstract class LlmClient {
     } on HttpException catch (e) {
       throw LlmException('HTTP error: ${e.message}');
     }
+    Object? json;
+    try {
+      json = jsonDecode(body);
+    } on FormatException {
+      json = null;
+    }
+    if (status != 200) throw LlmException(_errorText(json, body), status: status);
+    final data = json is Map ? json['data'] : null;
+    if (data is! List) throw const LlmException('The provider returned malformed JSON');
+    return [
+      for (final m in data)
+        if (m is Map && m['id'] is String) m['id'] as String,
+    ]..sort();
   }
 
-  static String _errorText(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map) {
-        final error = json['error'];
-        if (error is Map && error['message'] is String) return error['message'] as String;
-        if (error is String) return error;
-        if (json['message'] is String) return json['message'] as String;
-      }
-    } on FormatException {
-      // Not JSON; fall through.
+  static String _errorText(Object? json, String body) {
+    if (json is Map) {
+      final error = json['error'];
+      if (error is Map && error['message'] is String) return error['message'] as String;
+      if (error is String) return error;
+      if (json['message'] is String) return json['message'] as String;
     }
     return body.length > 200 ? '${body.substring(0, 200)}…' : body;
   }
 
-  static Map<Object?, Object?> _json(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map) return json;
-    } on FormatException {
-      // Reported below.
-    }
-    throw const LlmException('The provider returned malformed JSON');
-  }
-
-  /// "Test connection": lists model ids (also proves the key works).
-  Future<List<String>> models() async {
-    final (status, body) = await _send('GET', '/models');
-    if (status != 200) throw LlmException(_errorText(body), status: status);
-    final data = _json(body)['data'];
-    return [
-      if (data is List)
-        for (final m in data)
-          if (m is Map && m['id'] is String) m['id'] as String,
-    ]..sort();
-  }
-
-  /// One request whose reply must be a JSON object matching [schema].
-  Future<Map<String, Object?>> completeJson({
-    required String system,
-    required String user,
-    required String schemaName,
-    required Map<String, Object?> schema,
-  });
-
   void close() => _http.close(force: true);
 }
 
-/// OpenAI-compatible Chat Completions. `response_format: json_schema` falls
-/// back to `json_object`, then to none, when a server rejects it.
-class OpenAiCompatibleClient extends LlmClient {
-  OpenAiCompatibleClient({
-    required String baseUrl,
-    required String model,
-    String? apiKey,
-    HttpClient? http,
-    Duration timeout = const Duration(minutes: 5),
-  }) : super._(baseUrl, model, apiKey, http, timeout);
-
-  static const _formats = ['json_schema', 'json_object', 'none'];
-  int _format = 0;
+/// Sends Chat Completions messages whose content is only text as a plain
+/// string. Genkit always sends a list of parts, which OpenAI accepts but
+/// several compatible servers do not.
+class PlainTextMessages extends http.BaseClient {
+  PlainTextMessages(this._inner);
+  final http.Client _inner;
 
   @override
-  void _auth(HttpClientRequest request, String key) =>
-      request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $key');
-
-  @override
-  Future<Map<String, Object?>> completeJson({
-    required String system,
-    required String user,
-    required String schemaName,
-    required Map<String, Object?> schema,
-  }) async {
-    while (true) {
-      final format = _formats[_format];
-      final (status, body) = await _send('POST', '/chat/completions', {
-        'model': model,
-        'messages': [
-          {'role': 'system', 'content': system},
-          {'role': 'user', 'content': user},
-        ],
-        if (format == 'json_schema')
-          'response_format': {
-            'type': 'json_schema',
-            'json_schema': {'name': schemaName, 'schema': schema},
-          },
-        if (format == 'json_object') 'response_format': {'type': 'json_object'},
-      });
-      if ((status == 400 || status == 422) && _format < _formats.length - 1) {
-        final error = LlmClient._errorText(body).toLowerCase();
-        if (error.contains('response_format') ||
-            error.contains('json') ||
-            error.contains('schema')) {
-          _format++;
-          continue;
-        }
-      }
-      if (status != 200) throw LlmException(LlmClient._errorText(body), status: status);
-      final json = LlmClient._json(body);
-      final used = json['usage'];
-      usage.calls++;
-      if (used is Map) {
-        usage.inputTokens += (used['prompt_tokens'] as num?)?.toInt() ?? 0;
-        usage.outputTokens += (used['completion_tokens'] as num?)?.toInt() ?? 0;
-      }
-      final choices = json['choices'];
-      final choice = choices is List && choices.isNotEmpty && choices.first is Map
-          ? choices.first as Map
-          : null;
-      final message = choice?['message'];
-      final content = message is Map ? message['content'] : null;
-      if (content is! String) throw const LlmException('The reply had no message content');
-      if (choice?['finish_reason'] == 'length') {
-        throw const LlmException('The reply was cut off at the output limit', truncated: true);
-      }
-      return parseJsonObject(content);
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    if (request is! http.Request || !request.url.path.endsWith('/chat/completions')) {
+      return _inner.send(request);
     }
+    Object? body;
+    try {
+      body = jsonDecode(request.body);
+    } on FormatException {
+      return _inner.send(request);
+    }
+    final messages = body is Map ? body['messages'] : null;
+    if (messages is! List) return _inner.send(request);
+    for (final m in messages) {
+      final content = m is Map ? m['content'] : null;
+      if (content is List &&
+          content.every((p) => p is Map && p['type'] == 'text' && p['text'] is String)) {
+        m['content'] = content.map((p) => (p as Map)['text']).join('\n');
+      }
+    }
+    final plain = http.Request(request.method, request.url)
+      ..headers.addAll(request.headers)
+      ..followRedirects = request.followRedirects
+      ..maxRedirects = request.maxRedirects
+      ..persistentConnection = request.persistentConnection
+      ..bodyBytes = utf8.encode(jsonEncode(body));
+    return _inner.send(plain);
   }
+
+  @override
+  void close() => _inner.close();
 }
 
-/// Anthropic Messages API with structured outputs (`output_config.format`).
-/// On the Claude API, models that support it get server-side refusal
-/// fallbacks (`fallbacks: "default"`), dropped if the server rejects them.
-class AnthropicClient extends LlmClient {
-  AnthropicClient({
-    required String baseUrl,
-    required String model,
-    String? apiKey,
-    HttpClient? http,
-    Duration timeout = const Duration(minutes: 5),
-  }) : super._(baseUrl, model, apiKey, http, timeout);
-
-  static const version = '2023-06-01';
-  static const fallbackBeta = 'server-side-fallback-2026-07-01';
-  static const _fallbackModels = {
-    'claude-opus-5-5',
-    'claude-opus-5',
-    'claude-fable-5-1',
-    'claude-sonnet-5-5',
-  };
-
-  late bool _fallbacks =
-      _fallbackModels.contains(model) && (Uri.tryParse(baseUrl)?.host ?? '') == 'api.anthropic.com';
-
-  /// Non-streaming requests stay well under HTTP timeouts at this size.
-  static const maxTokens = 16000;
-
-  @override
-  void _auth(HttpClientRequest request, String key) => request.headers.set('x-api-key', key);
-
-  @override
-  Future<(int, String)> _send(
-    String method,
-    String path, [
-    Map<String, Object?>? body,
-    Map<String, String>? headers,
-  ]) => super._send(method, path, body, {'anthropic-version': version, ...?headers});
-
-  @override
-  Future<Map<String, Object?>> completeJson({
-    required String system,
-    required String user,
-    required String schemaName,
-    required Map<String, Object?> schema,
-  }) async {
-    while (true) {
-      final fallbacks = _fallbacks;
-      final (status, body) = await _send('POST', '/messages', {
-        'model': model,
-        'max_tokens': maxTokens,
-        'system': system,
-        'messages': [
-          {'role': 'user', 'content': user},
-        ],
-        'output_config': {
-          'format': {'type': 'json_schema', 'schema': schema},
-        },
-        if (fallbacks) 'fallbacks': 'default',
-      }, fallbacks ? {'anthropic-beta': fallbackBeta} : null);
-      if (status == 400 &&
-          fallbacks &&
-          LlmClient._errorText(body).toLowerCase().contains('fallback')) {
-        _fallbacks = false;
-        continue;
-      }
-      if (status != 200) throw LlmException(LlmClient._errorText(body), status: status);
-      final json = LlmClient._json(body);
-      final used = json['usage'];
-      usage.calls++;
-      if (used is Map) {
-        usage.inputTokens += (used['input_tokens'] as num?)?.toInt() ?? 0;
-        usage.outputTokens += (used['output_tokens'] as num?)?.toInt() ?? 0;
-      }
-      final stop = json['stop_reason'];
-      if (stop == 'refusal') {
-        final details = json['stop_details'];
-        final category = details is Map ? details['category'] : null;
-        throw LlmException(
-          'The model declined this request${category is String ? ' ($category)' : ''}',
-          refused: true,
-        );
-      }
-      if (stop == 'max_tokens') {
-        throw const LlmException('The reply was cut off at the output limit', truncated: true);
-      }
-      final content = json['content'];
-      final text = [
-        if (content is List)
-          for (final block in content)
-            if (block is Map && block['type'] == 'text' && block['text'] is String)
-              block['text'] as String,
-      ].join();
-      if (text.isEmpty) throw const LlmException('The reply had no text');
-      return parseJsonObject(text);
-    }
-  }
-}
+/// The schema as prompt text, for servers that enforce none.
+String schemaInstructions(Map<String, Object?> schema) =>
+    'Reply with one JSON object that matches this JSON schema, and nothing else:\n'
+    '${jsonEncode(schema)}';
 
 /// Extracts the JSON object from a model reply (``` fences and chatter
 /// around it are tolerated).

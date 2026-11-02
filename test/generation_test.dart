@@ -70,6 +70,13 @@ String _fenced(String user) {
 /// Deterministic stand-in for an LLM: quotes the transcript it was given,
 /// plus one paraphrase that the validator must reject.
 class StubModel implements JsonModel {
+  StubModel({this.fixes = const {}, this.extraWord});
+
+  /// What the stub answers when asked for the exact text of a quote.
+  final Map<String, String> fixes;
+
+  /// A further word item, quoted as given.
+  final String? extraWord;
   int calls = 0;
   final users = <String>[];
   @override
@@ -95,6 +102,14 @@ class StubModel implements JsonModel {
         ],
         'episode_summary_en': 'A school garden project.',
         'topics': ['community'],
+      };
+    }
+    if (schemaName == 'quote_fixes') {
+      final wrong = jsonDecode(RegExp(r'not: (\[.*?\])\n').firstMatch(user)!.group(1)!) as List;
+      return {
+        'fixes': [
+          for (final w in wrong) {'wrong': w, 'exact': fixes[w] ?? ''},
+        ],
       };
     }
     final text = _fenced(user);
@@ -125,6 +140,7 @@ class StubModel implements JsonModel {
           'meaning_zh': '',
           'memory_aid': <String, Object?>{},
         },
+        if (extraWord != null) {'text': extraWord, 'meaning_zh': '词'},
       ],
       'phrases': <Object?>[],
       'sentences': [
@@ -290,6 +306,62 @@ void main() {
       expect(stub.calls, 1 + 2 * course.clips.length);
     });
 
+    test('wrong quotes: near copies are fixed locally, the rest by one small request', () async {
+      const transcript =
+          'So we, um, decided to rebuild the kitchen garden behind the school last spring.';
+      expect(
+        snapQuote('we decided to rebuild the kitchen garden behind the school', transcript),
+        'we, um, decided to rebuild the kitchen garden behind the school',
+      );
+      expect(snapQuote('the garden', transcript), isNull, reason: 'short quotes are not guessed');
+      expect(snapQuote('nothing like anything that was said here at all', transcript), isNull);
+
+      const provider = LlmProvider(
+        id: 'p1',
+        preset: 'ollama',
+        label: 'Local',
+        baseUrl: 'http://localhost:11434/v1',
+        model: 'stub-1',
+        enabled: true,
+      );
+      final stub = StubModel(extraWord: 'ambitous', fixes: const {'ambitous': 'ambitious'});
+      final job = await finish(service(stub: stub).start('s1', provider: provider));
+      expect(job.stage, GenerationStage.done, reason: job.error);
+      final items = job.course!.clips.expand((c) => c.items).toList();
+      expect(items.where((i) => i.text == 'ambitious' && i.meaning == '词'), isNotEmpty);
+      expect(items.map((i) => i.text), isNot(contains('ambitous')));
+      final repairs = stub.users.where((u) => u.startsWith('These quotes'));
+      expect(repairs, isNotEmpty);
+      // The repair asks only for the quotes, not for the plan again.
+      expect(repairs.every((u) => !u.contains('Candidate words')), isTrue);
+    });
+
+    test('clips are planned side by side, in order, and a fatal error stops the rest', () async {
+      var running = 0, most = 0;
+      final order = await inParallel(10, 3, (i) async {
+        running++;
+        most = most > running ? most : running;
+        await Future<void>.delayed(Duration(milliseconds: 20 - i));
+        running--;
+        return i;
+      });
+      expect(order, [for (var i = 0; i < 10; i++) i]);
+      expect(most, 3);
+
+      var started = 0;
+      await expectLater(
+        inParallel(10, 2, (i) async {
+          started++;
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+          if (i == 0) throw const LlmException('Invalid API key', status: 401);
+          return i;
+        }),
+        throwsA(isA<LlmException>()),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(started, lessThan(10));
+    });
+
     test('untitled live captions get their first sentence as the course title', () async {
       await live.createSession(
         id: 's2',
@@ -362,11 +434,18 @@ void main() {
       server.listen((request) async {
         final body = jsonDecode(await utf8.decodeStream(request)) as Map<String, Object?>;
         final messages = (body['messages']! as List).cast<Map<String, Object?>>();
+        // The schema travels natively; which request this is shows in the prompt.
         final format = body['response_format']! as Map<String, Object?>;
-        final schemaName = (format['json_schema']! as Map<String, Object?>)['name']! as String;
+        expect(format['type'], 'json_schema');
+        final user = messages.last['content']! as String;
+        final schemaName = user.startsWith('Choose the')
+            ? 'clip_selection'
+            : user.startsWith('These quotes')
+            ? 'quote_fixes'
+            : 'clip_plan';
         final reply = await stub.completeJson(
           system: messages.first['content']! as String,
-          user: messages.last['content']! as String,
+          user: user,
           schemaName: schemaName,
           schema: const {},
         );
@@ -374,11 +453,18 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(
             jsonEncode({
+              'id': 'chatcmpl-1',
+              'object': 'chat.completion',
+              'created': 1,
+              'model': 'stub-1',
               'choices': [
                 {
+                  'index': 0,
                   'message': {'role': 'assistant', 'content': jsonEncode(reply)},
+                  'finish_reason': 'stop',
                 },
               ],
+              'usage': {'prompt_tokens': 100, 'completion_tokens': 50, 'total_tokens': 150},
             }),
           );
         await request.response.close();
@@ -395,6 +481,8 @@ void main() {
       final job = await finish(service().start('s1', provider: provider));
       expect(job.stage, GenerationStage.done, reason: job.error);
       expect(job.requests, stub.calls);
+      expect(job.inputTokens, 100 * stub.calls);
+      expect(job.outputTokens, 50 * stub.calls);
       expect(
         job.course!.clips.expand((c) => c.items).where((i) => i.kind == 'sentences'),
         isNotEmpty,

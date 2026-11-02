@@ -6,7 +6,7 @@ import '../providers/provider_repository.dart';
 import 'course_generator.dart';
 
 /// Bumped whenever a prompt or schema changes (part of the cache key).
-const promptVersion = 'm5.2';
+const promptVersion = 'm6.0';
 
 /// Anything that can answer a JSON prompt: the real client or a stub.
 abstract interface class JsonModel {
@@ -76,6 +76,29 @@ class CachedJsonModel implements JsonModel {
   }
 }
 
+/// Runs [task] for 0…[count]-1 with at most [width] running at once; the
+/// results keep their order. After a failure no new task starts and the
+/// first error is thrown.
+Future<List<T>> inParallel<T>(int count, int width, Future<T> Function(int index) task) async {
+  final results = List<T?>.filled(count, null);
+  var next = 0;
+  var failed = false;
+  Future<void> worker() async {
+    while (!failed && next < count) {
+      final index = next++;
+      try {
+        results[index] = await task(index);
+      } catch (_) {
+        failed = true;
+        rethrow;
+      }
+    }
+  }
+
+  await Future.wait([for (var w = 0; w < width && w < count; w++) worker()], eagerError: true);
+  return results.cast<T>();
+}
+
 /// Transcript text is data. It is fenced, and any fence-like text inside it
 /// is neutralised so it cannot close the block and pose as instructions.
 String fenceTranscript(String text) =>
@@ -93,6 +116,9 @@ Map<String, Object?> _obj(Map<String, Object?> props, [List<String>? required]) 
 };
 const _str = {'type': 'string'};
 const _strList = {'type': 'array', 'items': _str};
+
+/// Characters of each window the L1 listing shows.
+const selectionPreviewChars = 400;
 
 /// L1: picks the best windows and writes a short overview.
 const selectionSchema = {
@@ -126,7 +152,10 @@ Future<({List<int> indices, Map<String, Object?> overview})?> selectWithModel(
   final listing = StringBuffer();
   for (var i = 0; i < windows.length; i++) {
     final w = windows[i];
-    final text = w.text.length > 600 ? '${w.text.substring(0, 600)}…' : w.text;
+    // The opening of a window is enough to judge it, and keeps L1 cheap.
+    final text = w.text.length > selectionPreviewChars
+        ? '${w.text.substring(0, selectionPreviewChars)}…'
+        : w.text;
     listing.writeln(
       '[$i] ${(w.startMs / 1000).round()}s–${(w.endMs / 1000).round()}s '
       'density=${w.score.toStringAsFixed(1)}: $text',
@@ -212,10 +241,12 @@ final clipPlanSchema = _obj({
   }),
 });
 
-String _clipPrompt(ClipWindow window, ClipCandidates c, String level, List<String> preferences) {
-  final words = c.words.take(15).map((w) => '${w.surface} (${w.entry.approxCefr})').join(', ');
-  return '''
-Build study material for this clip for a $level learner whose first language is Chinese.
+/// The part of an L2 prompt that is the same for every clip of a run: sent
+/// first, so providers with prefix caching (OpenAI, DeepSeek, Qwen, Kimi…)
+/// bill it once.
+String clipSystem(String level) =>
+    '''
+You are an expert English teacher writing structured course data for a $level learner whose first language is Chinese. $_dataRule Reply with JSON only.
 
 Rules:
 - Every "text", shadowing "text" and retelling "source_evidence" must be copied EXACTLY from the transcript (same words, same order). Never paraphrase a quote.
@@ -226,12 +257,41 @@ Rules:
 - memory_aid: a short cue (type is one of: sound, image, story, contrast, root).
 - shadowing: 1–2 complete sentences worth imitating, with a reason.
 - retelling: a prompt, 3–5 outline points, each with one exact source_evidence quote, plus 2–4 target_texts taken from your words/phrases.
-- difficulty: 1 (easy) to 5 (hard).
+- difficulty: 1 (easy) to 5 (hard).''';
 
+String _clipPrompt(ClipWindow window, ClipCandidates c, List<String> preferences) {
+  final words = c.words.take(15).map((w) => '${w.surface} (${w.entry.approxCefr})').join(', ');
+  return '''
+Build study material for this clip.
 ${preferences.isEmpty ? '' : 'Learner preferences: ${preferences.join('; ')}.\n'}Candidate words found by a dictionary (you may choose others): $words
 Candidate phrases: ${c.phrases.take(10).map((p) => p.surface).join(', ')}
 
 ${fenceTranscript(window.text)}''';
+}
+
+/// Calls [edit] on every quote in [reply] (item texts, shadowing texts,
+/// retelling evidence); a non-null result replaces the quote.
+void _eachQuote(Map<String, Object?> reply, String? Function(String quote) edit) {
+  for (final kind in ['words', 'phrases', 'sentences', 'shadowing']) {
+    final list = reply[kind];
+    if (list is! List) continue;
+    for (final item in list) {
+      if (item is Map && item['text'] is String) {
+        final next = edit(item['text'] as String);
+        if (next != null) item['text'] = next;
+      }
+    }
+  }
+  final retell = reply['retelling'];
+  final evidence = retell is Map ? retell['source_evidence'] : null;
+  if (evidence is List) {
+    for (var i = 0; i < evidence.length; i++) {
+      final quote = evidence[i];
+      if (quote is! String) continue;
+      final next = edit(quote);
+      if (next != null) evidence[i] = next;
+    }
+  }
 }
 
 /// Quotes in [reply] that are not verbatim in the clip (case and quote
@@ -239,28 +299,73 @@ ${fenceTranscript(window.text)}''';
 List<String> invalidQuotes(Map<String, Object?> reply, String transcript) {
   final key = sourceKey(transcript);
   final bad = <String>[];
-  void check(Object? text) {
-    if (text is String && text.trim().isNotEmpty && !key.contains(sourceKey(text.trim()))) {
-      bad.add(text);
-    }
-  }
+  _eachQuote(reply, (text) {
+    if (text.trim().isNotEmpty && !key.contains(sourceKey(text.trim()))) bad.add(text);
+    return null;
+  });
+  return bad;
+}
 
-  for (final kind in ['words', 'phrases', 'sentences', 'shadowing']) {
-    final list = reply[kind];
-    if (list is List) {
-      for (final item in list) {
-        if (item is Map) check(item['text']);
+final _wordPattern = RegExp(r"[a-z0-9]+(?:'[a-z0-9]+)*");
+
+/// Lower-cased words of [text] with their offsets in it.
+List<(String, int, int)>? _words(String text) {
+  final plain = text.toLowerCase().replaceAll(RegExp(r'[’‘]'), "'");
+  // Offsets are only good while lower-casing keeps every character's place.
+  if (plain.length != text.length) return null;
+  return [for (final m in _wordPattern.allMatches(plain)) (m[0]!, m.start, m.end)];
+}
+
+/// The transcript span a near-verbatim [quote] was copied from (a dropped
+/// "um", a changed tense, a missing word), or null when no span is close
+/// enough. Short quotes are never guessed.
+String? snapQuote(String quote, String transcript) {
+  final q = _words(quote)?.map((w) => w.$1).toList();
+  final t = _words(transcript);
+  if (q == null || t == null || q.length < 4) return null;
+  final n = q.length, longest = n + 2;
+  var best = 0.0;
+  (int, int)? span;
+  for (var i = 0; i < t.length; i++) {
+    final width = longest < t.length - i ? longest : t.length - i;
+    // lcs[a][b]: longest common subsequence of q[..a] and t[i..i+b].
+    final lcs = List.generate(n + 1, (_) => List.filled(width + 1, 0));
+    for (var a = 1; a <= n; a++) {
+      for (var b = 1; b <= width; b++) {
+        lcs[a][b] = q[a - 1] == t[i + b - 1].$1
+            ? lcs[a - 1][b - 1] + 1
+            : (lcs[a - 1][b] > lcs[a][b - 1] ? lcs[a - 1][b] : lcs[a][b - 1]);
+      }
+    }
+    for (var length = n - 2 < 1 ? 1 : n - 2; length <= width; length++) {
+      final score = 2 * lcs[n][length] / (n + length);
+      if (score > best) {
+        best = score;
+        span = (t[i].$2, t[i + length - 1].$3);
       }
     }
   }
-  final retell = reply['retelling'];
-  if (retell is Map && retell['source_evidence'] is List) {
-    for (final e in retell['source_evidence'] as List) {
-      check(e);
-    }
-  }
-  return bad;
+  return best >= 0.8 && span != null ? transcript.substring(span.$1, span.$2) : null;
 }
+
+/// Replaces near-verbatim quotes in [reply] with the transcript's own text,
+/// so no request is spent on them.
+void snapQuotes(Map<String, Object?> reply, String transcript) {
+  final key = sourceKey(transcript);
+  _eachQuote(reply, (text) {
+    final quote = text.trim();
+    if (quote.isEmpty || key.contains(sourceKey(quote))) return null;
+    return snapQuote(quote, transcript);
+  });
+}
+
+/// The small repair reply: the exact text for each wrong quote.
+final quoteFixSchema = _obj({
+  'fixes': {
+    'type': 'array',
+    'items': _obj({'wrong': _str, 'exact': _str}),
+  },
+});
 
 String _s(Object? v) => v is String ? v.trim() : '';
 List<String> _l(Object? v) => [
@@ -320,9 +425,11 @@ ClipPlan planFromJson(Map<String, Object?> j) {
   );
 }
 
-/// L2 with one repair round: if quotes are not verbatim, the model is told
-/// which ones and asked again. Remaining bad quotes are dropped by the
-/// compiler. Returns null if the model produced no usable item.
+/// L2. Quotes that are not verbatim are first matched to the transcript
+/// locally; any left are sent back in one small request that asks only for
+/// the exact text of those quotes, not the whole plan again. Remaining bad
+/// quotes are dropped by the compiler. Returns null if the model produced
+/// no usable item.
 Future<ClipPlan?> planWithModel(
   JsonModel model,
   ClipWindow window,
@@ -330,28 +437,40 @@ Future<ClipPlan?> planWithModel(
   String level = 'B2',
   List<String> preferences = const [],
 }) async {
-  final system =
-      'You are an expert English teacher writing structured course data. $_dataRule '
-      'Reply with JSON only.';
-  final user = _clipPrompt(window, candidates, level, preferences);
-  var reply = await model.completeJson(
+  final system = clipSystem(level);
+  final answer = await model.completeJson(
     system: system,
-    user: user,
+    user: _clipPrompt(window, candidates, preferences),
     schemaName: 'clip_plan',
     schema: clipPlanSchema,
   );
-  final bad = invalidQuotes(reply, window.text);
+  // A private copy: replies may come from the cache or be read-only.
+  final reply = jsonDecode(jsonEncode(answer)) as Map<String, Object?>;
+  snapQuotes(reply, window.text);
+  final bad = invalidQuotes(reply, window.text).toSet().toList();
   if (bad.isNotEmpty) {
-    final repaired = await model.completeJson(
+    final fixed = await model.completeJson(
       system: system,
       user:
-          '$user\n\nYour previous answer was:\n${jsonEncode(reply)}\n\n'
-          'These quotes are not exact copies of the transcript: ${jsonEncode(bad)}. '
-          'Return the full JSON again with every quote copied exactly from the transcript.',
-      schemaName: 'clip_plan',
-      schema: clipPlanSchema,
+          'These quotes were meant to be copied exactly from the transcript but are not: '
+          '${jsonEncode(bad)}\nFor each one, give the transcript text it should be, copied '
+          'character for character, or an empty string if nothing fits.\n'
+          '${fenceTranscript(window.text)}',
+      schemaName: 'quote_fixes',
+      schema: quoteFixSchema,
     );
-    if (invalidQuotes(repaired, window.text).length < bad.length) reply = repaired;
+    final key = sourceKey(window.text);
+    final exact = <String, String>{
+      if (fixed['fixes'] is List)
+        for (final f in fixed['fixes'] as List)
+          if (f is Map &&
+              f['wrong'] is String &&
+              f['exact'] is String &&
+              (f['exact'] as String).trim().isNotEmpty &&
+              key.contains(sourceKey((f['exact'] as String).trim())))
+            f['wrong'] as String: (f['exact'] as String).trim(),
+    };
+    _eachQuote(reply, (text) => exact[text]);
   }
   final plan = planFromJson(reply);
   return plan.items.isEmpty ? null : plan;

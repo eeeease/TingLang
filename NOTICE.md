@@ -199,7 +199,8 @@ and are downloaded by macOS itself (AssetInventory) when the user asks.
 
 Flutter, media_kit and its native video libraries, file_picker, path_provider,
 path, crypto, ffi, sherpa_onnx (see above), record, drift, sqlite3 (which bundles SQLite, public domain),
-intl, flutter_localizations, pigeon (development only), build_runner /
+intl, flutter_localizations, genkit / genkit_openai / genkit_anthropic / schemantic
+(Apache-2.0), openai_dart / anthropic_sdk_dart (MIT), http, pigeon (development only), build_runner /
 drift_dev (development only) and json_schema / yaml (development only, for the
 API contract check) retain their respective licences. Versions are
 locked in `pubspec.lock`. Review the generated dependency licence list and the

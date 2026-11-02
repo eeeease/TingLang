@@ -4,6 +4,16 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.0 · AI courses on Genkit, clips in parallel
+
+| Command | Outcome |
+| --- | --- |
+| Research on pub.dev (2026-11-02) | genkit 1.0.1 (Google, Oct 2026, 40k downloads/30 days, plugins for OpenAI-compatible servers, Anthropic, Gemini), dartantic_ai 3.4.2 (Jul 2026, 8.6k), langchain 0.9.0 (Aug 2026, 3.2k; langchain_anthropic 0.4), llm_dart 0.10.7 (Mar 2026, 90 points). Genkit chosen; sources of genkit, genkit_openai, genkit_anthropic, schemantic and both SDKs read for request shape, errors and usage |
+| `bash scripts/check.sh` | Python checks 33 OK; analyze no issues; app tests 307 (new: the OpenAI-compatible client steps from `json_schema` to `json_object` with the schema on one line in the system prompt and plain-string messages, remembers it, counts tokens; a model listed without JSON schema starts at `json_object`; chat errors carry the status and never the key; Claude requests carry `output_config`, `max_tokens` 16000, the key only in `x-api-key`, refusals and cut-off replies reported as such; near-verbatim quotes fixed locally, the rest by one small request that asks only for quotes; clips planned at most N at once, in order, stopping after a fatal error; the end-to-end run over HTTP reports provider tokens); other packages as before |
+| `fvm dart run tools/llm_demo.dart --base-url http://127.0.0.1:18765/v1 --model fake --clips 3` against a stand-in OpenAI-compatible server (Python, scratch) | 30 sentences, 2 windows, both clips requested at the same time (0.5 s for two 0.4 s answers), a sentence with a dropped word restored from the transcript without a further request, the course validated with the strict codec, `json_schema` used |
+
+Not run: any real provider (needs your key; `tools/llm_demo.dart` is the check); the app's Make course dialog with the new client; a macOS build.
+
 ## 0.7.6 · video back, online playback for links, covers
 
 | Command | Outcome |

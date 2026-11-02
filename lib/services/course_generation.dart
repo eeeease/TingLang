@@ -72,6 +72,10 @@ class CourseGenerationService {
 
   static String courseIdFor(String sessionId) => 'gen-$sessionId';
 
+  /// Clip requests in flight at once. Providers' SDKs retry rate limits
+  /// with backoff, so a low tier only slows down.
+  static const parallelClips = 4;
+
   /// `preferences` flags from the learner profile (learner.json), as plain
   /// phrases: `prefer_common_words: true` → "prefer common words". Only
   /// fixed-shape keys are used; values are never copied into the prompt.
@@ -239,8 +243,10 @@ class CourseGenerationService {
     // D3 + L2 / Basic.
     job.clipsTotal = picked.length;
     job._set(GenerationStage.planning);
-    final plans = <ClipPlan>[];
-    for (final i in picked) {
+    // Clips are planned side by side; a run that must stop (a rejected key,
+    // an unreachable provider) stops starting new ones.
+    final plans = await inParallel(picked.length, parallelClips, (n) async {
+      final i = picked[n];
       ClipPlan? plan;
       if (model != null) {
         // A clip the model fails on gets Basic content; one bad reply does
@@ -257,10 +263,10 @@ class CourseGenerationService {
         count();
         if (plan == null) job.fallbacks++;
       }
-      plans.add(plan ?? basicPlan(windows[i], candidates[i]));
       job.clipsDone++;
       job._changed();
-    }
+      return plan ?? basicPlan(windows[i], candidates[i]);
+    });
 
     // D4.
     job._set(GenerationStage.compiling);
