@@ -5,15 +5,20 @@
 //   TINGLANG_LLM_KEY=sk-ant-… fvm dart run tools/official/build_courses.dart \
 //     --manifest ../TingLang-web/scripts/library-manifest.json \
 //     --work ../TingLang-web/library-work --out ../TingLang-web/library-courses \
-//     --yt-dlp <path> --transcriber <path> [--model claude-haiku-5-5] [--budget 200]
+//     --yt-dlp <path> --transcriber <path> [--model claude-haiku-5-5] [--budget 200] \
+//     [--clip-minutes 2] [--max-clips 30]
 //
 // For each `url` entry: page facts (yt-dlp -J), then the transcript — the
 // page's English captions when it has them, else its audio transcribed on
 // this Mac (tools/official/transcribe.swift, built with swiftc; the audio
 // is deleted afterwards) — then L1 selection and parallel L2 clip plans,
-// compiled and validated like any generated course. Finished courses are
-// skipped on the next run; no new video starts once [--budget] US dollars
-// are spent. The key is read from TINGLANG_LLM_KEY only.
+// compiled and validated like any generated course. A course gets a clip
+// per [--clip-minutes] of video, at most [--max-clips]. Finished courses
+// are skipped on the next run unless built at another density: those are
+// rebuilt and the new file replaces the old one in place. No new video
+// starts once [--budget] US dollars are spent. A summary goes to
+// `_summary-<manifest name>.json` in --out, so runs over different
+// manifests can share one --out. The key is read from TINGLANG_LLM_KEY only.
 import 'dart:convert';
 import 'dart:io';
 
@@ -26,6 +31,8 @@ import 'package:tinglang/core/providers/catalog.dart';
 import 'package:tinglang/core/providers/llm_client.dart';
 
 late String ytDlp, transcriber;
+late double clipMinutes;
+late int maxClips;
 late Directory work;
 
 Future<void> main(List<String> args) async {
@@ -41,6 +48,8 @@ Future<void> main(List<String> args) async {
   work = Directory(options['work']!)..createSync(recursive: true);
   final out = Directory(options['out']!)..createSync(recursive: true);
   final budget = double.tryParse(options['budget'] ?? '') ?? 200;
+  clipMinutes = double.tryParse(options['clip-minutes'] ?? '') ?? 2;
+  maxClips = int.tryParse(options['max-clips'] ?? '') ?? 30;
   final model = options['model'] ?? 'claude-haiku-5-5';
   final key = Platform.environment['TINGLANG_LLM_KEY'];
   if (key == null || key.isEmpty) _usage('TINGLANG_LLM_KEY is not set');
@@ -82,8 +91,8 @@ Future<void> main(List<String> args) async {
         _log('skip $url: not a YouTube video');
         continue;
       }
-      final done = out.listSync().whereType<File>().where((f) => f.path.contains('youtube-$id-'));
-      if (done.isNotEmpty) {
+      final done = out.listSync().whereType<File>().where((f) => f.path.contains('youtube-$id-')).toList();
+      if (done.isNotEmpty && _density(done.first) == clipMinutes) {
         _log('done $id (${done.first.uri.pathSegments.last})');
         continue;
       }
@@ -107,6 +116,11 @@ Future<void> main(List<String> args) async {
         warm = true;
         final file = File('${out.path}/${course['podcast_id']}.json')
           ..writeAsStringSync(jsonEncode(course));
+        // A course rebuilt under a new title: keep the old file aside.
+        for (final old in done.where((f) => f.path != file.path)) {
+          final kept = Directory('${out.path}-replaced')..createSync(recursive: true);
+          old.renameSync('${kept.path}/${old.uri.pathSegments.last}');
+        }
         final clips = (course['clips']! as List).length;
         final cost = spent() - before.$3;
         summary.add({
@@ -136,7 +150,8 @@ Future<void> main(List<String> args) async {
       'total: ${u.calls} requests, ${u.inputTokens} input, ${u.cacheWriteTokens} cache written, '
       '${u.cacheReadTokens} cache read, ${u.outputTokens} output tokens = \$${spent().toStringAsFixed(3)}',
     );
-    File('${out.path}/_summary.json').writeAsStringSync(
+    final name = File(options['manifest']!).uri.pathSegments.last.replaceAll('.json', '');
+    File('${out.path}/_summary-$name.json').writeAsStringSync(
       const JsonEncoder.withIndent('  ').convert({
         'model': model,
         'usd': double.parse(spent().toStringAsFixed(4)),
@@ -306,9 +321,10 @@ Future<Map<String, Object?>> _course({
   for (var i = 0; i < windows.length; i++) {
     windows[i].score = candidates[i].density + (windows[i].durationMs >= 30000 ? 1 : 0);
   }
-  // About one clip per 4 minutes: richer than an everyday generated course.
+  // A clip per [clipMinutes] of video: much richer than an everyday
+  // generated course.
   final minutes = ((info['duration'] as num?) ?? windows.last.endMs / 1000) / 60;
-  final count = (minutes / 4).round().clamp(2, 15).clamp(1, windows.length);
+  final count = (minutes / clipMinutes).round().clamp(2, maxClips).clamp(1, windows.length);
   var picked = selectWindows(windows, count: count);
   Map<String, Object?>? overview;
   if (windows.length > picked.length) {
@@ -347,6 +363,7 @@ Future<Map<String, Object?>> _course({
   );
   json[Course.youtubeIdKey] = id;
   json['tinglang_category'] = entry['category'];
+  json['tinglang_clip_minutes'] = clipMinutes;
   json['tinglang_series'] = entry['series'];
   if (info['duration'] is num) {
     json['tinglang_duration_ms'] = ((info['duration']! as num) * 1000).round();
@@ -355,18 +372,38 @@ Future<Map<String, Object?>> _course({
   return json;
 }
 
-/// A clip the model fails on gets Basic content; a rejected key or an
-/// unreachable provider stops the run.
-Future<T?> _soft<T>(Future<T?> Function() call) async {
+/// The clip density a finished course was built with; older courses have
+/// none and are rebuilt (the new file replaces the old one).
+double? _density(File course) {
   try {
-    return await call();
-  } on LlmException catch (e) {
-    if (e.unauthorized || e.status == null) rethrow;
-    _log('  model problem, Basic content instead: $e');
+    final json = jsonDecode(course.readAsStringSync()) as Map<String, Object?>;
+    return (json['tinglang_clip_minutes'] as num?)?.toDouble();
+  } on Object {
     return null;
-  } on FormatException catch (e) {
-    _log('  unusable reply, Basic content instead: ${e.message}');
-    return null;
+  }
+}
+
+/// A clip the model fails on gets Basic content; a rejected key or an
+/// unreachable provider stops the run. Rate limits and overloads are
+/// waited out first, so several runs can share one key.
+Future<T?> _soft<T>(Future<T?> Function() call) async {
+  for (var attempt = 1; ; attempt++) {
+    try {
+      return await call();
+    } on LlmException catch (e) {
+      if (e.unauthorized || e.status == null) rethrow;
+      final busy = e.status == 429 || e.status == 529 || e.status! >= 500;
+      if (busy && attempt < 6) {
+        _log('  busy (${e.status}), retrying in ${attempt * 15} s');
+        await Future<void>.delayed(Duration(seconds: attempt * 15));
+        continue;
+      }
+      _log('  model problem, Basic content instead: $e');
+      return null;
+    } on FormatException catch (e) {
+      _log('  unusable reply, Basic content instead: ${e.message}');
+      return null;
+    }
   }
 }
 
