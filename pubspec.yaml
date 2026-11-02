@@ -1,7 +1,7 @@
 name: tinglang
 description: A local-first English practice studio. Learn from your scenes; speak in your own words.
 publish_to: 'none'
-version: 0.8.2+16
+version: 0.8.3+17
 environment:
   sdk: ^3.13.0
   flutter: '>=3.47.7'
