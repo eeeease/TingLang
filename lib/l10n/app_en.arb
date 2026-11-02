@@ -619,6 +619,14 @@
   "panelView": "View",
   "panelMakeCourse": "Make course",
   "panelDropHint": "Drop to import and transcribe",
+  "reviewDueHint": "{count} cards due for review — click to review",
+  "@reviewDueHint": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "panelNewRecordings": "{count} new recordings",
   "@panelNewRecordings": {
     "placeholders": {

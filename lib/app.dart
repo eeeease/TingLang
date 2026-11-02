@@ -270,7 +270,12 @@ class _TinglangShellState extends State<TinglangShell> {
     widget.navigation.value = null;
     switch (request) {
       case OpenHistory():
-        _navigate(Section.records, records: RecordsTab.captions);
+        // The panel's count is cards due for review: with any due, its
+        // button opens the review tab.
+        _navigate(
+          Section.records,
+          records: widget.app.due.isEmpty ? RecordsTab.captions : RecordsTab.review,
+        );
       case OpenSettings(:final speech):
         _navigate(Section.settings, settings: speech ? SettingsTab.speech : null);
       case OpenVoiceMemos():
@@ -556,6 +561,7 @@ class _TinglangShellState extends State<TinglangShell> {
               dueCount: widget.app.due.length,
               live: widget.live,
               onSelect: (section) => _navigate(section),
+              onReview: () => _navigate(Section.records, records: RecordsTab.review),
               onSpeechSetup: () => _navigate(Section.settings, settings: SettingsTab.speech),
               cloud: widget.cloud,
               openUrl: widget.openUrl,
@@ -621,6 +627,7 @@ class _Sidebar extends StatelessWidget {
     required this.dueCount,
     required this.live,
     required this.onSelect,
+    required this.onReview,
     required this.onSpeechSetup,
     this.cloud,
     this.openUrl,
@@ -631,6 +638,9 @@ class _Sidebar extends StatelessWidget {
   final int dueCount;
   final LiveController live;
   final ValueChanged<Section> onSelect;
+
+  /// Opens History → Review (the count by History is cards due).
+  final VoidCallback onReview;
 
   /// Shows Settings → Speech recognition (start found nothing set up).
   final VoidCallback onSpeechSetup;
@@ -720,6 +730,8 @@ class _Sidebar extends StatelessWidget {
             icon: Icons.subtitles_outlined,
             label: l.navRecords,
             count: dueCount,
+            countHint: l.reviewDueHint('$dueCount'),
+            onCount: onReview,
             selected: section == Section.records,
             enabled: !locked,
             onTap: () => onSelect(Section.records),
@@ -798,12 +810,18 @@ class _NavItem extends StatelessWidget {
     required this.enabled,
     required this.onTap,
     this.count = 0,
+    this.countHint,
+    this.onCount,
   });
   final IconData icon;
   final String label;
   final bool selected, enabled;
   final VoidCallback onTap;
   final int count;
+
+  /// What [count] counts, shown on hover; tapping the count runs [onCount].
+  final String? countHint;
+  final VoidCallback? onCount;
 
   @override
   Widget build(BuildContext context) {
@@ -836,12 +854,25 @@ class _NavItem extends StatelessWidget {
                     ),
                   ),
                   if (count > 0)
-                    Text(
-                      '$count',
-                      style: SlType.caption.copyWith(
-                        color: tone,
-                        fontWeight: FontWeight.w600,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                    Tooltip(
+                      message: countHint ?? '',
+                      child: InkWell(
+                        key: key is ValueKey<String>
+                            ? ValueKey('${(key! as ValueKey<String>).value}-count')
+                            : null,
+                        borderRadius: SlRadius.all(8),
+                        onTap: enabled ? (onCount ?? onTap) : null,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          child: Text(
+                            '$count',
+                            style: SlType.caption.copyWith(
+                              color: tone,
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: const [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                 ],

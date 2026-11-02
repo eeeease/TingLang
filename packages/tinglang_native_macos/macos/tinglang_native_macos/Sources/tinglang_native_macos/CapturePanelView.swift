@@ -1052,7 +1052,12 @@ private struct HistoryButton: View {
     }
     .buttonStyle(.plain)
     .onHover { hovering = $0 }
-    .panelHint(model.text("history", "History and review"), model: model)
+    .panelHint(
+      model.dueCount > 0
+        ? model.text("historyDue", "{n} cards due for review — click to review")
+          .replacingOccurrences(of: "{n}", with: "\(model.dueCount)")
+        : model.text("history", "History and review"),
+      model: model)
   }
 }
 

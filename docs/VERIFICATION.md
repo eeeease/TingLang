@@ -4,6 +4,16 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.2 · the count by History explained, denser official courses
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks 33 OK; analyze no issues; app tests 314 (new: with a card due, the count by History says "1 张卡片待复习，点这里复习" on hover, tapping it opens Review, and the panel's history request opens Review instead of Captions); `tinglang_api` 74 plus the contract check; other packages as before |
+| `fvm flutter build macos --debug` | Built `Tinglang.app` (the panel's history button now names the due cards in its hint) |
+| `build_courses` (compiled, Haiku 5.5) on the 34 videos of 0.8.1 at the new density | 34 of 34 rebuilt in place, one clip per 2 minutes (at most 30): 462 requests, 1,000,073 tokens read from the prompt cache, $0.93. A second run skips them; an older course without a density is rebuilt |
+
+Not run: the panel in the running app with a card due.
+
 ## 0.8.1 · official library by interest, captions-first links
 
 | Command | Outcome |

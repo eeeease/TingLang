@@ -1031,6 +1031,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get panelDropHint => 'Drop to import and transcribe';
 
   @override
+  String reviewDueHint(String count) {
+    return '$count cards due for review — click to review';
+  }
+
+  @override
   String panelNewRecordings(String count) {
     return '$count new recordings';
   }

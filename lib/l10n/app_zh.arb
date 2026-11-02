@@ -303,6 +303,7 @@
   "panelView": "查看",
   "panelMakeCourse": "生成课程",
   "panelDropHint": "松开即可导入并转写",
+  "reviewDueHint": "{count} 张卡片待复习，点这里复习",
   "panelNewRecordings": "{count} 条新录音",
   "panelDisplay": "显示方式",
   "panelModeCard": "卡片",

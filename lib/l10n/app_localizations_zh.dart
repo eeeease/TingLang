@@ -999,6 +999,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get panelDropHint => '松开即可导入并转写';
 
   @override
+  String reviewDueHint(String count) {
+    return '$count 张卡片待复习，点这里复习';
+  }
+
+  @override
   String panelNewRecordings(String count) {
     return '$count 条新录音';
   }

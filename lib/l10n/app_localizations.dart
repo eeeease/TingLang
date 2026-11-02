@@ -1911,6 +1911,12 @@ abstract class AppLocalizations {
   /// **'Drop to import and transcribe'**
   String get panelDropHint;
 
+  /// No description provided for @reviewDueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cards due for review — click to review'**
+  String reviewDueHint(String count);
+
   /// No description provided for @panelNewRecordings.
   ///
   /// In en, this message translates to:

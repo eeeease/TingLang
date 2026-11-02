@@ -8,6 +8,8 @@ import 'package:tinglang/app.dart';
 import 'package:tinglang/core/library_store.dart';
 import 'package:tinglang/core/db/database.dart';
 import 'package:tinglang/core/live_repository.dart';
+import 'package:tinglang/core/review.dart';
+import 'package:tinglang/services/panel_coordinator.dart';
 import 'package:tinglang/services/app_controller.dart';
 import 'package:tinglang/services/live_controller.dart';
 import 'package:tinglang/services/transcription_controller.dart';
@@ -97,6 +99,65 @@ void main() {
     expect(find.text('TingLang'), findsWidgets);
     expect(find.text('History'), findsWidgets);
     expect(app.setting(AppController.learningLanguageKey, 'en'), 'ja');
+  });
+
+  testWidgets('the count by History is cards due: it says so and opens Review', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.llfbandit.record/messages'),
+      (call) async => null,
+    );
+    tester.view.physicalSize = const Size(1400, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final app = AppController(
+      MemoryStore(),
+      LibraryState(
+        settings: {AppController.uiLocaleKey: 'zh'},
+        reviews: [
+          ReviewCard(
+            id: 'r1',
+            courseId: 'c',
+            clipId: 'a',
+            text: 'show up',
+            meaning: '坚持参与',
+            dueAt: DateTime.utc(2026),
+          ),
+        ],
+      ),
+    );
+    final db = TinglangDatabase.memory();
+    addTearDown(() => tester.runAsync(db.close));
+    final live = LiveController(repository: LiveRepository(db));
+    final navigation = ValueNotifier<ShellRequest?>(null);
+    await tester.pumpWidget(
+      TinglangApp(
+        controller: app,
+        playback: PlaybackHub(),
+        recorder: RecordingService(MemoryStore()),
+        live: live,
+        transcription: TranscriptionController(repository: live.repository, store: MemoryStore()),
+        navigation: navigation,
+        exitNotice: ValueNotifier(null),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final count = find.byKey(const ValueKey('nav-records-count'));
+    expect(count, findsOneWidget);
+    expect(find.byTooltip('1 张卡片待复习，点这里复习'), findsOneWidget);
+    expect(find.text('坚持参与'), findsNothing, reason: 'History opens on captions');
+    await tester.tap(count);
+    await tester.pumpAndSettle();
+    expect(find.text('坚持参与'), findsOneWidget);
+
+    // The panel's history button, with cards due, opens Review too.
+    await tester.tap(find.text('字幕'));
+    await tester.pumpAndSettle();
+    expect(find.text('坚持参与'), findsNothing);
+    navigation.value = const OpenHistory();
+    await tester.pumpAndSettle();
+    expect(find.text('坚持参与'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a newer version puts a green arrow on the mark that opens the update', (

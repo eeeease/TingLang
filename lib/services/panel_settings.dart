@@ -147,6 +147,7 @@ Map<String, String> panelStrings(AppLocalizations l) => {
   'sourceSystem': l.liveSourceSystem,
   'sourceMic': l.liveSourceMic,
   'history': l.panelHistory,
+  'historyDue': l.reviewDueHint('{n}'),
   'more': l.panelMore,
   'appearance': l.panelAppearance,
   'openApp': l.panelOpenApp,
