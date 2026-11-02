@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   title: Tinglang Cloud API
-  version: 1.1.0
+  version: 1.2.0
   summary: The contract between the Tinglang desktop client and a Tinglang server.
   description: |
     Optional cloud services for Tinglang: accounts and entitlements, cloud jobs

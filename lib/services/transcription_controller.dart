@@ -232,6 +232,70 @@ class TranscriptionController extends ChangeNotifier {
     return job;
   }
 
+  /// Saves a transcript that already exists (a page's captions) as a
+  /// session without media, the way [importFile] saves a transcribed one.
+  /// The returned job is already done or failed.
+  Future<ImportJob> importLines(
+    List<({int startMs, int endMs, String text, String? wordsJson})> lines, {
+    required String language,
+    String origin = 'file',
+    String? sourceRef,
+    required String title,
+    DateTime? recordedAt,
+  }) async {
+    final job = ImportJob(newId(), title.trim(), sourceRef: sourceRef);
+    jobs.insert(0, job);
+    notifyListeners();
+    var sessionCreated = false;
+    try {
+      await repository.createSession(
+        id: job.sessionId,
+        origin: origin,
+        language: language,
+        title: job.title,
+        startedAt: (recordedAt ?? DateTime.now()).toUtc(),
+        timeBase: 'media',
+        sourceRef: sourceRef,
+      );
+      sessionCreated = true;
+      final segments = <NewSegment>[
+        for (var i = 0; i < lines.length; i++)
+          (
+            id: '${job.sessionId}-$i',
+            startMs: lines[i].startMs,
+            endMs: lines[i].endMs,
+            text: lines[i].text,
+            language: language,
+            wordsJson: lines[i].wordsJson,
+          ),
+      ];
+      for (var i = 0; i < segments.length; i += batchSize) {
+        await repository.addSegments(
+          job.sessionId,
+          segments.sublist(i, i + batchSize > segments.length ? segments.length : i + batchSize),
+        );
+      }
+      job.segments = segments.length;
+      await repository.endSession(
+        job.sessionId,
+        status: 'completed',
+        endedAt: DateTime.now().toUtc(),
+      );
+      job._set(status: ImportStatus.done, progress: 1);
+    } catch (e) {
+      if (sessionCreated) {
+        await repository.endSession(
+          job.sessionId,
+          status: 'failed',
+          endedAt: DateTime.now().toUtc(),
+        );
+      }
+      job._set(status: ImportStatus.failed, failure: e);
+    }
+    notifyListeners();
+    return job;
+  }
+
   Future<void> _run(
     ImportJob job,
     File source,

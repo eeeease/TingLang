@@ -823,6 +823,8 @@ class LibraryEntry {
     required this.clipCount,
     required this.version,
     this.area,
+    this.category,
+    this.series,
     this.sourceLabel,
     this.youtubeId,
     this.coverUrl,
@@ -839,6 +841,8 @@ class LibraryEntry {
       clipCount: r.number('clip_count').toInt(),
       version: r.str('version'),
       area: r.optStr('area'),
+      category: r.optStr('category'),
+      series: r.optStr('series'),
       sourceLabel: r.optStr('source_label'),
       youtubeId: r.optStr('youtube_id'),
       coverUrl: r.optUri('cover_url'),
@@ -853,6 +857,9 @@ class LibraryEntry {
   final String title, version;
   final int clipCount;
   final String? area, sourceLabel, youtubeId, learnerLevel;
+
+  /// Id of one of [OfficialLibrary.categories], and the show it comes from.
+  final String? category, series;
   final Uri? coverUrl;
   final int? durationMs;
   final DateTime? updatedAt;
@@ -861,6 +868,8 @@ class LibraryEntry {
     'id': id,
     'title': title,
     'area': ?area,
+    'category': ?category,
+    'series': ?series,
     'source_label': ?sourceLabel,
     'youtube_id': ?youtubeId,
     'cover_url': ?coverUrl?.toString(),
@@ -872,25 +881,64 @@ class LibraryEntry {
   };
 }
 
+/// An interest category of the official library, named per language.
+class LibraryCategory {
+  const LibraryCategory({required this.id, required this.names});
+
+  factory LibraryCategory.fromJson(Object? value) {
+    final r = _Read(value, 'library.categories[]');
+    final names = r.json['names'];
+    if (names is! Map || names['en'] is! String) {
+      throw const ApiBadResponse('library.categories[].names: expected an object with en');
+    }
+    return LibraryCategory(
+      id: r.str('id'),
+      names: {
+        for (final e in names.entries)
+          if (e.key is String && e.value is String) e.key as String: e.value as String,
+      },
+    );
+  }
+
+  final String id;
+
+  /// Display name per language tag; `en` is always there.
+  final Map<String, String> names;
+
+  /// The name for [languageCode], else English.
+  String name(String languageCode) => names[languageCode] ?? names['en']!;
+
+  Map<String, Object?> toJson() => {'id': id, 'names': names};
+}
+
 /// The official library (GET /library): text-only courses with covers.
 class OfficialLibrary {
-  const OfficialLibrary({required this.courses, this.updatedAt});
+  const OfficialLibrary({required this.courses, this.categories = const [], this.updatedAt});
 
   factory OfficialLibrary.fromJson(Object? value) {
     final r = _Read(value, 'library');
     final list = r.json['courses'];
     if (list is! List) throw const ApiBadResponse('library.courses: expected a list');
+    final categories = r.json['categories'];
     return OfficialLibrary(
       updatedAt: r.optDate('updated_at'),
+      categories: [
+        if (categories is List)
+          for (final c in categories) LibraryCategory.fromJson(c),
+      ],
       courses: [for (final c in list) LibraryEntry.fromJson(c)],
     );
   }
 
   final List<LibraryEntry> courses;
+
+  /// Interest categories in display order (none from servers before 1.2).
+  final List<LibraryCategory> categories;
   final DateTime? updatedAt;
 
   Map<String, Object?> toJson() => {
     if (updatedAt != null) 'updated_at': rfc3339(updatedAt!),
+    if (categories.isNotEmpty) 'categories': [for (final c in categories) c.toJson()],
     'courses': [for (final c in courses) c.toJson()],
   };
 }

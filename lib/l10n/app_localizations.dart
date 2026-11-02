@@ -4352,6 +4352,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The official library cannot be reached right now'**
   String get officialUnavailable;
+
+  /// No description provided for @officialAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get officialAllCategories;
+
+  /// No description provided for @officialOtherCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get officialOtherCategory;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

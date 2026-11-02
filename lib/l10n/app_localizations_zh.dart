@@ -2371,4 +2371,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get officialUnavailable => '暂时连不上官方素材库';
+
+  @override
+  String get officialAllCategories => '全部';
+
+  @override
+  String get officialOtherCategory => '其他';
 }

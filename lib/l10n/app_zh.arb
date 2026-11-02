@@ -709,5 +709,7 @@
   "officialAdd": "加入素材库",
   "officialOpen": "打开",
   "officialUpdate": "更新",
-  "officialUnavailable": "暂时连不上官方素材库"
+  "officialUnavailable": "暂时连不上官方素材库",
+  "officialAllCategories": "全部",
+  "officialOtherCategory": "其他"
 }

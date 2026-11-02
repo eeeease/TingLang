@@ -7,6 +7,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
+import '../core/captions.dart';
+
 import 'app_controller.dart';
 import 'course_covers.dart';
 import 'course_generation.dart';
@@ -47,6 +49,7 @@ final class LinkInfo {
     this.duration,
     this.site,
     this.thumbnail,
+    this.captions,
   });
   final String url, title;
   final Duration? duration;
@@ -56,6 +59,9 @@ final class LinkInfo {
 
   /// The page's picture, which becomes the course cover.
   final Uri? thumbnail;
+
+  /// English captions the page offers; read instead of transcribing.
+  final CaptionTrack? captions;
 }
 
 /// Where a page's video plays from right now (such addresses expire) and
@@ -244,27 +250,37 @@ class LinkImportService extends ChangeNotifier {
       duration: seconds is num ? Duration(milliseconds: (seconds * 1000).round()) : null,
       site: json['extractor_key'] as String?,
       thumbnail: thumbnail != null && thumbnail.isScheme('https') ? thumbnail : null,
+      captions: englishCaptions(json),
     );
   }
 
-  /// Imports [info]'s audio: downloads it into a temporary folder, hands it to
-  /// [transcription] (which reads it there, keeping no copy) and, once the
-  /// transcript is done, deletes it and makes a Basic course. The page's
-  /// picture becomes the cover.
+  /// Imports [info]: its English captions when the page has them (nothing
+  /// to download or transcribe), otherwise its audio, downloaded into a
+  /// temporary folder and handed to [transcription] (which reads it there,
+  /// keeping no copy). Once the transcript is done the folder goes and a
+  /// Basic course is made. The page's picture becomes the cover.
   Future<ImportJob> import(LinkInfo info) async {
     _cancelled = false;
     final work = await _workFolder();
     try {
-      final audio = await _download(info.url, work);
-      final job = await transcribeMedia(
-        app,
-        transcription,
-        audio,
-        origin: 'link',
-        sourceRef: info.url,
-        title: info.title,
-        keepMedia: false,
-      );
+      final lines = info.captions == null ? null : await _captions(info, work);
+      final job = lines != null
+          ? await transcription.importLines(
+              lines,
+              language: 'en',
+              origin: 'link',
+              sourceRef: info.url,
+              title: info.title,
+            )
+          : await transcribeMedia(
+              app,
+              transcription,
+              await _download(info.url, work),
+              origin: 'link',
+              sourceRef: info.url,
+              title: info.title,
+              keepMedia: false,
+            );
       final thumbnail = info.thumbnail;
       if (thumbnail != null) {
         unawaited(_saveCover(CourseGenerationService.courseIdFor(job.sessionId), thumbnail));
@@ -364,6 +380,46 @@ class LinkImportService extends ChangeNotifier {
   void cancel() {
     _cancelled = true;
     _running?.kill();
+  }
+
+  /// Fewest words a caption track needs to be used instead of the audio.
+  static const minCaptionWords = 20;
+
+  /// [info]'s captions as lines, or null when they cannot be read (the
+  /// audio is transcribed instead).
+  Future<List<({int startMs, int endMs, String text, String? wordsJson})>?> _captions(
+    LinkInfo info,
+    Directory work,
+  ) async {
+    final track = info.captions!;
+    final result = await Process.run(
+      tool.path,
+      [
+        '--skip-download',
+        if (track.automatic) '--write-auto-subs' else '--write-subs',
+        '--sub-langs',
+        track.language,
+        '--sub-format',
+        'json3',
+        '--no-playlist',
+        '--no-warnings',
+        '-o',
+        p.join(work.path, 'captions'),
+        info.url,
+      ],
+      stdoutEncoding: utf8,
+      stderrEncoding: utf8,
+    );
+    if (_cancelled) throw const LinkImportFailure(LinkProblem.network, 'cancelled');
+    final file = File(p.join(work.path, 'captions.${track.language}.json3'));
+    if (result.exitCode != 0 || !await file.exists()) return null;
+    final lines = captionLines(await file.readAsString());
+    final words = lines.fold(0, (n, l) => n + l.text.split(' ').length);
+    if (words < minCaptionWords) return null;
+    return [
+      for (final l in lines)
+        (startMs: l.startMs, endMs: l.endMs, text: l.text, wordsJson: l.wordsJson),
+    ];
   }
 
   Future<File> _download(String url, Directory work) async {

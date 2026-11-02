@@ -47,7 +47,12 @@ Map<String, Object?> _message(String text, {String stop = 'end_turn'}) => {
     {'type': 'text', 'text': text},
   ],
   'stop_reason': stop,
-  'usage': {'input_tokens': 1200, 'output_tokens': 800},
+  'usage': {
+    'input_tokens': 1200,
+    'output_tokens': 800,
+    'cache_creation_input_tokens': 2400,
+    'cache_read_input_tokens': 0,
+  },
 };
 
 void main() {
@@ -85,7 +90,14 @@ void main() {
     );
     expect(headers.every((h) => h.value('anthropic-version') == '2023-06-01'), isTrue);
     final body = bodies.single;
-    expect(body['system'], 'sys');
+    // The system prompt is marked for prompt caching.
+    expect(body['system'], [
+      {
+        'type': 'text',
+        'text': 'sys',
+        'cache_control': {'type': 'ephemeral'},
+      },
+    ]);
     expect(body['max_tokens'], LlmClient.anthropicMaxTokens);
     expect(body['output_config'], {
       'format': {'type': 'json_schema', 'schema': schema},
@@ -94,6 +106,8 @@ void main() {
     expect(body.containsKey('fallbacks'), isFalse);
     expect(client.usage.inputTokens, 1200);
     expect(client.usage.outputTokens, 800);
+    expect(client.usage.cacheWriteTokens, 2400);
+    expect(client.usage.cacheReadTokens, 0);
     client.close();
   });
 
@@ -184,6 +198,8 @@ void main() {
       expect(opus.context, 1000000);
       expect(opus.jsonSchema, isTrue);
       expect(opus.cost(1000000, 100000), closeTo(6, 1e-9));
+      // Cache writes at 1.25×, reads at 0.1× the input price.
+      expect(opus.cost(0, 0, cacheWrites: 1000000, cacheReads: 1000000), closeTo(5.4, 1e-9));
       final estimate = CostEstimate.forCourse(
         windows: 3,
         clips: 1,

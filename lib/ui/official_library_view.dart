@@ -21,6 +21,11 @@ class OfficialLibraryView extends StatefulWidget {
 class _OfficialLibraryViewState extends State<OfficialLibraryView> {
   OfficialLibraryService get _official => widget.official;
 
+  /// The chosen category id; null shows every course, [_other] those in
+  /// no listed category.
+  String? _category;
+  static const _other = '';
+
   @override
   void initState() {
     super.initState();
@@ -60,11 +65,59 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
             ],
           );
         }
+        final language = Localizations.localeOf(context).languageCode;
+        final listed = {for (final category in library.categories) category.id};
+        bool inCategory(LibraryEntry entry, String id) =>
+            id == _other ? !listed.contains(entry.category) : entry.category == id;
+        // Only categories that have courses; a stale choice shows everything.
+        final categories = [
+          for (final category in library.categories)
+            if (library.courses.any((e) => e.category == category.id)) category,
+        ];
+        final others = categories.isNotEmpty && library.courses.any((e) => inCategory(e, _other));
+        final chosen =
+            _category == null ||
+                (_category == _other ? others : categories.any((x) => x.id == _category))
+            ? _category
+            : null;
+        final courses = chosen == null
+            ? library.courses
+            : [
+                for (final entry in library.courses)
+                  if (inCategory(entry, chosen)) entry,
+              ];
         return ListView(
           padding: const EdgeInsets.fromLTRB(SlSpace.page, 0, SlSpace.page, SlSpace.page),
           children: [
             Text(l.officialIntro, style: SlType.body.copyWith(color: c.inkSoft)),
             const SizedBox(height: SlSpace.xl),
+            if (categories.isNotEmpty) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: Text(l.officialAllCategories),
+                    selected: chosen == null,
+                    onSelected: (_) => setState(() => _category = null),
+                  ),
+                  for (final category in categories)
+                    ChoiceChip(
+                      key: ValueKey('official-category-${category.id}'),
+                      label: Text(category.name(language)),
+                      selected: chosen == category.id,
+                      onSelected: (_) => setState(() => _category = category.id),
+                    ),
+                  if (others)
+                    ChoiceChip(
+                      label: Text(l.officialOtherCategory),
+                      selected: chosen == _other,
+                      onSelected: (_) => setState(() => _category = _other),
+                    ),
+                ],
+              ),
+              const SizedBox(height: SlSpace.xl),
+            ],
             if (library.courses.isEmpty)
               SlEmptyState(
                 icon: Icons.explore_outlined,
@@ -84,7 +137,7 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
                     spacing: SlSpace.lg,
                     runSpacing: SlSpace.lg,
                     children: [
-                      for (final entry in library.courses)
+                      for (final entry in courses)
                         SizedBox(width: width, child: _card(context, entry)),
                     ],
                   );

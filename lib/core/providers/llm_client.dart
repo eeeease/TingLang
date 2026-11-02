@@ -55,6 +55,10 @@ enum LlmProtocol {
 /// Tokens reported by the provider, summed over a client's calls.
 class LlmUsage {
   int inputTokens = 0, outputTokens = 0, calls = 0;
+
+  /// Claude prompt caching: input tokens written to and read from the cache
+  /// (not part of [inputTokens]).
+  int cacheWriteTokens = 0, cacheReadTokens = 0;
 }
 
 /// How a reply is held to its JSON schema, strongest first. A server that
@@ -84,6 +88,7 @@ class LlmClient {
     HttpClient? http,
     this.timeout = const Duration(minutes: 5),
     JsonMode jsonMode = JsonMode.schema,
+    this.effort,
   }) : baseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl,
        _http = http ?? (HttpClient()..connectionTimeout = const Duration(seconds: 10)),
        _mode = protocol == LlmProtocol.anthropic ? JsonMode.schema : jsonMode;
@@ -95,6 +100,10 @@ class LlmClient {
 
   /// Per request. Reasoning models can take minutes on a long JSON reply.
   final Duration timeout;
+
+  /// Claude's `output_config.effort` (`low`…`max`); the model's default when
+  /// null.
+  final String? effort;
   final usage = LlmUsage();
   JsonMode _mode;
 
@@ -130,15 +139,22 @@ class LlmClient {
         name: 'tinglang',
         apiKey: key,
         baseUrl: baseUrl,
-        httpClient: PlainTextMessages(io),
+        httpClient: RewriteJsonBody(io, '/chat/completions', plainTextMessages),
       ),
       // The SDK adds `/v1/messages` itself; presets store the `/v1` base.
       LlmProtocol.anthropic => anthropic(
         apiKey: key,
         baseUrl: baseUrl.replaceFirst(RegExp(r'/v1$'), ''),
-        httpClient: io,
+        httpClient: RewriteJsonBody(io, '/messages', cacheSystemPrompt, onReply: _countCache),
       ),
     };
+  }
+
+  void _countCache(Map<String, Object?> reply) {
+    final used = reply['usage'];
+    if (used is! Map) return;
+    usage.cacheWriteTokens += (used['cache_creation_input_tokens'] as num?)?.toInt() ?? 0;
+    usage.cacheReadTokens += (used['cache_read_input_tokens'] as num?)?.toInt() ?? 0;
   }
 
   /// One request whose reply must be a JSON object matching [schema].
@@ -164,7 +180,10 @@ class LlmClient {
               system: mode == JsonMode.schema ? system : '$system\n\n${schemaInstructions(schema)}',
               prompt: user,
               config: switch (protocol) {
-                LlmProtocol.anthropic => AnthropicOptions(maxTokens: anthropicMaxTokens),
+                LlmProtocol.anthropic => AnthropicOptions(
+                  maxTokens: anthropicMaxTokens,
+                  outputConfig: effort == null ? null : AnthropicOutputConfig(effort: effort),
+                ),
                 LlmProtocol.openai => OpenAIChatOptions(jsonMode: mode == JsonMode.jsonObject),
               },
               outputSchema: mode == JsonMode.schema ? output : null,
@@ -290,44 +309,99 @@ class LlmClient {
   void close() => _http.close(force: true);
 }
 
-/// Sends Chat Completions messages whose content is only text as a plain
-/// string. Genkit always sends a list of parts, which OpenAI accepts but
-/// several compatible servers do not.
-class PlainTextMessages extends http.BaseClient {
-  PlainTextMessages(this._inner);
+/// Rewrites the JSON body of requests to [path] on their way out; the
+/// providers' SDKs give no say over these details.
+class RewriteJsonBody extends http.BaseClient {
+  RewriteJsonBody(this._inner, this.path, this.rewrite, {this.onReply});
   final http.Client _inner;
+
+  /// Requests whose URL path ends with this are rewritten.
+  final String path;
+  final void Function(Map<String, Object?> body) rewrite;
+
+  /// Sees each successful JSON reply to those requests (for figures the
+  /// SDK does not pass on).
+  final void Function(Map<String, Object?> reply)? onReply;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    if (request is! http.Request || !request.url.path.endsWith('/chat/completions')) {
+    if (request is! http.Request || !request.url.path.endsWith(path)) {
       return _inner.send(request);
     }
-    Object? body;
+    final Object? body;
     try {
       body = jsonDecode(request.body);
     } on FormatException {
       return _inner.send(request);
     }
-    final messages = body is Map ? body['messages'] : null;
-    if (messages is! List) return _inner.send(request);
-    for (final m in messages) {
-      final content = m is Map ? m['content'] : null;
-      if (content is List &&
-          content.every((p) => p is Map && p['type'] == 'text' && p['text'] is String)) {
-        m['content'] = content.map((p) => (p as Map)['text']).join('\n');
-      }
-    }
-    final plain = http.Request(request.method, request.url)
+    if (body is! Map<String, Object?>) return _inner.send(request);
+    rewrite(body);
+    final rewritten = http.Request(request.method, request.url)
       ..headers.addAll(request.headers)
       ..followRedirects = request.followRedirects
       ..maxRedirects = request.maxRedirects
       ..persistentConnection = request.persistentConnection
       ..bodyBytes = utf8.encode(jsonEncode(body));
-    return _inner.send(plain);
+    final reply = onReply;
+    if (reply == null) return _inner.send(rewritten);
+    return _inner.send(rewritten).then((response) async {
+      if (response.statusCode != 200) return response;
+      final bytes = await response.stream.toBytes();
+      try {
+        final json = jsonDecode(utf8.decode(bytes));
+        if (json is Map<String, Object?>) reply(json);
+      } on FormatException {
+        // Not JSON (a stream): nothing to read.
+      }
+      return http.StreamedResponse(
+        Stream.value(bytes),
+        response.statusCode,
+        contentLength: bytes.length,
+        request: response.request,
+        headers: response.headers,
+        isRedirect: response.isRedirect,
+        persistentConnection: response.persistentConnection,
+        reasonPhrase: response.reasonPhrase,
+      );
+    });
   }
 
   @override
   void close() => _inner.close();
+}
+
+/// Chat Completions messages whose content is only text go as a plain
+/// string. Genkit always sends a list of parts, which OpenAI accepts but
+/// several compatible servers do not.
+void plainTextMessages(Map<String, Object?> body) {
+  final messages = body['messages'];
+  if (messages is! List) return;
+  for (final m in messages) {
+    final content = m is Map ? m['content'] : null;
+    if (content is List &&
+        content.every((p) => p is Map && p['type'] == 'text' && p['text'] is String)) {
+      m['content'] = content.map((p) => (p as Map)['text']).join('\n');
+    }
+  }
+}
+
+/// Marks Claude's system prompt for prompt caching. Course prompts put the
+/// rules every clip shares there, so after the first clip they are read
+/// from the cache at a tenth of the input price (prefixes shorter than the
+/// model's minimum are simply not cached).
+void cacheSystemPrompt(Map<String, Object?> body) {
+  final system = body['system'];
+  if (system is String && system.isNotEmpty) {
+    body['system'] = [
+      {
+        'type': 'text',
+        'text': system,
+        'cache_control': {'type': 'ephemeral'},
+      },
+    ];
+  } else if (system is List && system.isNotEmpty && system.last is Map) {
+    (system.last as Map).putIfAbsent('cache_control', () => {'type': 'ephemeral'});
+  }
 }
 
 /// The schema as prompt text, for servers that enforce none.

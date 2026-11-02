@@ -9,7 +9,8 @@
 // Options: --preset <id> (see assets/providers/catalog.v1.json), --model,
 // --base-url, --protocol openai|anthropic, --clips <n> (default 2),
 // --transcript <file> (plain English text; a built-in sample otherwise),
-// --out <file> (default build/llm_demo_course.json).
+// --out <file> (default build/llm_demo_course.json), --effort low|medium|…
+// (Claude only).
 //
 // The API key is read from TINGLANG_LLM_KEY only; it is never printed.
 import 'dart:convert';
@@ -82,6 +83,7 @@ Future<void> main(List<String> args) async {
     apiKey: key,
     protocol: protocol,
     jsonMode: info?.jsonSchema == false ? JsonMode.jsonObject : JsonMode.schema,
+    effort: options['effort'],
   );
   final jsonModel = ClientJsonModel(preset.id, client);
   stdout.writeln(
@@ -149,8 +151,11 @@ Future<void> main(List<String> args) async {
 
     final usage = client.usage;
     final cost = info != null && info.priced
-        ? ' ≈ ${formatUsd(info.cost(usage.inputTokens, usage.outputTokens))}'
+        ? ' ≈ ${formatUsd(info.cost(usage.inputTokens, usage.outputTokens, cacheWrites: usage.cacheWriteTokens, cacheReads: usage.cacheReadTokens))}'
         : '';
+    final cache = usage.cacheWriteTokens + usage.cacheReadTokens == 0
+        ? ''
+        : ' (cache: ${usage.cacheWriteTokens} written, ${usage.cacheReadTokens} read)';
     stdout
       ..writeln(
         'OK: ${course.clips.length} clips, '
@@ -159,7 +164,7 @@ Future<void> main(List<String> args) async {
       )
       ..writeln(
         '${usage.calls} requests, ${usage.inputTokens} input + ${usage.outputTokens} output '
-        'tokens$cost; structured output: ${client.jsonMode.name}',
+        'tokens$cache$cost; structured output: ${client.jsonMode.name}',
       )
       ..writeln('Course JSON: ${out.path}');
   } on LlmException catch (e) {
@@ -173,8 +178,7 @@ Future<void> main(List<String> args) async {
   }
 }
 
-String _seconds(Stopwatch watch) =>
-    '${(watch.elapsedMilliseconds / 1000).toStringAsFixed(1)} s';
+String _seconds(Stopwatch watch) => '${(watch.elapsedMilliseconds / 1000).toStringAsFixed(1)} s';
 
 Never _usage(String problem) {
   stderr.writeln('$problem\nSee the comment at the top of tools/llm_demo.dart.');

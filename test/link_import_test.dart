@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tinglang/core/captions.dart';
 import 'package:tinglang/core/db/database.dart';
 import 'package:tinglang/core/library_store.dart';
 import 'package:tinglang/core/live_repository.dart';
@@ -31,6 +32,7 @@ for a in "$@"; do
   if [ "$a" = "-J" ]; then
     case "$last" in
       *live*) echo '{"title":"Live now","is_live":true}' ;;
+      *captioned*) echo '{"title":"A captioned talk","duration":20,"webpage_url":"'"$last"'","extractor_key":"Youtube","automatic_captions":{"en-orig":[]}}' ;;
       *) echo '{"title":"A talk about listening","duration":95.5,"webpage_url":"https://www.youtube.com/watch?v=abc","extractor_key":"Youtube","thumbnail":"https://i.ytimg.com/vi/abc/hq.jpg"}' ;;
     esac
     exit 0
@@ -40,6 +42,13 @@ out=""; prev=""
 for a in "$@"; do
   if [ "$prev" = "-o" ]; then out="$a"; fi
   prev="$a"
+done
+for a in "$@"; do
+  if [ "$a" = "--write-auto-subs" ]; then
+    case "$last" in *badcaps*) exit 1 ;; esac
+    echo '{"events":[{"tStartMs":1000,"dDurationMs":7500,"segs":[{"utf8":"Captions"},{"utf8":" are","tOffsetMs":300},{"utf8":" read","tOffsetMs":600},{"utf8":" straight","tOffsetMs":900},{"utf8":" from","tOffsetMs":1200},{"utf8":" the","tOffsetMs":1500},{"utf8":" page,","tOffsetMs":1800},{"utf8":" so","tOffsetMs":2100},{"utf8":" nothing","tOffsetMs":2400},{"utf8":" has","tOffsetMs":2700},{"utf8":" to","tOffsetMs":3000},{"utf8":" be","tOffsetMs":3300},{"utf8":" downloaded","tOffsetMs":3600},{"utf8":" or","tOffsetMs":3900},{"utf8":" transcribed.","tOffsetMs":4200},{"utf8":" That","tOffsetMs":4500},{"utf8":" saves","tOffsetMs":4800},{"utf8":" time","tOffsetMs":5100},{"utf8":" and","tOffsetMs":5400},{"utf8":" battery","tOffsetMs":5700},{"utf8":" on","tOffsetMs":6000},{"utf8":" every","tOffsetMs":6300},{"utf8":" link","tOffsetMs":6600},{"utf8":" you","tOffsetMs":6900},{"utf8":" add.","tOffsetMs":7200}]}]}' > "$out.en-orig.json3"
+    exit 0
+  fi
 done
 file=$(echo "$out" | sed 's/%(ext)s/m4a/')
 echo "download: 50.0%"
@@ -229,6 +238,50 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
       expect(app.covers.image(courseId)!.readAsBytesSync(), jpeg);
+    });
+
+    test('a page with English captions is read, not downloaded or transcribed', () async {
+      final work = await Directory.systemTemp.createTemp('tinglang-link-work-');
+      final links = service(workFolder: work);
+      await installFakeTool(links);
+      final info = await links.inspect('https://www.youtube.com/watch?v=captioned');
+      expect((info.captions?.language, info.captions?.automatic), ('en-orig', true));
+      final job = await links.import(info);
+      expect(job.status, ImportStatus.done, reason: job.error);
+      final session = (await transcription.repository.recentSessions()).single;
+      expect(session.origin, 'link');
+      expect(session.mediaId, isNull);
+      final lines = await transcription.repository.lines(session.id);
+      expect(lines.map((l) => l.text), [
+        'Captions are read straight from the page, so nothing has to be downloaded or transcribed.',
+        'That saves time and battery on every link you add.',
+      ]);
+      expect(lines.first.startMs, 1000);
+      expect(lines.first.wordsJson, contains('"w":"Captions"'));
+      // Nothing was downloaded: the stand-in transcriber's line is not there.
+      expect(lines.map((l) => l.text), isNot(contains('Listening is a skill.')));
+    });
+
+    test('captions that cannot be read fall back to the audio', () async {
+      final work = await Directory.systemTemp.createTemp('tinglang-link-work-');
+      final links = service(workFolder: work);
+      await installFakeTool(links);
+      final job = await links.import(
+        const LinkInfo(
+          url: 'https://www.youtube.com/watch?v=badcaps',
+          title: 'No usable captions',
+          captions: CaptionTrack('en-orig', automatic: true),
+        ),
+      );
+      while (job.status == ImportStatus.copying || job.status == ImportStatus.transcribing) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(job.status, ImportStatus.done, reason: job.error);
+      final session = (await transcription.repository.recentSessions()).single;
+      expect(
+        (await transcription.repository.lines(session.id)).single.text,
+        'Listening is a skill.',
+      );
     });
 
     test('a page plays from the stream yt-dlp finds, with its headers', () async {

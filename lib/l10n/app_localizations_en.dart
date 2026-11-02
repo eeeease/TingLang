@@ -2450,4 +2450,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get officialUnavailable => 'The official library cannot be reached right now';
+
+  @override
+  String get officialAllCategories => 'All';
+
+  @override
+  String get officialOtherCategory => 'More';
 }

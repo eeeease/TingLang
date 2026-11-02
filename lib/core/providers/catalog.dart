@@ -20,8 +20,11 @@ class CatalogModel {
   final bool jsonSchema;
   bool get priced => inputPerMTok != null && outputPerMTok != null;
 
-  double cost(int inputTokens, int outputTokens) =>
-      (inputTokens * (inputPerMTok ?? 0) + outputTokens * (outputPerMTok ?? 0)) / 1e6;
+  /// Claude prompt-cache writes cost 1.25× and reads 0.1× the input price.
+  double cost(int inputTokens, int outputTokens, {int cacheWrites = 0, int cacheReads = 0}) =>
+      ((inputTokens + cacheWrites * 1.25 + cacheReads * 0.1) * (inputPerMTok ?? 0) +
+          outputTokens * (outputPerMTok ?? 0)) /
+      1e6;
 }
 
 /// A ready-made endpoint. Every one is BYOK: Tinglang never ships or proxies

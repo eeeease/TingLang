@@ -1,10 +1,28 @@
 {
   "updated_at": "2026-11-01T10:00:00Z",
+  "categories": [
+    {
+      "id": "tech",
+      "names": {
+        "en": "Tech & AI",
+        "zh": "科技与 AI"
+      }
+    },
+    {
+      "id": "news",
+      "names": {
+        "en": "News",
+        "zh": "新闻时事"
+      }
+    }
+  ],
   "courses": [
     {
       "id": "lex-0490-state-of-ai-in-2026",
       "title": "State of AI in 2026 | Lex Fridman Podcast #490",
       "area": "podcasts",
+      "category": "tech",
+      "series": "Lex Fridman Podcast",
       "source_label": "Lex Fridman Podcast · YouTube",
       "youtube_id": "EV7WhVT270Q",
       "cover_url": "https://api.tinglang.app/v1/library/lex-0490-state-of-ai-in-2026/cover.jpg",

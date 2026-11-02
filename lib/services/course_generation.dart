@@ -221,7 +221,12 @@ class CourseGenerationService {
       job.inputTokens = usage.inputTokens;
       job.outputTokens = usage.outputTokens;
       job.costUsd = info != null && info.priced
-          ? info.cost(usage.inputTokens, usage.outputTokens)
+          ? info.cost(
+              usage.inputTokens,
+              usage.outputTokens,
+              cacheWrites: usage.cacheWriteTokens,
+              cacheReads: usage.cacheReadTokens,
+            )
           : null;
     }
 

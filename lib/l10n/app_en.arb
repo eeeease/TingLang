@@ -1580,5 +1580,7 @@
   "officialAdd": "Add",
   "officialOpen": "Open",
   "officialUpdate": "Update",
-  "officialUnavailable": "The official library cannot be reached right now"
+  "officialUnavailable": "The official library cannot be reached right now",
+  "officialAllCategories": "All",
+  "officialOtherCategory": "More"
 }

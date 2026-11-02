@@ -59,4 +59,65 @@ void main() {
     expect(find.textContaining('连接 tinglang.app'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('categories filter the cards; courses in none show under Other', (tester) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final app = AppController(MemoryStore(), LibraryState());
+    LibraryEntry entry(String id, String? category) =>
+        LibraryEntry(id: id, title: 'Course $id', clipCount: 3, version: 'v1', category: category);
+    final official =
+        OfficialLibraryService(
+            app: app,
+            api: () => TinglangApi(ServerUrl.parse('https://api.tinglang.example')),
+          )
+          ..library = OfficialLibrary(
+            categories: const [
+              LibraryCategory(id: 'news', names: {'en': 'News', 'zh': '新闻时事'}),
+              LibraryCategory(id: 'sports', names: {'en': 'Sports', 'zh': '体育'}),
+              LibraryCategory(id: 'health', names: {'en': 'Health'}),
+            ],
+            courses: [
+              entry('a', 'news'),
+              entry('b', 'sports'),
+              entry('c', 'sports'),
+              entry('d', null),
+            ],
+          );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TinglangTheme.light(),
+        locale: const Locale('zh'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: OfficialLibraryView(official: official, onOpen: (_) {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.textContaining('Course '), findsNWidgets(4));
+    // Named in the app's language; a category without courses is not offered.
+    expect(find.text('新闻时事'), findsOneWidget);
+    expect(find.text('Health'), findsNothing);
+    await tester.tap(find.text('体育'));
+    await tester.pump();
+    expect(find.text('Course b'), findsOneWidget);
+    expect(find.text('Course c'), findsOneWidget);
+    expect(find.text('Course a'), findsNothing);
+    await tester.tap(find.text('其他'));
+    await tester.pump();
+    expect(find.text('Course d'), findsOneWidget);
+    expect(find.textContaining('Course '), findsOneWidget);
+    await tester.tap(find.text('全部'));
+    await tester.pump();
+    expect(find.textContaining('Course '), findsNWidgets(4));
+    expect(tester.takeException(), isNull);
+  });
 }

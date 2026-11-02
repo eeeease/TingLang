@@ -4,6 +4,18 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.1 · official library by interest, captions-first links
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks 33 OK; analyze no issues; app tests 313 (new: the English caption track chosen from yt-dlp's list, machine captions of other speech refused; machine captions regrouped into sentences with word timings, publisher rows joined to sentence ends, sound tags dropped; a page with captions imported without downloading or transcribing; captions that fail fall back to the audio; Claude's system prompt marked for caching and cache tokens counted and priced; category chips filter the official library, uncategorised courses under Other); `tinglang_api` 74 plus the contract check (15 operations, 19 schemas, 38 examples); other packages as before |
+| `fvm dart run tools/llm_demo.dart --preset anthropic --model claude-haiku-5-5 --clips 2` with the user's key | First real provider run of the 0.8 client: 2 clips, 16 items, all quotes verbatim, structured output `schema`, 23 s, $0.005 |
+| `swiftc -O tools/official/transcribe.swift`, run on a 21-minute interview | 4,294 punctuated words with timings in 20 s |
+| `fvm dart run tools/official/build_courses.dart` (Haiku 5.5, manifest in TingLang-web) | 34 videos in 8 new categories over three runs (a 2-video trial, the batch, one replacement for an age-restricted video that yt-dlp could not read without sign-in): 32 from YouTube captions (10 publisher, 22 machine), 2 transcribed on the Mac. 221 clips, 258 requests; 3,843 tokens written to the prompt cache and 522,356 read from it; $0.51 in all. Every course validated with the strict codec |
+| `python3 scripts/publish-library.py --dry-run` (TingLang-web), then the index and every course parsed with `OfficialLibrary.fromJson` and `CourseCodec` | 64 courses in 11 categories; all decode with matching id and YouTube id |
+
+Not run: the upload to R2 and the running app against it; a captioned link imported in the running app.
+
 ## 0.8.0 · AI courses on Genkit, clips in parallel
 
 | Command | Outcome |
