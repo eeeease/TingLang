@@ -24,6 +24,7 @@ import 'services/cloud/cloud_services.dart';
 import 'services/course_generation.dart';
 import 'services/app_exit.dart';
 import 'services/link_import.dart';
+import 'services/cloud/file_secret_store.dart';
 import 'services/official_library.dart';
 import 'services/live_controller.dart';
 import 'services/panel_coordinator.dart';
@@ -116,9 +117,12 @@ Future<void> main() async {
       app: controller,
       clientVersion: appVersion,
       officialServer: CloudController.official,
+      // The account's token in a private file, not the Keychain: macOS
+      // asks for the Keychain password after every update of an ad-hoc
+      // signed app.
       connect: (server) => CloudClient(
         server,
-        secrets: secrets,
+        secrets: FileSecretStore(File(p.join(store.root.path, 'account', 'tokens.json'))),
         browser: browser,
         userAgent: 'TingLang/$appVersion (macos)',
       ),

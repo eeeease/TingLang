@@ -16,6 +16,12 @@ class _Tokens implements TokenSource {
   }
 }
 
+/// A session that cannot be read.
+class _Failing implements TokenSource {
+  @override
+  Future<String> accessToken({bool force = false}) async => throw StateError('KeychainError');
+}
+
 void main() {
   late LocalServer server;
   setUp(() async => server = await LocalServer.start());
@@ -78,6 +84,33 @@ void main() {
       api().getLibraryCourse('youtube-locked'),
       throwsA(isA<ApiProblemException>().having((e) => e.problem.status, 'status', 401)),
     );
+  });
+
+  test('the library is asked signed out when no usable token can be had', () async {
+    server.handler = (r) => Reply.json(
+      example(
+        r.header('authorization') == null
+            ? 'getLibrary/response.200.preview.json'
+            : 'getLibrary/response.200.json',
+      ),
+    );
+    // The stored session cannot be read (e.g. a Keychain error).
+    final unreadable = await api(tokens: _Failing()).getLibrary();
+    expect(unreadable.preview, isTrue);
+    expect(server.requests.single.header('authorization'), isNull);
+
+    // The server refuses the token twice (session revoked): asked again signed out.
+    server.requests.clear();
+    server.handler = (r) => r.header('authorization') == null
+        ? Reply.json(example('getLibrary/response.200.preview.json'))
+        : Reply.problem(example('getLibrary/response.401.json'));
+    final revoked = await api(tokens: _Tokens(['old', 'new'])).getLibrary();
+    expect(revoked.preview, isTrue);
+    expect(server.requests.map((r) => r.header('authorization')), [
+      'Bearer old',
+      'Bearer new',
+      null,
+    ]);
   });
 
   test('problems keep their code and Retry-After', () async {

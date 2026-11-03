@@ -17,7 +17,7 @@ OAuth 2.1 authorization code with PKCE (RFC 8252 for native apps):
 1. The user presses **Sign in** (sidebar → account). Only then does the app request `/v1/meta`.
 2. The app creates a `code_verifier` and `state` and opens the `authorization_endpoint` in the system's web authentication session (`ASWebAuthenticationSession`, capability `webAuth`), so the user signs in with the browser's saved passwords and passkeys — email code, Google or GitHub.
 3. The redirect (`auth.redirect_uri` in `/v1/meta`, a private scheme such as `tinglang://oauth/callback`) is caught by that session, not by an open port. The app checks `state` and exchanges the code with the verifier for an access token (short-lived, kept in memory) and a refresh token.
-4. The refresh token is stored in the Keychain (`SecretStore`, key `account:<server host>`), never in the database; the server rotates it on each refresh.
+4. The refresh token is stored in `<data>/account/tokens.json` (mode 600, readable only by this user; `FileSecretStore`, key `account:<server host>`), never in the database; the server rotates it on each refresh. Up to 0.8.4 it was in the Keychain; builds are signed ad hoc, so macOS asked for the Keychain password after every update before reading it, and from 0.8.5 the Keychain item is no longer read (signing in once more writes the file). Provider keys stay in the Keychain.
 5. Signing out asks the server to revoke the session (`/v1/auth/revoke`, RFC 7009 style) and always forgets the tokens and cached account locally, whether or not the server answered.
 
 The database keeps only that the user is signed in, the account's display fields, the last `/v1/meta` and the last entitlements.

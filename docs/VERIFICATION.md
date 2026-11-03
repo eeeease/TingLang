@@ -4,6 +4,15 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.5 · the account token out of the Keychain, the library without a usable session
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks OK; analyze no issues; app tests 320 (new: the account token kept in a mode-600 file, other servers' tokens kept, the file removed when empty, a damaged file read as signed out); `tinglang_api` 79 (new: with a session that cannot be read the library is asked signed out; a token refused twice is followed by a signed-out request, not an error) plus the contract check; other packages as before |
+| `fvm flutter build macos --debug` | Built `Tinglang.app` |
+
+Reported by the user on 0.8.4: opening Official asked for the Keychain password (an item written by an older ad-hoc build) and then failed with `KeychainError`. Not run: signing in and opening Official in the running app (needs the user's account).
+
 ## 0.8.4 · the whole official library for signed-in accounts
 
 | Command | Outcome |

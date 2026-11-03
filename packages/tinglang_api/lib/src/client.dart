@@ -30,14 +30,22 @@ class TinglangApi {
   Future<Account> getAccount() async => Account.fromJson(await _get('/account'));
 
   /// The official library: every course with [tokens], else the preview.
-  Future<OfficialLibrary> getLibrary() async =>
-      OfficialLibrary.fromJson(await _get('/library', auth: tokens != null));
+  /// Sign-in is optional here: without a usable token (none stored, the
+  /// session gone) the preview is asked for instead of failing.
+  Future<OfficialLibrary> getLibrary() async => OfficialLibrary.fromJson(
+    (await _call('GET', '/library', auth: false, optionalAuth: true)).json(),
+  );
 
   /// One official course as an English V3 course document (the client
   /// validates it with its course codec). Courses outside the preview need
   /// [tokens].
   Future<Map<String, Object?>> getLibraryCourse(String id) async {
-    final json = await _get('/library/${Uri.encodeComponent(id)}', auth: tokens != null);
+    final json = (await _call(
+      'GET',
+      '/library/${Uri.encodeComponent(id)}',
+      auth: false,
+      optionalAuth: true,
+    )).json();
     if (json is! Map<String, Object?>) throw const ApiBadResponse('course: expected an object');
     return json;
   }
@@ -107,36 +115,56 @@ class TinglangApi {
     Map<String, String> headers = const {},
   }) async => (await _call(method, path, body: body, headers: headers)).json();
 
+  /// [optionalAuth]: send the token when one can be had, else ask as
+  /// signed out (and again signed out if the server refuses the token).
   Future<HttpReply> _call(
     String method,
     String path, {
     bool auth = true,
+    bool optionalAuth = false,
     Map<String, String>? query,
     Map<String, Object?>? body,
     Map<String, String> headers = const {},
   }) async {
     final uri = server.api(path, query);
-    Future<HttpReply> attempt({required bool force}) async {
-      final all = {'Accept': 'application/json, application/problem+json', ...headers};
-      if (auth) {
-        final source = tokens;
-        if (source == null) {
-          throw const AuthFailure('Not signed in', reason: AuthFailureReason.signedOut);
+    Future<String?> token({required bool force}) async {
+      final source = tokens;
+      if (optionalAuth) {
+        if (source == null) return null;
+        try {
+          return await source.accessToken(force: force);
+        } on Object {
+          // No usable session (none stored, revoked, unreadable).
+          return null;
         }
-        all['Authorization'] = 'Bearer ${await source.accessToken(force: force)}';
       }
+      if (!auth) return null;
+      if (source == null) {
+        throw const AuthFailure('Not signed in', reason: AuthFailureReason.signedOut);
+      }
+      return source.accessToken(force: force);
+    }
+
+    Future<(HttpReply, bool)> attempt({required bool force, bool anonymous = false}) async {
+      final all = {'Accept': 'application/json, application/problem+json', ...headers};
+      final bearer = anonymous ? null : await token(force: force);
+      if (bearer != null) all['Authorization'] = 'Bearer $bearer';
       if (body != null) all['Content-Type'] = 'application/json';
-      return _transport.send(
+      final reply = await _transport.send(
         method,
         uri,
         headers: all,
         body: body == null ? null : utf8.encode(jsonEncode(body)),
       );
+      return (reply, bearer != null);
     }
 
-    var reply = await attempt(force: false);
+    var (reply, sent) = await attempt(force: false);
     // One retry with a fresh token: the cached one may have just expired.
-    if (reply.status == 401 && auth) reply = await attempt(force: true);
+    if (reply.status == 401 && sent) (reply, sent) = await attempt(force: true);
+    if (reply.status == 401 && sent && optionalAuth) {
+      (reply, sent) = await attempt(force: false, anonymous: true);
+    }
     if (!reply.ok) throw reply.problem();
     return reply;
   }
