@@ -51,6 +51,15 @@ final class CloudUnsupported implements Exception {
 
 enum CloudUnsupportedReason { noBrowserSession, noSecureStorage, noAccounts }
 
+/// The sign-in server ([host], named by the server's meta) did not answer;
+/// no browser window was opened.
+final class SignInUnreachable implements Exception {
+  const SignInUnreachable(this.host);
+  final String host;
+  @override
+  String toString() => 'Cannot reach the sign-in server $host';
+}
+
 /// The refresh token lives in the platform's secret store (Keychain), one
 /// entry per server.
 final class SecretTokenStore implements TokenStore {
@@ -138,6 +147,11 @@ final class CloudClient implements AccountService, CloudJobService {
     final agent = browser;
     if (agent == null) throw const CloudUnsupported(CloudUnsupportedReason.noBrowserSession);
     final session = _sessionFor(meta);
+    try {
+      await session.client.checkReachable();
+    } on ApiUnreachable {
+      throw SignInUnreachable(session.client.auth.authorizationEndpoint.host);
+    }
     await session.adopt(await api.signIn(session.client, BrowserAgent(agent)));
     _api = null;
   }

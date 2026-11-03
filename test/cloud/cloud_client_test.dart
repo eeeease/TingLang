@@ -84,7 +84,21 @@ void main() {
       throwsA(isA<AuthFailure>().having((e) => e.reason, 'reason', AuthFailureReason.canceled)),
     );
     expect(await client.hasSession(), isFalse);
-    expect(server.requests, isEmpty);
+    // Only the check that the sign-in server answers.
+    expect(server.requests.map((r) => r.uri.path), ['/auth/v1/oauth/authorize']);
+  });
+
+  test('a sign-in server that does not answer is reported before any browser window', () async {
+    final port = await deadPort();
+    final json = meta().toJson();
+    final auth = json['auth']! as Map<String, Object?>;
+    auth['authorization_endpoint'] = 'http://127.0.0.1:$port/auth/v1/oauth/authorize';
+    await expectLater(
+      client.signIn(ApiMeta.fromJson(json)),
+      throwsA(isA<SignInUnreachable>().having((e) => e.host, 'host', '127.0.0.1')),
+    );
+    expect(browser.opened, isEmpty);
+    expect(await client.hasSession(), isFalse);
   });
 
   test('without a browser session or secure storage, sign-in is refused up front', () async {

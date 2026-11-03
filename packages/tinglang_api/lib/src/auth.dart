@@ -111,6 +111,13 @@ class OAuthClient {
     if (auth.revocationEndpoint != null) ServerUrl.checkSecure(auth.revocationEndpoint!);
   }
 
+  /// Asks the sign-in page's server once, so a sign-in server that cannot be
+  /// reached is reported before a browser window opens on an error page.
+  /// Any answer counts; throws [ApiUnreachable] when there is none.
+  Future<void> checkReachable() async {
+    await _transport.send('GET', auth.authorizationEndpoint.replace(query: ''));
+  }
+
   final AuthConfig auth;
   final HttpTransport _transport;
   final DateTime Function() _now;

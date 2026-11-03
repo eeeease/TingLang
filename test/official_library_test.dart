@@ -122,10 +122,8 @@ void main() {
     final official = OfficialLibraryService(
       app: app,
       account: account,
-      api: () => TinglangApi(
-        ServerUrl.parse(base),
-        tokens: account.signedIn ? const _Tokens() : null,
-      ),
+      api: () =>
+          TinglangApi(ServerUrl.parse(base), tokens: account.signedIn ? const _Tokens() : null),
     );
     addTearDown(official.dispose);
     // Not opened yet: signing in asks nothing.

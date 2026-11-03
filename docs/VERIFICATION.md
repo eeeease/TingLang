@@ -4,6 +4,16 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.6 · an unreachable sign-in server reported before the browser opens
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks OK; analyze no issues; app tests 321 (new: a sign-in server that does not answer is reported as such, by its host, before any browser window opens, and nothing is stored; the normal sign-in now first asks the sign-in page once); `tinglang_api` 79 plus the contract check; other packages as before |
+| `fvm flutter build macos --debug` | Built `Tinglang.app` |
+| `dig akfavagjvixjvlxrilvh.supabase.co` (1.1.1.1, 8.8.8.8) | NXDOMAIN: the sign-in page the app opened (reported by the user on 0.8.5) is on a Supabase project that no longer resolves, most likely paused by Supabase's free plan after a week without activity. TingLang-web's Worker now queries the database daily to keep it awake |
+
+Not run: sign-in against the restored project and the whole library signed in (waiting for the project to be restored).
+
 ## 0.8.5 · the account token out of the Keychain, the library without a usable session
 
 | Command | Outcome |

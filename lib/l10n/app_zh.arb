@@ -429,6 +429,7 @@
   "accountOffline": "暂时连不上 {host}，显示的是 {time} 的方案信息。",
   "accountOfflineUnconfirmed": "暂时连不上 {host}，目前无法确认方案状态。本机功能不受影响。",
   "cloudErrorUnreachable": "连不上 {host}，请检查地址和网络；本机功能不受影响。",
+  "cloudErrorSignInUnreachable": "登录服务（{host}）暂时连不上，请稍后再试；本机功能不受影响。",
   "cloudErrorNoAccounts": "这台服务器不提供账号。",
   "cloudErrorNoBrowser": "这个系统暂不支持在浏览器中登录。",
   "cloudErrorNoKeychain": "这个系统没有可用的安全存储来保存登录信息。",

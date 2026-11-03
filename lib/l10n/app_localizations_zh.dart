@@ -1417,6 +1417,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String cloudErrorSignInUnreachable(String host) {
+    return '登录服务（$host）暂时连不上，请稍后再试；本机功能不受影响。';
+  }
+
+  @override
   String get cloudErrorNoAccounts => '这台服务器不提供账号。';
 
   @override

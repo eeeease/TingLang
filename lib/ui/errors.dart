@@ -79,6 +79,7 @@ String describeError(AppLocalizations l, Object error) {
 String describeCloudError(AppLocalizations l, Object error, {required String host}) =>
     switch (error) {
       ApiUnreachable() => l.cloudErrorUnreachable(host),
+      SignInUnreachable(:final host) => l.cloudErrorSignInUnreachable(host),
       CloudUnsupported(reason: CloudUnsupportedReason.noAccounts) => l.cloudErrorNoAccounts,
       CloudUnsupported(reason: CloudUnsupportedReason.noBrowserSession) => l.cloudErrorNoBrowser,
       CloudUnsupported(reason: CloudUnsupportedReason.noSecureStorage) => l.cloudErrorNoKeychain,

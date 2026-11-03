@@ -2667,6 +2667,12 @@ abstract class AppLocalizations {
   /// **'Cannot reach {host}. Check the address and your connection; features on this Mac keep working.'**
   String cloudErrorUnreachable(String host);
 
+  /// No description provided for @cloudErrorSignInUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in service ({host}) can\'t be reached right now. Try again later; everything on this Mac keeps working.'**
+  String cloudErrorSignInUnreachable(String host);
+
   /// No description provided for @cloudErrorNoAccounts.
   ///
   /// In en, this message translates to:

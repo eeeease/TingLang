@@ -1458,6 +1458,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String cloudErrorSignInUnreachable(String host) {
+    return 'The sign-in service ($host) can\'t be reached right now. Try again later; everything on this Mac keeps working.';
+  }
+
+  @override
   String get cloudErrorNoAccounts => 'This server does not offer accounts.';
 
   @override
