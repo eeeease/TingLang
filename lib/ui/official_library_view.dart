@@ -44,35 +44,17 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
     if (mounted) setState(() => _signingIn = false);
   }
 
-  /// Signed out, the server lists a few courses per category: say how many
-  /// there are and offer to sign in.
-  Widget _previewNotice(BuildContext context, OfficialLibrary library) {
-    final l = context.l10n;
-    final c = context.sl;
-    return SlPanel(
-      key: const ValueKey('official-preview'),
-      child: Row(
-        children: [
-          Icon(Icons.lock_outline, color: c.accentInk),
-          const SizedBox(width: SlSpace.md),
-          Expanded(
-            child: Text(
-              l.officialPreviewNotice(library.courseCount ?? library.courses.length),
-              style: SlType.body.copyWith(color: c.text),
-            ),
-          ),
-          if (_official.account != null) ...[
-            const SizedBox(width: SlSpace.md),
-            FilledButton(
-              key: const ValueKey('official-sign-in'),
-              onPressed: _signingIn ? null : _signIn,
-              child: Text(l.officialSignInForAll),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  /// Signed out, the server lists a few courses per category; this signs in
+  /// for all of them.
+  Widget _signInForAll(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: FilledButton.icon(
+      key: const ValueKey('official-sign-in'),
+      onPressed: _signingIn ? null : _signIn,
+      icon: const Icon(Icons.lock_outline, size: 18),
+      label: Text(context.l10n.officialSignInForAll),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +110,8 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
           children: [
             Text(l.officialIntro, style: SlType.body.copyWith(color: c.inkSoft)),
             const SizedBox(height: SlSpace.xl),
-            if (library.preview) ...[
-              _previewNotice(context, library),
+            if (library.preview && _official.account != null) ...[
+              _signInForAll(context),
               const SizedBox(height: SlSpace.xl),
             ],
             if (categories.isNotEmpty) ...[

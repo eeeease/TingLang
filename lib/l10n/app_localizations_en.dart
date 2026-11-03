@@ -2451,11 +2451,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get officialOtherCategory => 'More';
 
   @override
-  String officialPreviewNotice(int count) {
-    return 'Signed out, each category shows 3 courses. Sign in to see all $count.';
-  }
-
-  @override
   String get officialSignInForAll => 'Sign in for all';
 
   @override

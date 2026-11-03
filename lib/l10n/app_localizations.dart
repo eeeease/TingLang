@@ -4347,12 +4347,6 @@ abstract class AppLocalizations {
   /// **'More'**
   String get officialOtherCategory;
 
-  /// No description provided for @officialPreviewNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed out, each category shows 3 courses. Sign in to see all {count}.'**
-  String officialPreviewNotice(int count);
-
   /// No description provided for @officialSignInForAll.
   ///
   /// In en, this message translates to:
