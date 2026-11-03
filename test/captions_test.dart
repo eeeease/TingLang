@@ -34,7 +34,12 @@ void main() {
       }),
       isNull,
     );
-    expect(englishCaptions({'subtitles': {'live_chat': _track}}), isNull);
+    expect(
+      englishCaptions({
+        'subtitles': {'live_chat': _track},
+      }),
+      isNull,
+    );
   });
 
   test('machine captions are regrouped into sentences with word timings', () {
@@ -84,7 +89,11 @@ void main() {
       ],
     });
     final lines = captionLines(json3);
-    expect(lines.map((l) => l.text), ['Good morning, everyone.', 'Today we start', 'after a pause']);
+    expect(lines.map((l) => l.text), [
+      'Good morning, everyone.',
+      'Today we start',
+      'after a pause',
+    ]);
     expect((lines.first.startMs, lines.first.endMs), (3000, 4300));
     final words = jsonDecode(lines[1].wordsJson!) as List;
     expect(words.map((w) => (w as Map)['w']), ['Today', 'we', 'start']);

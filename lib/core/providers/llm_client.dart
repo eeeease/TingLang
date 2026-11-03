@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as claude_sdk;
-import 'package:genkit/genkit.dart'
-    show GenkitException, GenkitPlugin, Model;
+import 'package:genkit/genkit.dart' show GenkitException, GenkitPlugin, Model;
 import 'package:genkit/lite.dart' as genkit;
 import 'package:genkit_anthropic/genkit_anthropic.dart';
 import 'package:genkit_openai/genkit_openai.dart';

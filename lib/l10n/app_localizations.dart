@@ -4346,6 +4346,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get officialOtherCategory;
+
+  /// No description provided for @officialPreviewNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out, each category shows 3 courses. Sign in to see all {count}.'**
+  String officialPreviewNotice(int count);
+
+  /// No description provided for @officialSignInForAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in for all'**
+  String get officialSignInForAll;
+
+  /// No description provided for @officialMoreAfterSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more in this category after signing in'**
+  String officialMoreAfterSignIn(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

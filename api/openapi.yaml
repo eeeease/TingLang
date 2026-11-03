@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   title: Tinglang Cloud API
-  version: 1.2.0
+  version: 1.3.0
   summary: The contract between the Tinglang desktop client and a Tinglang server.
   description: |
     Optional cloud services for Tinglang: accounts and entitlements, cloud jobs
@@ -247,20 +247,27 @@ paths:
     get:
       operationId: getLibrary
       tags: [library]
-      summary: The official library — courses anyone may add to their own
+      summary: The official library — courses a signed-in user may add to their own
       description: |
-        Needs no sign-in. The client asks only when the user opens the official
-        library. Courses carry text only (transcripts, explanations, exercises);
-        their media plays from where it is published (for example the YouTube
-        embedded player), so `cover_url` and the course itself are the only
-        files served.
-      security: []
+        The client asks only when the user opens the official library. Without
+        a token the answer is a preview: the first three courses of each
+        category, `preview: true`, and each category's full `course_count`.
+        With the account's token it lists every course. A token that is sent
+        but no longer valid gets 401, so the client refreshes it rather than
+        silently showing the preview. Courses carry text only (transcripts,
+        explanations, exercises); their media plays from where it is published
+        (for example the YouTube embedded player), so `cover_url` and the course
+        itself are the only files served.
+      security:
+        - {}
+        - bearer: []
       responses:
         '200':
-          description: Every course on offer, newest first.
+          description: Every course on offer, or the preview without a token.
           content:
             application/json:
               schema: { $ref: './schemas/library.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '503': { $ref: '#/components/responses/Unavailable' }
   /library/{course_id}:
     parameters:
@@ -269,13 +276,19 @@ paths:
       operationId: getLibraryCourse
       tags: [library]
       summary: One official course, as an English V3 course document
-      security: []
+      description: |
+        The courses in the preview need no token; every other course needs the
+        account's token and answers 401 without one.
+      security:
+        - {}
+        - bearer: []
       responses:
         '200':
           description: The course.
           content:
             application/json:
               schema: { $ref: './schemas/course.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '503': { $ref: '#/components/responses/Unavailable' }
   /llm/models:

@@ -39,7 +39,8 @@ class LocalServer {
         request.response.headers.set(HttpHeaders.contentTypeHeader, reply.contentType!);
       }
       reply.headers.forEach(request.response.headers.set);
-      if (reply.body != null) request.response.write(reply.body);
+      // UTF-8 like a real server (the contract's examples have Chinese names).
+      if (reply.body != null) request.response.add(utf8.encode(reply.body!));
       await request.response.close();
     });
   }

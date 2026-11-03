@@ -883,7 +883,7 @@ class LibraryEntry {
 
 /// An interest category of the official library, named per language.
 class LibraryCategory {
-  const LibraryCategory({required this.id, required this.names});
+  const LibraryCategory({required this.id, required this.names, this.courseCount});
 
   factory LibraryCategory.fromJson(Object? value) {
     final r = _Read(value, 'library.categories[]');
@@ -897,10 +897,15 @@ class LibraryCategory {
         for (final e in names.entries)
           if (e.key is String && e.value is String) e.key as String: e.value as String,
       },
+      courseCount: r.optInt('course_count'),
     );
   }
 
   final String id;
+
+  /// Courses in this category in the whole library (more than are listed
+  /// while [OfficialLibrary.preview]); null from servers before 1.3.
+  final int? courseCount;
 
   /// Display name per language tag; `en` is always there.
   final Map<String, String> names;
@@ -908,12 +913,22 @@ class LibraryCategory {
   /// The name for [languageCode], else English.
   String name(String languageCode) => names[languageCode] ?? names['en']!;
 
-  Map<String, Object?> toJson() => {'id': id, 'names': names};
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'names': names,
+    if (courseCount != null) 'course_count': courseCount,
+  };
 }
 
 /// The official library (GET /library): text-only courses with covers.
 class OfficialLibrary {
-  const OfficialLibrary({required this.courses, this.categories = const [], this.updatedAt});
+  const OfficialLibrary({
+    required this.courses,
+    this.categories = const [],
+    this.updatedAt,
+    this.preview = false,
+    this.courseCount,
+  });
 
   factory OfficialLibrary.fromJson(Object? value) {
     final r = _Read(value, 'library');
@@ -922,6 +937,8 @@ class OfficialLibrary {
     final categories = r.json['categories'];
     return OfficialLibrary(
       updatedAt: r.optDate('updated_at'),
+      preview: r.json['preview'] == true,
+      courseCount: r.optInt('course_count'),
       categories: [
         if (categories is List)
           for (final c in categories) LibraryCategory.fromJson(c),
@@ -936,8 +953,16 @@ class OfficialLibrary {
   final List<LibraryCategory> categories;
   final DateTime? updatedAt;
 
+  /// Listed without sign-in: only the first courses of each category.
+  final bool preview;
+
+  /// Courses in the whole library; null from servers before 1.3.
+  final int? courseCount;
+
   Map<String, Object?> toJson() => {
     if (updatedAt != null) 'updated_at': rfc3339(updatedAt!),
+    if (preview) 'preview': true,
+    if (courseCount != null) 'course_count': courseCount,
     if (categories.isNotEmpty) 'categories': [for (final c in categories) c.toJson()],
     'courses': [for (final c in courses) c.toJson()],
   };

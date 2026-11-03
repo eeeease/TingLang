@@ -120,4 +120,66 @@ void main() {
     expect(find.textContaining('Course '), findsNWidgets(4));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('signed out, the preview says how many courses there are and offers sign-in', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final app = AppController(MemoryStore(), LibraryState());
+    final account = _Account();
+    LibraryEntry entry(String id) =>
+        LibraryEntry(id: id, title: 'Course $id', clipCount: 3, version: 'v1', category: 'news');
+    final official =
+        OfficialLibraryService(
+            app: app,
+            account: account,
+            api: () => TinglangApi(ServerUrl.parse('https://api.tinglang.example')),
+          )
+          ..library = OfficialLibrary(
+            preview: true,
+            courseCount: 2118,
+            categories: const [
+              LibraryCategory(id: 'news', names: {'en': 'News', 'zh': '新闻时事'}, courseCount: 101),
+            ],
+            courses: [entry('a'), entry('b'), entry('c')],
+          );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TinglangTheme.light(),
+        locale: const Locale('zh'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: OfficialLibraryView(official: official, onOpen: (_) {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('未登录时，每个分类只显示 3 门课程。登录后可以看到全部 2118 门。'), findsOneWidget);
+    await tester.tap(find.text('新闻时事'));
+    await tester.pump();
+    expect(find.text('这个分类还有 98 门课程，登录后可见'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('official-sign-in')));
+    await tester.pump();
+    expect(account.signIns, 1);
+    expect(tester.takeException(), isNull);
+  });
+}
+
+final class _Account extends ChangeNotifier implements LibraryAccount {
+  int signIns = 0;
+  @override
+  bool get signedIn => false;
+  @override
+  Object? get error => null;
+  @override
+  Future<void> signIn() async => signIns++;
 }

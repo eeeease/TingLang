@@ -18,6 +18,10 @@ abstract interface class AccountService {
 
   /// Whether a refresh token is stored for this server (no network).
   Future<bool> hasSession();
+
+  /// The signed-in session's access tokens, for calls made elsewhere (the
+  /// official library). Asking for one may refresh it.
+  TokenSource tokens(ApiMeta meta);
   Future<Account> fetchAccount(ApiMeta meta);
   Future<Entitlements> fetchEntitlements(ApiMeta meta);
 
@@ -143,6 +147,9 @@ final class CloudClient implements AccountService, CloudJobService {
     final store = secrets;
     return store != null && await SecretTokenStore(store, server).read() != null;
   }
+
+  @override
+  TokenSource tokens(ApiMeta meta) => _sessionFor(meta);
 
   @override
   Future<Account> fetchAccount(ApiMeta meta) => _client(meta).getAccount();

@@ -1586,5 +1586,22 @@
   "officialUpdate": "Update",
   "officialUnavailable": "The official library cannot be reached right now",
   "officialAllCategories": "All",
-  "officialOtherCategory": "More"
+  "officialOtherCategory": "More",
+  "officialPreviewNotice": "Signed out, each category shows 3 courses. Sign in to see all {count}.",
+  "@officialPreviewNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "officialSignInForAll": "Sign in for all",
+  "officialMoreAfterSignIn": "{count} more in this category after signing in",
+  "@officialMoreAfterSignIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

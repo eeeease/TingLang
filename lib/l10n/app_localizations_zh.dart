@@ -2370,4 +2370,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get officialOtherCategory => '其他';
+
+  @override
+  String officialPreviewNotice(int count) {
+    return '未登录时，每个分类只显示 3 门课程。登录后可以看到全部 $count 门。';
+  }
+
+  @override
+  String get officialSignInForAll => '登录查看全部';
+
+  @override
+  String officialMoreAfterSignIn(int count) {
+    return '这个分类还有 $count 门课程，登录后可见';
+  }
 }

@@ -1,19 +1,22 @@
 {
   "updated_at": "2026-11-01T10:00:00Z",
+  "course_count": 1,
   "categories": [
     {
       "id": "tech",
       "names": {
         "en": "Tech & AI",
         "zh": "科技与 AI"
-      }
+      },
+      "course_count": 1
     },
     {
       "id": "news",
       "names": {
         "en": "News",
         "zh": "新闻时事"
-      }
+      },
+      "course_count": 0
     }
   ],
   "courses": [

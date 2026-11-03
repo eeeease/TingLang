@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tinglang/core/library_store.dart';
 import 'package:tinglang/services/app_controller.dart';
@@ -14,6 +15,7 @@ void main() {
   late String base;
   late Map<String, Object?> course;
   late List<String> requests;
+  late List<String?> tokensSeen;
   var version = 'v1';
   var foreignCover = false;
   final jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3, 4];
@@ -25,12 +27,15 @@ void main() {
       File('api/examples/getLibraryCourse/response.200.json').readAsStringSync(),
     ) as Map<String, Object?>;
     requests = [];
+    tokensSeen = [];
     version = 'v1';
     foreignCover = false;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     base = 'http://127.0.0.1:${server.port}';
     server.listen((request) async {
       requests.add(request.uri.path);
+      final authorization = request.headers.value(HttpHeaders.authorizationHeader);
+      tokensSeen.add(authorization);
       final response = request.response;
       final id = course['podcast_id'];
       switch (request.uri.path) {
@@ -38,6 +43,8 @@ void main() {
           response.headers.contentType = ContentType.json;
           response.write(
             jsonEncode({
+              if (authorization == null) 'preview': true,
+              'course_count': 40,
               'courses': [
                 {
                   'id': id,
@@ -110,6 +117,48 @@ void main() {
     expect(requests.where((r) => r.endsWith('cover.jpg')), isEmpty);
   });
 
+  test('signed out it is the preview; signing in or out asks an opened library again', () async {
+    final account = _Account();
+    final official = OfficialLibraryService(
+      app: app,
+      account: account,
+      api: () => TinglangApi(
+        ServerUrl.parse(base),
+        tokens: account.signedIn ? const _Tokens() : null,
+      ),
+    );
+    addTearDown(official.dispose);
+    // Not opened yet: signing in asks nothing.
+    await account.signIn();
+    await account.signOut();
+    expect(requests, isEmpty);
+
+    await official.load();
+    expect(official.library!.preview, isTrue);
+    expect(official.library!.courseCount, 40);
+
+    await official.signIn();
+    await _settle(official);
+    expect(official.library!.preview, isFalse);
+    expect(tokensSeen, [null, 'Bearer access-1']);
+
+    await account.signOut();
+    await _settle(official);
+    expect(official.library!.preview, isTrue);
+    expect(tokensSeen.last, isNull);
+  });
+
+  test('a failed sign-in from the library is reported', () async {
+    final account = _Account()..failure = const AuthFailure('Sign-in canceled');
+    final official = OfficialLibraryService(
+      app: app,
+      account: account,
+      api: () => TinglangApi(ServerUrl.parse(base)),
+    );
+    addTearDown(official.dispose);
+    await expectLater(official.signIn(), throwsA(isA<AuthFailure>()));
+  });
+
   test('an unreachable server is an error to show, not a crash', () async {
     await server.close(force: true);
     final official = service();
@@ -117,4 +166,38 @@ void main() {
     expect(official.library, isNull);
     expect(official.error, isNotNull);
   });
+}
+
+/// Waits for a reload started by a sign-in change.
+Future<void> _settle(OfficialLibraryService official) async {
+  for (var i = 0; i < 200; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    if (!official.loading) return;
+  }
+}
+
+final class _Account extends ChangeNotifier implements LibraryAccount {
+  @override
+  bool signedIn = false;
+  @override
+  Object? error;
+  Object? failure;
+
+  @override
+  Future<void> signIn() async {
+    error = failure;
+    signedIn = failure == null;
+    notifyListeners();
+  }
+
+  Future<void> signOut() async {
+    signedIn = false;
+    notifyListeners();
+  }
+}
+
+final class _Tokens implements TokenSource {
+  const _Tokens();
+  @override
+  Future<String> accessToken({bool force = false}) async => 'access-1';
 }

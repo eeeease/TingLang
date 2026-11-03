@@ -4,6 +4,17 @@ What has actually been run, on which machine, and what has not. A check is liste
 
 Machine: MacBook Pro, Apple M4 Pro, macOS 27.0.1; Xcode 27.1; Flutter 3.47.7 through fvm; Python 3.12. Builds are signed ad-hoc (no Apple team), so macOS asks for permissions again after rebuilds.
 
+## 0.8.4 · the whole official library for signed-in accounts
+
+| Command | Outcome |
+| --- | --- |
+| `bash scripts/check.sh` | Python checks OK; analyze no issues; app tests 318 (new: signed out the library is the preview, signing in asks an opened library again with the account's token and signing out asks again without; nothing is asked before the library is opened; a failed sign-in from the library is reported; the preview notice gives the full count, a chosen category says how many more it has, and its button signs in); `tinglang_api` 78 (new: the library without a session is the preview and complete with one; a course outside the preview is 401) plus the contract check (15 operations, 19 schemas, 41 examples); other packages as before |
+| `fvm flutter build macos --debug` | Built `Tinglang.app` |
+| `pnpm exec vitest run` and `pnpm run typecheck` in TingLang-web `workers/api` (contract 1.3.0 copied in) | 54 tests; typecheck clean. New: an app or website token gets the whole index (`private`, `vary: authorization`); no token gets `preview.json`; an invalid, foreign-client or signed-out token gets 401, not the preview; preview courses open without a token, others answer 401 and unknown ids stay 404 |
+| `python3 scripts/publish-library.py --dry-run` (TingLang-web), then `index.json` and `preview.json` checked against `schemas/library.json` with ajv, and every course decoded with `OfficialLibrary.fromJson` and `CourseCodec` | 2,118 courses in 18 categories, 26,063 clips, none rejected; preview 54 courses (3 per category); both files valid |
+
+Not run: the deployed Worker; the running app signed in against api.tinglang.app.
+
 ## 0.8.3 · YouTube captions off, words and phrases as cards
 
 | Command | Outcome |

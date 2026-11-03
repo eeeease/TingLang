@@ -1,0 +1,55 @@
+{
+  "updated_at": "2026-11-01T10:00:00Z",
+  "preview": true,
+  "course_count": 2118,
+  "categories": [
+    {
+      "id": "tech",
+      "names": {
+        "en": "Tech & AI",
+        "zh": "科技与 AI"
+      },
+      "course_count": 101
+    },
+    {
+      "id": "news",
+      "names": {
+        "en": "News",
+        "zh": "新闻时事"
+      },
+      "course_count": 101
+    }
+  ],
+  "courses": [
+    {
+      "id": "lex-0490-state-of-ai-in-2026",
+      "title": "State of AI in 2026 | Lex Fridman Podcast #490",
+      "area": "podcasts",
+      "category": "tech",
+      "series": "Lex Fridman Podcast",
+      "source_label": "Lex Fridman Podcast · YouTube",
+      "youtube_id": "EV7WhVT270Q",
+      "cover_url": "https://api.tinglang.app/v1/library/lex-0490-state-of-ai-in-2026/cover.jpg",
+      "clip_count": 16,
+      "duration_ms": 1680000,
+      "learner_level": "B2",
+      "version": "3f2a9c",
+      "updated_at": "2026-11-01T10:00:00Z"
+    },
+    {
+      "id": "youtube-9t3Xksq7qzA-cnn-10",
+      "title": "CNN 10 | November 3, 2026",
+      "area": "podcasts",
+      "category": "news",
+      "series": "CNN 10",
+      "source_label": "CNN 10 · YouTube",
+      "youtube_id": "9t3Xksq7qzA",
+      "cover_url": "https://api.tinglang.app/v1/library/youtube-9t3Xksq7qzA-cnn-10/cover.jpg",
+      "clip_count": 5,
+      "duration_ms": 600000,
+      "learner_level": "B1",
+      "version": "9c1d02",
+      "updated_at": "2026-11-01T10:00:00Z"
+    }
+  ]
+}

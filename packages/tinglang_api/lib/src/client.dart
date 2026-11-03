@@ -29,14 +29,15 @@ class TinglangApi {
   Future<ApiMeta> getMeta() async => ApiMeta.fromJson(await _get('/meta', auth: false));
   Future<Account> getAccount() async => Account.fromJson(await _get('/account'));
 
-  /// The official library; needs no sign-in.
+  /// The official library: every course with [tokens], else the preview.
   Future<OfficialLibrary> getLibrary() async =>
-      OfficialLibrary.fromJson(await _get('/library', auth: false));
+      OfficialLibrary.fromJson(await _get('/library', auth: tokens != null));
 
   /// One official course as an English V3 course document (the client
-  /// validates it with its course codec).
+  /// validates it with its course codec). Courses outside the preview need
+  /// [tokens].
   Future<Map<String, Object?>> getLibraryCourse(String id) async {
-    final json = await _get('/library/${Uri.encodeComponent(id)}', auth: false);
+    final json = await _get('/library/${Uri.encodeComponent(id)}', auth: tokens != null);
     if (json is! Map<String, Object?>) throw const ApiBadResponse('course: expected an object');
     return json;
   }

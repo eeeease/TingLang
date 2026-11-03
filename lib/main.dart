@@ -109,14 +109,6 @@ Future<void> main() async {
       toolsFolder: Directory(p.join(store.root.path, 'tools')),
       generation: generation,
     );
-    // The official library: asked only when the user opens it.
-    final official = OfficialLibraryService(
-      app: controller,
-      api: () => TinglangApi(
-        ServerUrl.parse(CloudController.official),
-        userAgent: 'TingLang/$appVersion (macos)',
-      ),
-    );
     // Optional cloud account: reads cached settings only; it talks to a
     // server when the user signs in (docs/CLOUD.md §10).
     final browser = await _webAuthenticator();
@@ -132,6 +124,17 @@ Future<void> main() async {
       ),
     );
     await cloud.forgetLegacyServer();
+    // The official library: asked only when the user opens it; every course
+    // with the account's tokens, a preview without.
+    final official = OfficialLibraryService(
+      app: controller,
+      account: cloud,
+      api: () => TinglangApi(
+        ServerUrl.parse(CloudController.official),
+        tokens: cloud.libraryTokens,
+        userAgent: 'TingLang/$appVersion (macos)',
+      ),
+    );
     await live.init();
     final voiceMemos = VoiceMemoService(
       app: controller,

@@ -2,6 +2,10 @@
 
 Versions of `api/openapi.yaml` (`info.version`). Additive changes raise the minor version; breaking changes start a new URL major version (`/v2`).
 
+## 1.3.0 · 2026-11-03
+
+- `GET /library` and `GET /library/{course_id}` take the account's token (optional). Without one, the library is a preview: the first three courses of each category with `preview: true`, and the courses outside it answer 401. Optional `course_count` on the library and on each category gives the full counts. A token that is sent but invalid answers 401.
+
 ## 1.2.0 · 2026-11-02
 
 - `GET /library`: optional `categories` (interest categories in display order, with a name per language) and, per course, optional `category` and `series`. Clients that ignore them still list every course.

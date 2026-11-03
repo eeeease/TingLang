@@ -25,6 +25,7 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
   /// no listed category.
   String? _category;
   static const _other = '';
+  bool _signingIn = false;
 
   @override
   void initState() {
@@ -36,6 +37,42 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
     final course = await _official.add(entry);
     if (mounted) widget.onOpen(course);
   });
+
+  Future<void> _signIn() async {
+    setState(() => _signingIn = true);
+    await reportAction(context, _official.signIn);
+    if (mounted) setState(() => _signingIn = false);
+  }
+
+  /// Signed out, the server lists a few courses per category: say how many
+  /// there are and offer to sign in.
+  Widget _previewNotice(BuildContext context, OfficialLibrary library) {
+    final l = context.l10n;
+    final c = context.sl;
+    return SlPanel(
+      key: const ValueKey('official-preview'),
+      child: Row(
+        children: [
+          Icon(Icons.lock_outline, color: c.accentInk),
+          const SizedBox(width: SlSpace.md),
+          Expanded(
+            child: Text(
+              l.officialPreviewNotice(library.courseCount ?? library.courses.length),
+              style: SlType.body.copyWith(color: c.text),
+            ),
+          ),
+          if (_official.account != null) ...[
+            const SizedBox(width: SlSpace.md),
+            FilledButton(
+              key: const ValueKey('official-sign-in'),
+              onPressed: _signingIn ? null : _signIn,
+              child: Text(l.officialSignInForAll),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +128,10 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
           children: [
             Text(l.officialIntro, style: SlType.body.copyWith(color: c.inkSoft)),
             const SizedBox(height: SlSpace.xl),
+            if (library.preview) ...[
+              _previewNotice(context, library),
+              const SizedBox(height: SlSpace.xl),
+            ],
             if (categories.isNotEmpty) ...[
               Wrap(
                 spacing: 8,
@@ -143,6 +184,17 @@ class _OfficialLibraryViewState extends State<OfficialLibraryView> {
                   );
                 },
               ),
+            if (library.preview && chosen != null && chosen != _other)
+              for (final category in categories.where((x) => x.id == chosen))
+                if ((category.courseCount ?? 0) > courses.length)
+                  Padding(
+                    padding: const EdgeInsets.only(top: SlSpace.lg),
+                    child: Text(
+                      l.officialMoreAfterSignIn(category.courseCount! - courses.length),
+                      key: const ValueKey('official-more'),
+                      style: SlType.caption.copyWith(color: c.muted),
+                    ),
+                  ),
           ],
         );
       },

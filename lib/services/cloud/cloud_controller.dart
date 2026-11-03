@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:tinglang_api/tinglang_api.dart';
 
 import '../app_controller.dart';
+import '../official_library.dart' show LibraryAccount;
 import 'cloud_services.dart';
 
 /// The optional TingLang account (sidebar → Account, docs/CLOUD.md).
@@ -11,7 +12,7 @@ import 'cloud_services.dart';
 /// It only reads what earlier sessions cached in settings; it talks to the
 /// server when the user signs in, refreshes or signs out, and never at
 /// startup. Tokens live in the secret store, never in settings.
-class CloudController extends ChangeNotifier {
+class CloudController extends ChangeNotifier implements LibraryAccount {
   CloudController({
     required this.app,
     required this.connect,
@@ -59,6 +60,7 @@ class CloudController extends ChangeNotifier {
   bool get busy => _busy;
 
   /// The last action's failure, for the page to describe.
+  @override
   Object? get error => _error;
 
   /// The last refresh could not reach the server; cached values are shown.
@@ -75,6 +77,7 @@ class CloudController extends ChangeNotifier {
     }
   }
 
+  @override
   bool get signedIn => app.setting(signedInKey, 'false') == 'true';
   ApiMeta? get meta => _cached(metaKey, ApiMeta.fromJson);
   Account? get account => signedIn ? _cached(accountKey, Account.fromJson) : null;
@@ -91,6 +94,14 @@ class CloudController extends ChangeNotifier {
   bool get planConfirmed {
     final e = entitlements;
     return e != null && (!_offline || e.usableOffline(_now()));
+  }
+
+  /// The account's tokens for the official library while signed in (the
+  /// server lists every course with them); null when signed out.
+  TokenSource? get libraryTokens {
+    final target = server, current = meta;
+    if (!signedIn || target == null || current == null || current.auth == null) return null;
+    return _connectTo(target).tokens(current);
   }
 
   T? _cached<T>(String key, T Function(Object? json) read) {
@@ -126,6 +137,7 @@ class CloudController extends ChangeNotifier {
   }
 
   /// Opens the server's sign-in page in the browser, then loads the account.
+  @override
   Future<void> signIn() => _run((target) async {
     final service = _connectTo(target);
     final meta = await service.fetchMeta();

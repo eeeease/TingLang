@@ -56,6 +56,30 @@ void main() {
     expect(server.requests.map((r) => r.header('authorization')), ['Bearer stale', 'Bearer fresh']);
   });
 
+  test('the library is the preview without a session and complete with one', () async {
+    server.handler = (r) => Reply.json(
+      example(
+        r.header('authorization') == null
+            ? 'getLibrary/response.200.preview.json'
+            : 'getLibrary/response.200.json',
+      ),
+    );
+    final preview = await api().getLibrary();
+    expect(preview.preview, isTrue);
+    expect(preview.courseCount, 2118);
+    expect(preview.categories.first.courseCount, 101);
+    final full = await api(tokens: _Tokens(['t1'])).getLibrary();
+    expect(full.preview, isFalse);
+    expect(server.requests.map((r) => r.header('authorization')), [null, 'Bearer t1']);
+
+    // A course outside the preview: 401 without a session.
+    server.handler = (_) => Reply.problem(example('getLibraryCourse/response.401.json'));
+    await expectLater(
+      api().getLibraryCourse('youtube-locked'),
+      throwsA(isA<ApiProblemException>().having((e) => e.problem.status, 'status', 401)),
+    );
+  });
+
   test('problems keep their code and Retry-After', () async {
     server.handler = (_) => Reply.problem(
       {'status': 429, 'code': 'rate_limited', 'title': 'Slow down'},

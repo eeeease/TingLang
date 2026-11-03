@@ -68,6 +68,8 @@ final class FakeAccountService implements AccountService {
   @override
   Future<bool> hasSession() async => session;
   @override
+  TokenSource tokens(ApiMeta meta) => FakeTokens('fake-access-token');
+  @override
   Future<Account> fetchAccount(ApiMeta meta) => _call('account', () => account);
   @override
   Future<Entitlements> fetchEntitlements(ApiMeta meta) => _call('entitlements', () => entitlements);
@@ -203,4 +205,12 @@ Future<int> deadPort() async {
   final port = socket.port;
   await socket.close();
   return port;
+}
+
+/// A fixed access token.
+final class FakeTokens implements TokenSource {
+  FakeTokens(this.token);
+  final String token;
+  @override
+  Future<String> accessToken({bool force = false}) async => token;
 }

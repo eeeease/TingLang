@@ -1,0 +1,7 @@
+{
+  "type": "https://tinglang.example/problems/unauthorized",
+  "title": "Sign in to add this course",
+  "status": 401,
+  "code": "unauthorized",
+  "detail": "Without an account only the preview courses of the official library can be added."
+}

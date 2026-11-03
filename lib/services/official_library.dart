@@ -11,19 +11,47 @@ import '../core/course_codec.dart';
 import '../core/models.dart';
 import 'app_controller.dart';
 
+/// The cloud account, as far as the official library needs it
+/// ([CloudController] in the app).
+abstract interface class LibraryAccount implements Listenable {
+  bool get signedIn;
+
+  /// The last sign-in's failure, if any.
+  Object? get error;
+
+  /// Opens the server's sign-in page in the browser.
+  Future<void> signIn();
+}
+
 /// The official library (Library → Official): text-only courses on
-/// api.tinglang.app that anyone may add to their own library. Nothing is
-/// requested until the user opens it. A course's cover is saved next to the
-/// library (`covers/<id>.jpg`), so its card has it offline too.
+/// api.tinglang.app. Signed in, every course can be added; signed out, the
+/// server lists a preview (a few per category). Nothing is requested until
+/// the user opens it. A course's cover is saved next to the library
+/// (`covers/<id>.jpg`), so its card has it offline too.
 class OfficialLibraryService extends ChangeNotifier {
-  OfficialLibraryService({required this.app, required this.api, HttpClient Function()? httpClient})
-    : _httpClient = httpClient ?? HttpClient.new;
+  OfficialLibraryService({
+    required this.app,
+    required this.api,
+    this.account,
+    HttpClient Function()? httpClient,
+  }) : _httpClient = httpClient ?? HttpClient.new {
+    account?.addListener(_accountChanged);
+  }
 
   final AppController app;
 
-  /// A client for the library's server; each request closes its own.
+  /// A client for the library's server, carrying the account's tokens when
+  /// signed in; each request closes its own.
   final TinglangApi Function() api;
+
+  /// Signing in or out asks an opened library again.
+  final LibraryAccount? account;
   final HttpClient Function() _httpClient;
+
+  /// Whether [library] was asked for while signed in.
+  bool? _loadedSignedIn;
+
+  bool get signedIn => account?.signedIn ?? false;
 
   /// `app_meta`: JSON `{course id: version}` of the courses added from here,
   /// so a newer version can be offered.
@@ -66,6 +94,7 @@ class OfficialLibraryService extends ChangeNotifier {
     if (loading || (library != null && !force)) return;
     loading = true;
     error = null;
+    _loadedSignedIn = signedIn;
     notifyListeners();
     final server = api();
     try {
@@ -77,9 +106,32 @@ class OfficialLibraryService extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // Signed in or out while this was on its way.
+    if (_loadedSignedIn != signedIn) return load(force: true);
     for (final entry in library?.courses ?? const <LibraryEntry>[]) {
       if (added(entry) && coverFor(entry.id) == null) unawaited(_saveCover(entry));
     }
+  }
+
+  /// Signs in from the library; throws the account's error when it failed.
+  Future<void> signIn() async {
+    final account = this.account;
+    if (account == null) return;
+    await account.signIn();
+    final failure = account.error;
+    if (!account.signedIn && failure != null) throw failure;
+  }
+
+  void _accountChanged() {
+    // Only a library already opened is asked again.
+    if (_loadedSignedIn == null || _loadedSignedIn == signedIn) return;
+    unawaited(load(force: true));
+  }
+
+  @override
+  void dispose() {
+    account?.removeListener(_accountChanged);
+    super.dispose();
   }
 
   /// Adds (or updates) [entry] in the user's library; learning progress,
